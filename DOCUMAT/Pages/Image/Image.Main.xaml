@@ -1,0 +1,221 @@
+﻿<Page x:Class="DOCUMAT.Pages.Image.Image"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:DOCUMAT.Pages.Image"
+      xmlns:src="clr-namespace:DOCUMAT.Converter"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      mc:Ignorable="d" 
+      Height="800" 
+      Title="Image"
+      d:DesignWidth="1080"
+      Loaded="Page_Loaded"
+      >
+
+    <Page.Resources>
+        <src:StringToImageSourceConverter x:Key="ImageConverter"/>
+        <ContextMenu x:Key="cmButton">
+            <MenuItem Header="Modifier"
+                      x:Name="btnEdit"
+                      Icon="{materialDesign:PackIcon Kind=Edit}"
+                      Click="btnEdit_Click" />
+            <MenuItem Header="Actualiser"   
+                      Name="btnRefresh"
+                      Icon="{materialDesign:PackIcon Kind=Refresh}"
+                      Click="btnRefresh_Click"/>
+            <MenuItem Header="Suppression">
+                <MenuItem Header="Supprimer la donnée"
+                          x:Name="DeleteDataImage"
+                          Icon="{materialDesign:PackIcon Kind=TableRemove}"
+                          Click="DeleteDataImage_Click"/>
+                <MenuItem Header="Supprimer le Fichier"
+                          x:Name="DeleteFileImage"
+                          Icon="{materialDesign:PackIcon Kind=FileRemove}"
+                          Click="DeleteFileImage_Click"/>
+                <MenuItem Header="Supprimer"
+                      x:Name="DeleteBoth"
+                      Icon="{materialDesign:PackIcon Kind=Remove}"
+                      Click="DeleteBoth_Click"/>
+            </MenuItem>
+        </ContextMenu>
+    </Page.Resources>
+
+    <StackPanel x:Name="Image_Space" >
+        <!--Bouton d'interaction-->
+        <StackPanel x:Name="panelInteracBtn"
+                    Orientation="Horizontal" 
+                    Margin="20"
+                    VerticalAlignment="Center">
+            <Image Height="80" Width="80" 
+                   x:Name="QrCodeImage"
+                   Stretch="UniformToFill"/>
+            <ComboBox x:Name="cbService" 
+                Foreground="White"
+                materialDesign:HintAssist.Hint="SERVICE VERSANT"
+                materialDesign:HintAssist.HelperText="SERVICE VERSANT"                                                                                                      
+                SelectedIndex="0"
+                DisplayMemberPath="Nom"
+                SelectedValuePath="ServiceID"
+                SelectionChanged="cbService_SelectionChanged"
+                Margin="20"/>
+
+            <ComboBox x:Name="cbAgent" 
+                        Foreground="White"
+                        SelectedIndex="0"
+                        materialDesign:HintAssist.Hint="AGENT VERSANT"
+                        materialDesign:HintAssist.HelperText="AGENT VERSANT"                                                                                                      
+                        DisplayMemberPath="Noms"
+                        SelectedValuePath="AgentID"
+                        SelectionChanged="cbAgent_SelectionChanged"
+                        Margin="20"/>
+
+            <ComboBox x:Name="cbVersement" 
+                        Foreground="White"
+                        SelectedIndex="0"
+                        materialDesign:HintAssist.Hint="NUMERO DE VERSEMENT"
+                        materialDesign:HintAssist.HelperText="NUMERO DE VERSEMENT"                                                                                                      
+                        DisplayMemberPath="NumeroVers"
+                        SelectedValuePath="VersementID"
+                        SelectionChanged="cbVersement_SelectionChanged"
+                        Margin="20"/>
+            <ComboBox x:Name="cbRegistre" 
+                        Foreground="White"
+                        SelectedIndex="0"
+                        materialDesign:HintAssist.Hint="NUMERO DE REGISTRE"
+                        materialDesign:HintAssist.HelperText="NUMERO DE REGISTRE"                                                                                                      
+                        DisplayMemberPath="Numero"
+                        SelectedValuePath="RegistreID"
+                        SelectionChanged="cbRegistre_SelectionChanged"
+                        Margin="20"/>
+            <!--<ComboBox x:Name="cbSatutImage" 
+                        Foreground="White"
+                        SelectedIndex="0"
+                        materialDesign:HintAssist.Hint="STATUT DES IMAGES"
+                        materialDesign:HintAssist.HelperText=" STATUT DES IMAGES"                                                                                                      
+                        DisplayMemberPath="Libelle"
+                        SelectedValuePath="StatutImageID"
+                        SelectionChanged="cbSatutImage_SelectionChanged"
+                        Margin="20"/>-->
+        </StackPanel>
+    
+    <!--Grid View des services-->
+    <Grid Margin="20" x:Name="gridViewPanelAgent" >
+        <DataGrid Name="dgImage" 
+                          AutoGenerateColumns="False" 
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
+                          IsReadOnly="True"
+                          MaxHeight="350" 
+                          RowDetailsVisibilityMode="VisibleWhenSelected" 
+                          Margin="0,-2,0,2"
+                          LoadingRow="dgImage_LoadingRow"
+                          SelectionChanged="dgImage_SelectionChanged"
+                          AreRowDetailsFrozen="False"
+                          LoadingRowDetails="dgImage_LoadingRowDetails" 
+                          CellEditEnding="dgImage_CellEditEnding"
+                          BeginningEdit="dgImage_BeginningEdit">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Numéro de scan" Binding="{Binding NumeroScan}" />
+                <DataGridTextColumn Header="Id" Binding="{Binding Image.ImageID}" Visibility="Collapsed" />
+                <DataGridTextColumn Header="Type d'Image" Binding="{Binding Type}" />
+                <DataGridTextColumn Header="Taille de l'image " Binding="{Binding Taille}" />
+                <DataGridTextColumn Header="Nom de l'image scanné" Binding="{Binding NomImageScan}" />
+                <DataGridTextColumn Header="Numéro de page" Binding="{Binding Image.NumeroPage}" />
+                <DataGridTextColumn Header="Statut de l'image" Binding="{Binding  StatutName}" />
+                <DataGridTextColumn Header="Date de Scan" Binding="{Binding DateScan}" />
+                <DataGridTextColumn Header="Date de Modification" Binding="{Binding Image.DateModif}" />
+            </DataGrid.Columns>
+
+            <!--Details sur le versement-->
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                        <DockPanel>
+
+                            <StackPanel x:Name="FileInfos"  Orientation="Horizontal">
+                                <!--Information sur le fichier dans le dossier registre-->
+                            <Image DockPanel.Dock="Left" 
+                                    x:Name="ImageScan"
+                                    Source="/Images/document.png" 
+                                    Stretch="UniformToFill"
+                                    Height="100"
+                                    Width="100" />
+                            <StackPanel Orientation="Vertical" Margin="10,10,150,10">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Numéro de scan : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding NumeroScan}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Type d'image : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding Type}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Taille de l'image : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding Taille}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Nom de l'image scanné : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding NomImageScan}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Date de Scan : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding DateScan}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Chemin du fichier : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding CheminScan}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
+                            
+                            <StackPanel x:Name="BdInfos"  Orientation="Horizontal" Visibility="{Binding ImageBdExiste}">
+                                <!--Information contenu dans la BD-->
+                                <Image DockPanel.Dock="Left" 
+                                        x:Name="ImageBd"
+                                        Source="/Images/documentStore.png" 
+                                        Stretch="UniformToFill"
+                                        Height="100"
+                                        Width="100" />
+                                <StackPanel Orientation="Vertical" Margin="10,10,10,10">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Numéro de page : " FontWeight="Bold" Grid.Row="2" />
+                                        <TextBlock Text="{Binding Image.NumeroPage}" Grid.Column="1" Grid.Row="2" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Type d'image : " FontWeight="Bold" Grid.Row="2" />
+                                        <TextBlock Text="{Binding Image.Type}" Grid.Column="1" Grid.Row="2" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Taille de l'image : " FontWeight="Bold" Grid.Row="2" />
+                                        <TextBlock Text="{Binding Image.Taille}" Grid.Column="1" Grid.Row="2" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Statut de l'image : " FontWeight="Bold" Grid.Row="2" />
+                                        <TextBlock Text="{Binding StatutName}" Grid.Column="1" Grid.Row="2" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Chemin de l'Image : " FontWeight="Bold" Grid.Row="2" />
+                                        <TextBlock Text="{Binding Image.CheminImage}" Grid.Column="1" Grid.Row="2" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Date de changement de statut: " FontWeight="Bold" Grid.Row="2" />
+                                        <TextBlock Text="{Binding Image.DateCreation}" Grid.Column="1" Grid.Row="2" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Date de Scan : " FontWeight="Bold" Grid.Row="2" />
+                                        <TextBlock Text="{Binding Image.DateScan}" Grid.Column="1" Grid.Row="2" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Dernière Modification : " FontWeight="Bold" Grid.Row="2" />
+                                        <TextBlock Text="{Binding Image.DateModif}" Grid.Column="1" Grid.Row="2" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+            </DataGrid>
+        </Grid>
+    </StackPanel>
+</Page>

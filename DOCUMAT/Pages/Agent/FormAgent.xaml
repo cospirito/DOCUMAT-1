@@ -1,0 +1,157 @@
+﻿<Window x:Class="DOCUMAT.Pages.Agent.FormAgent"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DOCUMAT.Pages.Agent"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"        
+        mc:Ignorable="d"
+        Title="FORMULAIRE D'AGENT" 
+        Height="500"  
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Width="800"
+        Background="SteelBlue"
+        Closing="Window_Closing"
+        Loaded="Window_Loaded"
+        >
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="444*"/>
+            <ColumnDefinition Width="144*"/>
+            <ColumnDefinition Width="31*"/>
+            <ColumnDefinition Width="175*"/>
+        </Grid.ColumnDefinitions>
+        <!--Formulaire d'ajout et de modification-->
+        <StackPanel x:Name="formAgent" Margin="30" Grid.ColumnSpan="4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel HorizontalAlignment="Center">
+                        <Image 
+                                x:Name="ImgPhotoAgent"
+                                Width="200"
+                                Height="200"
+                                Margin="0 10"
+                                Stretch="Uniform"
+                                Source="/Images/user.png"
+                                />
+                        <Button Margin="10" 
+                                x:Name="BtnChoixImg"
+                                ToolTip="Parcourir"
+                                Background="Transparent"
+                                BorderBrush="White"
+                                Click="BtnChoixImg_Click"
+                                >
+                            SELECTIONNER UNE IMAGE
+                        </Button>
+
+                    </StackPanel>
+                    <TextBox x:Name="tbMatricule" 
+                                Foreground="White"
+                                CharacterCasing="Upper"
+                                materialDesign:HintAssist.Hint="MATRICULE"
+                                materialDesign:HintAssist.HelperText="MATRICULE"
+                                Margin="20" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1">
+                    <TextBox x:Name="tbNom" 
+                        Foreground="White"
+                        CharacterCasing="Upper"
+                        materialDesign:HintAssist.Hint="NOM"
+                        materialDesign:HintAssist.HelperText="NOM"                             
+                        Margin="20" />
+
+                    <TextBox x:Name="tbPrenoms" 
+                        Foreground="White"
+                        CharacterCasing="Upper"
+                        materialDesign:HintAssist.Hint="PRENOMS"
+                        materialDesign:HintAssist.HelperText="PRENOMS"                             
+                        Margin="20"/>
+
+                    <ComboBox x:Name="cbGenre" 
+                            Foreground="White"
+                            Margin="20" SelectedIndex="1"
+                            materialDesign:HintAssist.HelperText="GENRE"                              
+                              >
+                        <ComboBoxItem Content="FEMME"/>
+                        <ComboBoxItem Content="HOMME"/>
+                    </ComboBox>
+
+                    <ComboBox x:Name="cbStatuMat" 
+                            Foreground="White"
+                            Margin="20" SelectedIndex="0"
+                            materialDesign:HintAssist.HelperText="STATUT MATRIMONIAL"                              
+                              >
+                        <ComboBoxItem Content="CELIBATAIRE"/>
+                        <ComboBoxItem Content="MARIE"/>
+                        <ComboBoxItem Content="DIVORCE"/>
+                        <ComboBoxItem Content="VEUF"/>
+                    </ComboBox>
+                    <DatePicker Name="dtNaissance" 
+                            InputScope="DateDay"
+                            materialDesign:HintAssist.Hint="DATE DE NAISSANCE"
+                            materialDesign:HintAssist.HelperText="DATE DE NAISSANCE"                                
+                            Foreground="White"
+                            Margin="20" 
+                        />
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <!--l'odre doit être strictement respecter-->
+                    <ComboBox x:Name="cbAffection" 
+                              Foreground="White"
+                              Margin="20" SelectedIndex="0"
+                              materialDesign:HintAssist.HelperText="AFFECTATION"
+                              >
+                        <ComboBoxItem Content="INVENTAIRE"/>
+                        <ComboBoxItem Content="SCANNE"/>
+                        <ComboBoxItem Content="INDEXATION"/>
+                        <ComboBoxItem Content="CONTROLEUR"/>
+                        <ComboBoxItem Content="CORRECTEUR"/>
+                        <ComboBoxItem Content="SUPERVISEUR"/>
+                        <ComboBoxItem Content="ADMINISTRATEUR"/>
+                    </ComboBox>
+
+                    <TextBox x:Name="tbLogin" 
+                        Foreground="White"
+                        CharacterCasing="Upper"
+                        materialDesign:HintAssist.Hint="LOGIN"
+                        materialDesign:HintAssist.HelperText="LOGIN"                             
+                        Margin="20"/>
+
+                    <PasswordBox x:Name="pwMdp" 
+                        Foreground="White"
+                        materialDesign:HintAssist.Hint="MOT DE PASSE"
+                        materialDesign:HintAssist.HelperText="MOT DE PASSE"                                 
+                        Margin="20"/>
+
+                    <PasswordBox x:Name="pwMdpConfirme" 
+                        Foreground="White"
+                        materialDesign:HintAssist.Hint="CONFIRMATION MOT DE PASSE"
+                        materialDesign:HintAssist.HelperText="CONFIRMATION MOT DE PASSE"                                 
+                        Margin="20"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+
+                <Button x:Name="btnAnnule" 
+                        Margin="5"
+                        Content="ANNULER"
+                        Background="Transparent"
+
+                        Click="btnAnnule_Click"/>
+
+                <Button x:Name="btnSave" Margin="5"
+                    Content="ENREGISTRE" Click="btnSave_Click"/>
+            </StackPanel>
+        </StackPanel>
+        <!--Fin du formulaire-->
+    </Grid>
+</Window>

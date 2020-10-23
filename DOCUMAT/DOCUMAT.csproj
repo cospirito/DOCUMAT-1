@@ -1,0 +1,512 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.4.0\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.0\build\EntityFramework.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{28EBF993-5DD2-47A1-853E-2FA1A5F0D0D4}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>DOCUMAT</RootNamespace>
+    <AssemblyName>DOCUMAT</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>ftp.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.5.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\iTextSharp.5.5.13\lib\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="MaterialDesignColors, Version=1.2.3.981, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignColors.1.2.3-ci981\lib\net45\MaterialDesignColors.dll</HintPath>
+    </Reference>
+    <Reference Include="MaterialDesignThemes.Wpf, Version=3.1.0.981, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MaterialDesignThemes.3.1.0-ci981\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Expression.Drawing, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Expression.Drawing.3.0.0\lib\net45\Microsoft.Expression.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack-Core.1.1.2\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ExtendedLinguisticServices, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack-ExtendedLinguisticServices.1.1.1\lib\Microsoft.WindowsAPICodePack.ExtendedLinguisticServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Sensors, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack-Sensors.1.1.1\lib\Microsoft.WindowsAPICodePack.Sensors.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack-Shell.1.1.1\lib\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ShellExtensions, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAPICodePack-ShellExtensions.1.1.1\lib\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Syncfusion.Licensing, Version=18.1460.0.36, Culture=neutral, PublicKeyToken=632609b4d040f6b4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Syncfusion.Licensing.18.1.0.36-beta\lib\net46\Syncfusion.Licensing.dll</HintPath>
+    </Reference>
+    <Reference Include="Syncfusion.SfProgressBar.WPF, Version=18.1460.0.36, Culture=neutral, PublicKeyToken=3d67ed1f87d44c89, processorArchitecture=MSIL">
+      <HintPath>..\packages\Syncfusion.SfProgressBar.WPF.18.1.0.36-beta\lib\net46\Syncfusion.SfProgressBar.WPF.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="Zen.Barcode.Core, Version=3.1.0.0, Culture=neutral, PublicKeyToken=b5ae55aa76d2d9de, processorArchitecture=MSIL">
+      <HintPath>..\packages\Zen.Barcode.Rendering.Framework.3.1.10729.1\lib\Zen.Barcode.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="ApplicationLoader.xaml.cs">
+      <DependentUpon>ApplicationLoader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converter\BoolColorConverter.cs" />
+    <Compile Include="Converter\DateConverter.cs" />
+    <Compile Include="Converter\HeaderToImageConverter.cs" />
+    <Compile Include="Converter\ImageConverter.cs" />
+    <Compile Include="ExtendClass.cs" />
+    <Compile Include="Impression\QrCode.Print.xaml.cs">
+      <DependentUpon>QrCode.Print.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009071707334_CreationBD.cs" />
+    <Compile Include="Migrations\202009071707334_CreationBD.designer.cs">
+      <DependentUpon>202009071707334_CreationBD.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009081222532_RemoveDependancetTablTraitement.cs" />
+    <Compile Include="Migrations\202009081222532_RemoveDependancetTablTraitement.designer.cs">
+      <DependentUpon>202009081222532_RemoveDependancetTablTraitement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009081524519_TableTraitementModif.cs" />
+    <Compile Include="Migrations\202009081524519_TableTraitementModif.designer.cs">
+      <DependentUpon>202009081524519_TableTraitementModif.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009101311431_nombreRegistre.cs" />
+    <Compile Include="Migrations\202009101311431_nombreRegistre.designer.cs">
+      <DependentUpon>202009101311431_nombreRegistre.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009101415347_registreNumeroVolumeToString.cs" />
+    <Compile Include="Migrations\202009101415347_registreNumeroVolumeToString.designer.cs">
+      <DependentUpon>202009101415347_registreNumeroVolumeToString.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202009281347029_TbTraitementAddObservation.cs" />
+    <Compile Include="Migrations\202009281347029_TbTraitementAddObservation.designer.cs">
+      <DependentUpon>202009281347029_TbTraitementAddObservation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202010201935298_setDateNullableOnDateofSessionTravailTable.cs" />
+    <Compile Include="Migrations\202010201935298_setDateNullableOnDateofSessionTravailTable.designer.cs">
+      <DependentUpon>202010201935298_setDateNullableOnDateofSessionTravailTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\Configs.cs" />
+    <Compile Include="Models\Controle.cs" />
+    <Compile Include="Models\Correction.cs" />
+    <Compile Include="Models\Livraison.cs" />
+    <Compile Include="Models\ManquantImage.cs" />
+    <Compile Include="Models\ManquantSequence.cs" />
+    <Compile Include="Models\Region.cs" />
+    <Compile Include="Models\Sequence.cs" />
+    <Compile Include="Models\TableModel.cs" />
+    <Compile Include="Models\Traitement.cs" />
+    <Compile Include="Outils\ProgressBarCirculaire.xaml.cs">
+      <DependentUpon>ProgressBarCirculaire.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Outils\RadialProgressBar.xaml.cs">
+      <DependentUpon>RadialProgressBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Agent\FormAgent.xaml.cs">
+      <DependentUpon>FormAgent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Agent\GestionAgent.xaml.cs">
+      <DependentUpon>GestionAgent.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Controle\Controle.xaml.cs">
+      <DependentUpon>Controle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Correction\Correction.Main.xaml.cs">
+      <DependentUpon>Correction.Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Dispatching\Dispatching.xaml.cs">
+      <DependentUpon>Dispatching.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Home\Admin.Home.xaml.cs">
+      <DependentUpon>Admin.Home.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\Image.Main.xaml.cs">
+      <DependentUpon>Image.Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\ImageController.xaml.cs">
+      <DependentUpon>ImageController.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\ImageControllerSecond.xaml.cs">
+      <DependentUpon>ImageControllerSecond.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\ImageCorrecteur.xaml.cs">
+      <DependentUpon>ImageCorrecteur.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\ImageCorrecteurSecond.xaml.cs">
+      <DependentUpon>ImageCorrecteurSecond.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\ImageIndexSuperviseur.xaml.cs">
+      <DependentUpon>ImageIndexSuperviseur.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\ImageViewer.xaml.cs">
+      <DependentUpon>ImageViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Indexation\Indexation.Main.xaml.cs">
+      <DependentUpon>Indexation.Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Inventaire\Inventaire.Main.xaml.cs">
+      <DependentUpon>Inventaire.Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Parametre\Parametre.xaml.cs">
+      <DependentUpon>Parametre.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Preindexation\Preindexation.Main.xaml.cs">
+      <DependentUpon>Preindexation.Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Registre\FormRegistre.xaml.cs">
+      <DependentUpon>FormRegistre.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Registre\Registre.Main.xaml.cs">
+      <DependentUpon>Registre.Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Scannerisation\Scannerisation.xaml.cs">
+      <DependentUpon>Scannerisation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Versement\FormVersement.xaml.cs">
+      <DependentUpon>FormVersement.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Versement\Versement.Main.xaml.cs">
+      <DependentUpon>Versement.Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="System\Windows\Forms.cs" />
+    <Compile Include="TestWindows.xaml.cs">
+      <DependentUpon>TestWindows.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\AgentView.cs" />
+    <Compile Include="ViewModels\ImageView.cs" />
+    <Compile Include="ViewModels\IView.cs" />
+    <Compile Include="ViewModels\RegionView.cs" />
+    <Compile Include="ViewModels\RegistreView.cs" />
+    <Compile Include="ViewModels\SequenceView.cs" />
+    <Compile Include="ViewModels\ServiceView.cs" />
+    <Compile Include="ViewModels\VersementView.cs" />
+    <Page Include="ApplicationLoader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Connexion.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Connexion.xaml.cs">
+      <DependentUpon>Connexion.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Page Include="Impression\QrCode.Print.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MenuGestion.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Outils\ProgressBarCirculaire.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Outils\RadialProgressBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Agent\FormAgent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Agent\GestionAgent.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Controle\Controle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Correction\Correction.Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Dispatching\Dispatching.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Home\Admin.Home.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\Image.Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\ImageController.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\ImageControllerSecond.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\ImageCorrecteur.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\ImageCorrecteurSecond.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\ImageIndexSuperviseur.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\ImageViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Indexation\Indexation.Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Inventaire\Inventaire.Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Parametre\Parametre.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Preindexation\Preindexation.Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Registre\FormRegistre.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Registre\Registre.Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Scannerisation\Scannerisation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Service\Service.Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Versement\FormVersement.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Versement\Versement.Main.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TestWindows.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MenuGestion.xaml.cs">
+      <DependentUpon>MenuGestion.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Agent.cs" />
+    <Compile Include="Models\DocumatContext.cs" />
+    <Compile Include="Models\Image.cs" />
+    <Compile Include="Models\Registre.cs" />
+    <Compile Include="Models\Service.cs" />
+    <Compile Include="Models\SessionTravail.cs" />
+    <Compile Include="Models\Enumeration.cs" />
+    <Compile Include="Models\StatutRegistre.cs" />
+    <Compile Include="Models\StatutImage.cs" />
+    <Compile Include="Models\Versement.cs" />
+    <Compile Include="Pages\Service\Service.Main.xaml.cs">
+      <DependentUpon>Service.Main.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Migrations\202009071707334_CreationBD.resx">
+      <DependentUpon>202009071707334_CreationBD.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009081222532_RemoveDependancetTablTraitement.resx">
+      <DependentUpon>202009081222532_RemoveDependancetTablTraitement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009081524519_TableTraitementModif.resx">
+      <DependentUpon>202009081524519_TableTraitementModif.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009101311431_nombreRegistre.resx">
+      <DependentUpon>202009101311431_nombreRegistre.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009101415347_registreNumeroVolumeToString.resx">
+      <DependentUpon>202009101415347_registreNumeroVolumeToString.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202009281347029_TbTraitementAddObservation.resx">
+      <DependentUpon>202009281347029_TbTraitementAddObservation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202010201935298_setDateNullableOnDateofSessionTravailTable.resx">
+      <DependentUpon>202010201935298_setDateNullableOnDateofSessionTravailTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Images\home.webp" />
+    <None Include="packages.config" />
+    <None Include="Polices\agency-fb_[fr.allfont.net].ttf" />
+    <None Include="Polices\Androgyne_TB.otf" />
+    <None Include="Polices\lobster_[fr.allfont.net].ttf" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\loader1.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\home.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\home2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\home.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\document.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\documentSave.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\documentStore.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\drive.png" />
+    <Resource Include="Images\file.png" />
+    <Resource Include="Images\folder-closed.png" />
+    <Resource Include="Images\folder-open.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\valide.png" />
+    <Resource Include="Images\warning.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\home5.svg" />
+    <Resource Include="Images\home6.png" />
+    <Resource Include="Images\home3.jpg" />
+    <Resource Include="Images\home4.png" />
+    <Resource Include="Images\ftp.ico" />
+    <Resource Include="Images\loader.gif" />
+    <Resource Include="Images\loader2.gif" />
+    <Resource Include="Images\home_stats.jpg" />
+    <Resource Include="Images\fileNoted.png" />
+    <Resource Include="Images\fileTrash.png" />
+    <Resource Include="Images\fileNotFound.png" />
+    <Resource Include="Images\flag.png" />
+    <Resource Include="Images\list.png" />
+    <Resource Include="Images\triangle.png" />
+    <Resource Include="Images\statistiques.png" />
+    <Resource Include="Images\homes.jpg" />
+    <Resource Include="Images\ftp.png" />
+    <Resource Include="Images\user.png" />
+    <Resource Include="Images\valide2.png" />
+    <Resource Include="Images\simplefile1.png" />
+    <Resource Include="Images\simplefile.png" />
+    <Resource Include="Images\valide1.png" />
+    <Resource Include="Images\warning1.png" />
+    <Resource Include="Images\dangerous.png" />
+    <Resource Include="Images\dataTransfer.png" />
+    <Resource Include="Images\edit.png" />
+    <Resource Include="Images\contract.png" />
+    <Resource Include="Images\correct.png" />
+    <Resource Include="Images\correct1.png" />
+    <Resource Include="ftp.ico" />
+    <Content Include="Images\file.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\MaterialDesignThemes.3.1.0-ci981\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.3.1.0-ci981\build\MaterialDesignThemes.targets')" />
+  <Import Project="..\packages\EntityFramework.6.4.0\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.0\build\EntityFramework.targets')" />
+</Project>

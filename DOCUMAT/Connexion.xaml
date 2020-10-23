@@ -1,0 +1,51 @@
+﻿<Window x:Class="DOCUMAT.Connexion"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DOCUMAT"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Width="800" Height="400"
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing"
+        ResizeMode="NoResize">
+    <StackPanel>
+        <Grid Height="400">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="397*"/>
+                <ColumnDefinition Width="58*"/>
+                <ColumnDefinition Width="340*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <Image Source="Images\home_stats.jpg" Width="600" Height="400" Stretch="Fill" StretchDirection="DownOnly"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Grid.ColumnSpan="2">
+                <TextBlock Text="AUTHENTIFICATION " Margin="125,50,100,10" FontFamily="Androgyne" 
+                           FontSize="15" Foreground="CornflowerBlue"                           
+                           />
+                <TextBox x:Name="login" Padding="5" Margin="86,0,69,10" 
+                     FontSize="15" GotFocus="login_GotFocus"                     
+                     Foreground="CornflowerBlue"
+                     KeyUp="login_KeyUp"
+                     materialDesign:HintAssist.Hint="..."
+                     materialDesign:HintAssist.HelperText="LOGIN"/>
+
+                <PasswordBox x:Name="Pwd" Padding="5" Margin="86,10,69,20"
+                         FontSize="15" GotFocus="Pwd_GotFocus"                                                  
+                         Foreground="CornflowerBlue"
+                         KeyUp="Pwd_KeyUp"
+                         materialDesign:HintAssist.Hint="..."                             
+                         materialDesign:HintAssist.HelperText="MOT DE PASSE"
+                         />
+                <Button Content="Se Connecter" FontSize="20" Padding="5" Margin="100 25" Background="{x:Null}" 
+                    x:Name="btn_seconnecter" 
+                    FontFamily="Androgyne"
+                    Foreground="CornflowerBlue" Cursor="Hand" Click="btn_seconnecter_Click" Height="50"/>
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</Window>

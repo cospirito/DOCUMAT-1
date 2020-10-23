@@ -1,0 +1,164 @@
+﻿<Window x:Class="DOCUMAT.Pages.Agent.GestionAgent"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DOCUMAT.Pages.Agent"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:src="clr-namespace:DOCUMAT.Converter"
+        mc:Ignorable="d"
+        Title="GESTION DES AGENTS" 
+        Height="800" 
+        WindowStartupLocation="CenterScreen"
+        Width="1080"
+        Loaded="Page_Loaded"
+        Background="SteelBlue">
+    
+    <Window.Resources>
+        <src:DateConverter x:Key="DateConverter"/>
+        <ContextMenu x:Key="cmButton">
+            <MenuItem Header="Ajouter"
+                      Icon="{materialDesign:PackIcon Kind=AddCircle}"
+                      Click="BtnAddAgent_Click"
+                       />
+            <MenuItem Header="Modifier"
+                      Name="BtnEdit"
+                      Icon="{materialDesign:PackIcon Kind=Edit}"                      
+                      Click="BtnEdit_Click"
+                      />
+            <MenuItem Header="Supprimer"   
+                      Name="BtnSuppItem"
+                      Icon="{materialDesign:PackIcon Kind=Remove}"                      
+                      Click="btnSupprimer_Click"
+                      />
+        </ContextMenu>
+    </Window.Resources>
+
+    <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
+        <!--Bouton d'interaction-->
+        <StackPanel x:Name="panelInteracBtn"
+                    Orientation="Horizontal" Margin="10">
+            <Button Margin="10" Background="{x:Null}"
+                    BorderBrush="white"
+                    BorderThickness="1 0 0 0"
+                    ToolTip="Actualiser"
+                    Name="btnRefresh" 
+                    Click="btnRefresh_Click" >
+                <materialDesign:PackIcon Kind="Refresh"
+                                        Width="25"
+                                        Height="25"
+                                        Foreground="White"/>
+            </Button>
+            <TextBox x:Name="TbRechercher" 
+                     materialDesign:HintAssist.Hint="RECHERCHER" 
+                     Foreground="White" 
+                     HorizontalAlignment="Center"
+                     CharacterCasing="Upper"
+                     VerticalAlignment="Center"
+                     Margin="20 20 20 20"
+                     TextChanged="TbRechercher_TextChanged"
+                     MinWidth="400"/>
+            <Button Margin="10" Background="{x:Null}"
+                                BorderBrush="white"
+                                BorderThickness="1 0 0 0"
+                                ToolTip="Ajouter un Agent"
+                                x:Name="BtnAddAgent"
+                                Click="BtnAddAgent_Click"
+                                    >
+                <materialDesign:PackIcon Kind="Plus"
+                                        Width="25"
+                                        Height="25"
+                                        Foreground="White"/>
+            </Button>
+        </StackPanel>
+
+
+        <!--Grid View des services-->
+        <Grid Margin="20" x:Name="gridViewPanelAgent" >
+            <DataGrid Name="dgAgent" 
+                          AutoGenerateColumns="False" 
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
+                          IsReadOnly="True"
+                          MaxHeight="600"    
+                          RowDetailsVisibilityMode="VisibleWhenSelected" 
+                          Margin="0,-2,0,2"
+                          LoadingRow="dgAgent_LoadingRow" 
+                          AreRowDetailsFrozen="False">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="White" />
+                                <Setter Property="Foreground" Value="Black" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="false">
+                                <Setter Property="Background" Value="SteelBlue" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn  Header="N°" Binding="{Binding NumeroOrdre}"/>
+                    <DataGridTextColumn  Header="Id" Binding="{Binding Agent.Id}" Visibility="Collapsed" />
+                    <DataGridTextColumn  Header="Matricule" Binding="{Binding Agent.Matricule}" />
+                    <DataGridTextColumn  Header="Nom de l'agent" Binding="{Binding Agent.Nom}" />
+                    <DataGridTextColumn  Header="Prénom(s) de l'agent" Binding="{Binding Agent.Prenom}" />
+                    <DataGridTextColumn  Header="Genre " Binding="{Binding Agent.Genre}" />
+                    <DataGridTextColumn  Header="Affectation " Binding="{Binding Affectation}" />
+                    <DataGridTextColumn  Header="Dernière Modification" Binding="{Binding Agent.DateModif, Converter={StaticResource DateConverter}}" />
+                </DataGrid.Columns>
+
+                <!--Details sur l'agent-->
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <DockPanel>
+                            <Image DockPanel.Dock="Left" 
+                                       Source="{Binding cheminLocalPhoto}" 
+                                       Height="150"
+                                       Width="150"
+                                       Stretch="Uniform"                                   
+                                       Margin="10" />
+                            <StackPanel Orientation="Vertical" Margin="10,10,10,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Matricule : " FontWeight="Bold" />
+                                    <TextBlock Text="{Binding Agent.Matricule}" Grid.Column="1" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Nom : " FontWeight="Bold" Grid.Row="1" />
+                                    <TextBlock Text="{Binding Agent.Nom}" Grid.Column="1" Grid.Row="1" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Prénoms: " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding Agent.Prenom}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Genre : " FontWeight="Bold" />
+                                    <TextBlock Text="{Binding Agent.Genre}" Grid.Column="1" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Date de naissance : " FontWeight="Bold" Grid.Row="1" />
+                                    <TextBlock Text="{Binding Agent.DateNaiss, Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="1" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Statut Matrimonial : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding Agent.StatutMat}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Affectation : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding Affectation}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Dernière Modification : " FontWeight="Bold" Grid.Row="2" />
+                                    <TextBlock Text="{Binding Agent.DateModif, Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+            </DataGrid>
+        </Grid>
+    </StackPanel>
+
+</Window>

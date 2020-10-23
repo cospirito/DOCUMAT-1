@@ -1,0 +1,166 @@
+﻿<Page x:Class="DOCUMAT.Pages.Service.Main"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      xmlns:src="clr-namespace:DOCUMAT.Converter"
+      mc:Ignorable="d"  
+      Loaded="Page_Loaded"
+      d:DesignWidth="1080"
+      Height="800"
+      Title="Main">
+    
+    <Page.Resources>
+        <src:DateConverter x:Key="DateConverter"/>
+        <ContextMenu x:Key="cmButton">
+            <MenuItem Header="Ajouter"
+                      Icon="{materialDesign:PackIcon Kind=AddCircle}"
+                      Click="btnAdd_Click" />
+            <MenuItem Header="Modifier"
+                      Icon="{materialDesign:PackIcon Kind=Edit}"
+                      Click="BtnEdit_Click" />
+            <MenuItem Header="Supprimer"                      
+                      Icon="{materialDesign:PackIcon Kind=Remove}"
+                      Click="btnSupprimer_Click"/>
+        </ContextMenu>
+    </Page.Resources>
+
+    <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
+
+        <!--Bouton d'interaction-->
+        <StackPanel x:Name="panelInteracBtn" Orientation="Horizontal" Margin="10">
+            <Button Margin="10" Background="{x:Null}"
+                    BorderBrush="CornflowerBlue"
+                    ToolTip="Actualiser"
+                    Name="btnRefresh" Click="btnRefresh_Click" >
+                <materialDesign:PackIcon Kind="Refresh"
+                                        Width="25"
+                                        Height="25"
+                                        Foreground="White"/>
+            </Button>
+            <TextBox x:Name="TbRechercher" 
+                     materialDesign:HintAssist.Hint="RECHERCHER" 
+                     Foreground="White" HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Margin="20 20 20 20"
+                     TextChanged="TbRechercher_TextChanged"
+                     MinWidth="400"/>
+            <Button Margin="10" Background="{x:Null}"
+                    BorderBrush="Orange"
+                    ToolTip="Rechercher"
+                    x:Name="BtnRechercher"
+                    Click="BtnRechercher_Click"
+                    >
+                <materialDesign:PackIcon Kind="Search"
+                                        Width="25"
+                                        Height="25"
+                                        Foreground="White"/>
+            </Button>
+
+            <Button Margin="10" Background="{x:Null}"
+                BorderBrush="GreenYellow"
+                ToolTip="Ajouter"
+                Name="btnAdd" Click="btnAdd_Click"
+                >
+                <materialDesign:PackIcon Kind="AddCircleOutline"
+                                    Width="25"
+                                    Height="25"
+                                    Foreground="White"/>
+            </Button>
+            <Button Margin="10" Background="{x:Null}"
+                    BorderBrush="White"
+                    ToolTip="Modifier"
+                    x:Name="BtnEdit"
+                    Click="BtnEdit_Click">
+                <materialDesign:PackIcon Kind="Edit"
+                                        Width="25"
+                                        Height="25"
+                                        Foreground="White"/>
+            </Button>
+            <Button Margin="10" Background="{x:Null}"
+                    x:Name="btnSupprimer"
+                    Click="btnSupprimer_Click"
+                    BorderBrush="Red"
+                    ToolTip="Supprimer">
+                <materialDesign:PackIcon Kind="Remove"
+                                        Width="25"
+                                        Height="25"
+                                        Foreground="White"/>
+            </Button>
+        </StackPanel>
+
+
+        <!--Zone de donnée-->
+        <StackPanel>
+            <!--Formulaire d'ajout et de modification de service-->
+            <StackPanel x:Name="formService" Margin="20" Visibility="Collapsed">
+                <TextBlock x:Name="txbFormHeader" 
+                    Text="FORMULAIRE D'AJOUT DE SERVICE"
+                   Foreground="White"
+                   HorizontalAlignment="Center"
+                   FontSize="20"/>
+
+                <TextBox x:Name="tbNom" 
+                    Foreground="White"
+                    CharacterCasing="Upper"
+                    materialDesign:HintAssist.Hint="NOM DU SERVICE"
+                    Margin="20" LostFocus="tbNom_LostFocus" />
+                
+                <TextBox x:Name="tbCode" 
+                    Foreground="White"
+                    MaxLength="2"
+                    CharacterCasing="Upper"
+                    materialDesign:HintAssist.Hint="CODE DU SERVICE"
+                    Margin="20"/>
+                
+                <TextBox x:Name="tbDesc" 
+                    Foreground="White"
+                    materialDesign:HintAssist.Hint="DESCRIPTION DU SERVICE"
+                    Margin="20"
+                    MinLines="3"/>
+
+                <TextBox x:Name="tbChemin" 
+                    Foreground="White"
+                    CharacterCasing="Upper"     
+                    materialDesign:HintAssist.Hint="NOM DU DOSSIER"
+                    Margin="20"/>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                
+                    <Button x:Name="btnAnnule" Margin="5"
+                    Content="ANNULER" Click="btnAnnule_Click"/>
+
+                    <Button x:Name="btnSave" Margin="5"
+                    Content="ENREGISTRE" Click="btnSave_Click"/>
+                </StackPanel>
+            </StackPanel>
+            <!--Fin du formulaire-->
+            
+
+            <!--Grid View des services-->
+            <Grid Margin="20" x:Name="gridViewPanel" >
+                <DataGrid Name="dgService" AutoGenerateColumns="False" 
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
+                          IsReadOnly="True"
+                          LoadingRow="dgService_LoadingRow"
+                          EnableRowVirtualization="False"
+                          MaxHeight="350" RowDetailsVisibilityMode="Collapsed" Margin="0,-2,0,2">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}"/>
+                        <DataGridTextColumn Header="Id" Binding="{Binding Service.ServiceId}" Visibility="Collapsed" />
+                        <DataGridTextColumn Header="Code du Service" Binding="{Binding Service.Code}" />
+                        <DataGridTextColumn Header="Nom du Service" Binding="{Binding Service.Nom}" />
+                        <DataGridTextColumn Header="Nombre de Versement" Binding="{Binding NombreVersement}" />
+                        <DataGridTextColumn Header="Nombre de Registre" Binding="{Binding NombreRegistre}" />
+                        <DataGridTextColumn Header="Chef de service Versant" Binding="{Binding ChefService.Noms}" />
+                        <DataGridTextColumn Header="Description" Binding="{Binding Service.Description}" />
+                        <DataGridTextColumn Header="Dernière Modification" Binding="{Binding Service.DateModif, Converter={StaticResource DateConverter}}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+
+        </StackPanel>
+    </StackPanel>
+</Page>

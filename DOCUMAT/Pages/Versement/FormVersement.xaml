@@ -1,0 +1,183 @@
+﻿<Window x:Class="DOCUMAT.Pages.Versement.FormVersement"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DOCUMAT.Pages.Versement"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Versement" 
+        Height="650" 
+        WindowStartupLocation="CenterScreen"
+        Closed="Window_Closed"
+        Width="800"
+        ResizeMode="NoResize"
+        Background="SteelBlue">
+
+    <StackPanel x:Name="Versement_space">
+
+        <!--Zone de donnée-->
+        <StackPanel x:Name="FormParent">
+            <!--Formulaire d'ajout et de modification-->
+            <StackPanel x:Name="formVersement" 
+                        Margin="20">
+                
+                <TextBlock x:Name="txbFormHeader" 
+                    Text="FORMULAIRE DE VERSEMENT"
+                    Foreground="White"
+                    HorizontalAlignment="Center"
+                    FontSize="20"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="7*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox x:Name="cbLivraison" 
+                                Foreground="White"
+                                materialDesign:HintAssist.Hint="NUMERO DE LIVRAISON"
+                                materialDesign:HintAssist.HelperText="NUMERO DE LIVRAISON"
+                                SelectedIndex="0"
+                                DisplayMemberPath="Numero"
+                                SelectedValuePath="LivraisonID"
+                                SelectionChanged="cbLivraison_SelectionChanged"
+                                Margin="20"  
+                                Grid.Column="0"
+                                >
+                    </ComboBox>
+                    <Button Margin="10" Background="{x:Null}"
+                            BorderBrush="White"
+                            Grid.Column="1"
+                            ToolTip="Actualiser"
+                            Name="btnAddLivraison" 
+                            Click="btnAddLivraison_Click" >
+                        <materialDesign:PackIcon Kind="Add"
+                                            Width="25"
+                                            Height="25"
+                                            Foreground="White"/>
+                    </Button>
+                </Grid>
+                <TextBox x:Name="tbNomAgentVersant" 
+                            Foreground="White"
+                            CharacterCasing="Upper"
+                            Typography.NumeralAlignment="Proportional"
+                            materialDesign:HintAssist.Hint="NOM AGENT VERSANT"
+                            materialDesign:HintAssist.HelperText="NOM AGENT VERSANT"
+                            Margin="20"
+                             />
+                <TextBox x:Name="tbPrenomsAgentVersant" 
+                            Foreground="White"
+                            CharacterCasing="Upper"
+                            Typography.NumeralAlignment="Proportional"
+                            materialDesign:HintAssist.Hint="PRENOMS AGENT VERSANT"
+                            materialDesign:HintAssist.HelperText="PRENOMS AGENT VERSANT"
+                            Margin="20"
+                             />
+                <TextBox x:Name="tbNumeroVers" 
+                        Foreground="White"
+                        CharacterCasing="Upper"
+                        InputScope="Number"
+                        Typography.NumeralAlignment="Proportional"
+                        materialDesign:HintAssist.Hint="NUMERO DE VERSEMENT"
+                        materialDesign:HintAssist.HelperText="NUMERO DE VERSEMENT"
+                        Margin="20"
+                        TextChanged="tbNumeroVers_TextChanged"
+                         />
+                <TextBlock Text="Nombre de registres Versés :" 
+                           HorizontalAlignment="Center" 
+                           FontSize="20"
+                           Foreground="White"/>
+                <StackPanel Orientation="Horizontal"  HorizontalAlignment="Center">
+                    <TextBox x:Name="tbNombreR3" 
+                            Foreground="White"
+                            CharacterCasing="Upper"
+                            InputScope="Number"
+                            Typography.NumeralAlignment="Proportional"
+                            materialDesign:HintAssist.Hint="NOMBRE DE REGISTRE R3"
+                            materialDesign:HintAssist.HelperText="NOMBRE DE REGISTRE R3"
+                            Margin="20"
+                            TextChanged="tbNumeroVers_TextChanged"
+                             />
+                    <TextBox x:Name="tbNombreR4" 
+                            Foreground="White"
+                            CharacterCasing="Upper"
+                            InputScope="Number"
+                            Typography.NumeralAlignment="Proportional"
+                            materialDesign:HintAssist.Hint="NOMBRE DE REGISTRE R4"
+                            materialDesign:HintAssist.HelperText="NOMBRE DE REGISTRE R4"
+                            Margin="20"
+                            TextChanged="tbNumeroVers_TextChanged"
+                             />
+                </StackPanel>
+                <DatePicker Name="dtVers" 
+                    InputScope="DateDay"
+                    materialDesign:HintAssist.Hint="DATE DE VERSEMENT"
+                    materialDesign:HintAssist.HelperText="DATE DE VERSEMENT"
+                    Foreground="White"
+                    Margin="20" />
+                <TextBox x:Name="tbService" 
+                                Foreground="White"
+                                IsEnabled="False"
+                                materialDesign:HintAssist.Hint="SERVICE VERSANT"
+                                materialDesign:HintAssist.HelperText="SERVICE VERSANT"
+                                Margin="20"/>
+                <!--<StackPanel Orientation="Horizontal" x:Name="PanelBordereau">
+                    <Button Margin="10" 
+                            x:Name="BtnChoixBordereau"
+                            ToolTip="Ajouter"
+                            Click="BtnChoixBordereau_Click"
+                            >
+                        SELECTIONNER LE BORDEREAU
+                    </Button>
+                    <TextBox x:Name="tbBorderau" 
+                                Foreground="White"
+                                CharacterCasing="Upper"
+                                materialDesign:HintAssist.Hint="CHEMIN DU BORDEREAU"
+                                Margin="10" 
+                                 IsReadOnly="True"/>
+                </StackPanel>-->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="btnAnnuleVersement" Margin="5"
+                        Content="ANNULER" Click="btnAnnuleVersement_Click"/>
+
+                    <Button x:Name="btnSaveVersement" Margin="5"
+                        Content="ENREGISTRE" Click="btnSaveVersement_Click"/>
+                </StackPanel>
+            </StackPanel>
+            <!--Fin du formulaire-->
+
+            <StackPanel x:Name="formLivraison" Margin="20"
+                        Visibility="Collapsed">
+                <TextBlock x:Name="txbFormLivHeader" 
+                    Text="FORMULAIRE DE LIVRAISON"
+                    Foreground="White"
+                    HorizontalAlignment="Center"                    
+                    FontSize="20"/>
+                            
+                <TextBox x:Name="tbNumeroLivraison" 
+                        Foreground="White"
+                        CharacterCasing="Upper"
+                        InputScope="Number"
+                        Typography.NumeralAlignment="Proportional"
+                        materialDesign:HintAssist.Hint="NUMERO DE LIVRAISON"
+                        materialDesign:HintAssist.HelperText="NUMERO DE LIVRAISON"
+                        TextChanged="tbNumeroLivraison_TextChanged"
+                        Margin="20" />
+                <DatePicker Name="dtLivraison" 
+                    InputScope="DateDay"
+                    materialDesign:HintAssist.Hint="DATE DE LIVRAISON"
+                    materialDesign:HintAssist.HelperText="DATE DE LIVRAISON"
+                    Foreground="White"
+                    Margin="20" />
+                            
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="btnAnnuleLivraison" Margin="5"
+                        Content="ANNULER" Click="btnAnnuleLivraison_Click"/>
+
+                    <Button x:Name="btnSaveLivraison" Margin="5"
+                        Content="ENREGISTRE" Click="btnSaveLivraison_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</Window>

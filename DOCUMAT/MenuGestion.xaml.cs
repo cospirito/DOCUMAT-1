@@ -220,8 +220,8 @@ namespace DOCUMAT
             this.ContenuAdd.Navigate(Accueil);
 
             // Vérouillage des onglet de contrôle et de correction 
-            BtnCORRECTION.IsEnabled = false;
-            BtnCONTROLE.IsEnabled = false;
+            //BtnCORRECTION.IsEnabled = false;
+            //BtnCONTROLE.IsEnabled = false;
 
             // Définition du Timer de maintient de session 
             Timer = new System.Timers.Timer() { AutoReset = true, Interval = 1 * 60 * 1000 };

@@ -9,7 +9,7 @@
         xmlns:WpfToolkit="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
         mc:Ignorable="d"
         WindowState="Maximized"
-        Title="CONTROLEUR PHASE 1"
+        Title="Controle Phase 1"
         MinWidth="1280"
         ResizeMode="CanResizeWithGrip"
         MinHeight="800"
@@ -180,97 +180,97 @@
         </Grid>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="50*"/>
-                <ColumnDefinition Width="300*"/>
-                <ColumnDefinition Width="120*"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="7*" MinWidth="600"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-                       
+
             <!--Partie dédier à l'aborescence-->
-            <StackPanel Grid.Column="0" Margin="5 5 5 5" Grid.ColumnSpan="2">
-                <TreeView x:Name="FolderView"
+            <Border BorderBrush="White" BorderThickness="2">
+                <StackPanel Grid.Column="0" Margin="5 5 5 5" Grid.ColumnSpan="2">
+                    <TreeView x:Name="FolderView"
                     Foreground="White"
                     MaxHeight="600">
-                    <TreeView.Resources>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Setter Property="HeaderTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image Height="30"
+                        <TreeView.Resources>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="HeaderTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Height="30"
                                                    Width="30"
                                                    Margin="3"
                                                    Stretch="Fill"
                                              Source="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TreeViewItem}},
                                             Path=Tag,
                                             Converter={x:Static local:HeaderToImageConverter.Instance}}" />
-                                            <TextBlock VerticalAlignment="Center" Text="{Binding}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </TreeView.Resources>
-                </TreeView>
+                                                <TextBlock VerticalAlignment="Center" Text="{Binding}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TreeView.Resources>
+                    </TreeView>
 
-                <Border x:Name="panelImageManquant"
+                    <Border x:Name="panelImageManquant"
                         BorderBrush="White" 
                         BorderThickness="0 7" 
                         Margin="0 20 0 0"
                         Visibility="Collapsed">
-                    <StackPanel HorizontalAlignment="Center">
-                        <TextBlock Text="IMAGE MANQUANTE"
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="IMAGE MANQUANTE"
                                HorizontalAlignment="Center"
                                Foreground="White"
                                Margin="0"
                                />
-                        <TextBox x:Name="tbNumeroImageManquant"
+                            <TextBox x:Name="tbNumeroImageManquant"
                              materialDesign:HintAssist.HelperText="PAGE"                             
                              Foreground="White"
                              Margin="0 10 0 0"
                              TextChanged="tbNumeroImageManquant_TextChanged"/>
-                        <TextBox x:Name="tbDebutSequenceManquant"
+                            <TextBox x:Name="tbDebutSequenceManquant"
                              materialDesign:HintAssist.HelperText="DEBUT"
                              Foreground="White"
                              Margin="0 10 0 0"
                                  TextChanged="tbDebutSequenceManquant_TextChanged"/>
-                        <TextBox x:Name="tbFinSequenceManquant"
+                            <TextBox x:Name="tbFinSequenceManquant"
                              materialDesign:HintAssist.HelperText="FIN"
                              Foreground="White"
                              Margin="0 10 0 0"
                              TextChanged="tbFinSequenceManquant_TextChanged"/>
-                        <DatePicker x:Name="dtDateSequenceManquant"
+                            <DatePicker x:Name="dtDateSequenceManquant"
                              materialDesign:HintAssist.HelperText="DATE DEBUT"
                              Foreground="White"
-                             Margin="0 10 0 0"/>                        
-                        <StackPanel Orientation="Horizontal"
+                             Margin="0 10 0 0"/>
+                            <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 Margin="0 30 0 10 ">
-                            <Button x:Name="btnAnnulerManquant" 
+                                <Button x:Name="btnAnnulerManquant" 
                                 Background="{x:Null}"                   
                                 BorderBrush="White"
                                 Height="25"
                                 Margin="0 0 5 0"
                                 Click="btnAnnulerManquant_Click"
                                 >
-                                <materialDesign:PackIcon Kind="RemoveCircle"
+                                    <materialDesign:PackIcon Kind="RemoveCircle"
                                                      />
-                            </Button>
-                            <Button x:Name="btnValiderManquant" 
+                                </Button>
+                                <Button x:Name="btnValiderManquant" 
                                 Background="{x:Null}"                   
                                 BorderBrush="White"
                                 Height="25"
                                 Margin="0 0 5 0"
                                 Click="btnValiderManquant_Click"
                                 >
-                                <materialDesign:PackIcon Kind="Check"
+                                    <materialDesign:PackIcon Kind="Check"
                                                      />
-                            </Button>
+                                </Button>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
-                </Border>
+                    </Border>
 
-                <Button x:Name="btnValideControle"    
+                    <Button x:Name="btnValideControle"    
                         Margin="10" 
                         Visibility="Collapsed"
                         Background="{x:Null}"
@@ -279,16 +279,19 @@
                         Height="100"
                         Click="btnValideControle_Click"
                         ToolTip="Valider l'indexation du registre"                                                    >
-                    <materialDesign:PackIcon Kind="CheckAll"
+                        <materialDesign:PackIcon Kind="CheckAll"
                                         Width="50"
                                         Height="50"
                                         Foreground="GreenYellow"/>
-                </Button>
-            </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
 
             <!--Partie d'dier à la visionneuse d'image-->
-            <Border Grid.Column="2"  BorderThickness="1" 
-                    BorderBrush="white" Margin="5">
+            <Border Grid.Column="1"  
+                    BorderThickness="2" 
+                    BorderBrush="white" 
+                    Margin="0">
                 <StackPanel Grid.Column="0">
                     <DocumentViewer Name="DocumentViewer" 
                                     Height="700"/>
@@ -297,15 +300,20 @@
             </Border>
 
             <!--Partie dédiée a Séquence d'Image-->
-            <Border Grid.Column="3" BorderBrush="White" 
-                    BorderThickness="1" Margin="5">
+            <Border Grid.Column="2" 
+                    BorderBrush="White" 
+                    BorderThickness="2" 
+                    Margin="0">
                 <StackPanel>
-                    <TextBlock Text="CONTROLE D'IMAGE"
-                                Foreground="White"
-                                FontSize="15"
-                                HorizontalAlignment="Center"
-                                Margin="5"
-                                />
+                    <StackPanel Background="White">
+                        <TextBlock Text="CONTROLE D'IMAGE"
+                                    Foreground="SteelBlue"
+                                    FontSize="15"
+                                    FontWeight="Bold"
+                                    HorizontalAlignment="Center"
+                                    Margin="5"
+                                    />
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal" 
                                 Margin="0">
                         <TextBlock x:Name="tbxNomPage" 
@@ -320,14 +328,29 @@
                         FontSize="10"          
                         InputScope="Number"                        
                         Margin="10"/>
+                        <TextBlock x:Name="tbxDebSeq" 
+                        Foreground="White"
+                        Text="N° Debut : "
+                        FontSize="10"          
+                        InputScope="Number"                        
+                        Margin="10"/>
+                        <TextBlock x:Name="tbxFinSeq" 
+                        Foreground="White"
+                        Text="N° Fin : "
+                        FontSize="10"          
+                        InputScope="Number"                        
+                        Margin="10"/>
                     </StackPanel>
                     
                     <StackPanel Visibility="Visible"
                                 x:Name="PanelControleEnCours">
-                        <TextBlock Text="Séquences de l'image" 
-                               HorizontalAlignment="Center"
-                               Padding="5" FontSize="12" 
-                               Foreground="White"/>
+                        <StackPanel Background="White">
+                            <TextBlock Text="Séquences de l'image" 
+                                   HorizontalAlignment="Center"
+                                   Padding="5" FontSize="12" 
+                                   Foreground="SteelBlue"
+                                   FontWeight="Bold"/>
+                        </StackPanel>
                         <DataGrid 
                             Name="dgSequence" 
                             AutoGenerateColumns="False" 
@@ -383,7 +406,7 @@
                             <Expander Name="SequenceSide" 
                                 Background="White" 
                                 HorizontalAlignment="Left"                             
-                                Header="CONTROLE SEQUENCES"
+                                Header="SEQUENCES"
                                 FontWeight="Bold"
                                 ExpandDirection="Down" 
                                 IsExpanded="False" 
@@ -391,14 +414,6 @@
                                 <StackPanel
                                             Background="SteelBlue" >
                                     <StackPanel Orientation="Horizontal"                                            >
-                                        <!--<CheckBox 
-                                                  x:Name="cbxSuppimerSequences"
-                                                  Content="Supprimé"
-                                                  Foreground="White"
-                                                  Margin="10"
-                                                  Checked="cbxSuppimerSequences_Checked"
-                                                  Unchecked="cbxSuppimerSequences_Unchecked"
-                                                  />-->
                                         <CheckBox 
                                                   x:Name="cbxManqueSequences"
                                                   Content="Manque"
@@ -407,29 +422,6 @@
                                                   Checked="cbxManqueSequences_Checked"
                                                   Unchecked="cbxManqueSequences_Unchecked"/>
                                     </StackPanel>
-                                    <!--Suppression Séquences -->
-                                    <!--<StackPanel x:Name="PanelSupprimeSequence" 
-                                                Orientation="Horizontal" 
-                                                Visibility="Collapsed"
-                                                HorizontalAlignment="Center">
-                                        <TextBox x:Name="tbSuprrimeSequences"
-                                                 Width="100"
-                                                 Foreground="White"
-                                                 materialDesign:HintAssist.Hint="ex : 1,2,3"
-                                                 materialDesign:HintAssist.HelperText="SEQUENCE A SUPPRIMEE"                                                                                          
-                                                 />
-                                        <Button 
-                                            x:Name="BtnAnnuleSupSequences"
-                                            Margin="5 0"
-                                            BorderBrush="White"
-                                            Background="Transparent"
-                                            Click="BtnAnnuleSupSequences_Click">
-                                            <materialDesign:PackIcon Kind="RemoveCircle"
-                                            Width="15"
-                                            Height="15"
-                                            Foreground="White"/>
-                                        </Button>
-                                    </StackPanel>-->
 
                                     <!--Pour les Manques-->
                                     <StackPanel x:Name="PanelManqueSequences" 
@@ -458,16 +450,11 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Expander>
-                        </StackPanel>
 
-                        <!--Zone de controle image-->
-                        <StackPanel Margin="10 10 0 0"
-                                    HorizontalAlignment="Left"
-                                    Orientation="Horizontal">
                             <Expander Name="ImageSide" 
                                 Background="White" 
                                 HorizontalAlignment="Left"                             
-                                Header="CONTROLE IMAGE"
+                                Header="IMAGE"
                                 FontWeight="Bold"
                                 ExpandDirection="Down" 
                                 IsExpanded="False" 
@@ -489,14 +476,6 @@
                                                   Checked="cbxSupprimerImage_Checked"
                                                   Unchecked="cbxSupprimerImage_Unchecked"
                                                   />
-                                        <!--<CheckBox 
-                                                  x:Name="cbxManqueImages"
-                                                  Content="Manque"
-                                                  Foreground="White"
-                                                  Margin="10 0"
-                                                  Checked="cbxManqueImages_Checked"
-                                                  Unchecked="cbxManqueImages_Unchecked"
-                                                  />-->
                                     </StackPanel>
                                     <!--Pour les rejet images -->
                                     <StackPanel x:Name="PanelRejetImage" 

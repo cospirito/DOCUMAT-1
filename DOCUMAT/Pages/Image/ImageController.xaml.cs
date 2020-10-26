@@ -70,16 +70,23 @@ namespace DOCUMAT.Pages.Image
 				{
 					tbxNomPage.Text = "PAGE DE GARDE";
 					tbxNumeroPage.Text = "";
+					tbxDebSeq.Text = "";
+					tbxFinSeq.Text = "";
+
 				}
 				else if (imageView1.Image.NumeroPage == 0)
 				{
 					tbxNomPage.Text = "PAGE D'OUVERTURE";
 					tbxNumeroPage.Text = "";
+					tbxDebSeq.Text = "";
+					tbxFinSeq.Text = "";
 				}
 				else
 				{
 					tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
 					tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
+					tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
+					tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
 				}
 
 				// Chargement de la visionneuse
@@ -95,7 +102,7 @@ namespace DOCUMAT.Pages.Image
 				cbxRejetImage.IsChecked = false;
 				cbxSupprimerImage.IsChecked = false;
 
-			#endregion
+				#endregion
 
 				#region RECUPERATION DES SEQUENCES DE L'IMAGE
 
@@ -497,19 +504,33 @@ namespace DOCUMAT.Pages.Image
 					}
 				}
 
-				//Ajout des pages numérotées
+				// Ensuite les autres pages numérotées 
+				//Système de trie des images de l'aborescence !!
+				Dictionary<int, string> filesInt = new Dictionary<int, string>();
 				foreach (var file in files)
 				{
-					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
-						&& GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
+					FileInfo file1 = new FileInfo(file);
+					int numero = 0;
+					if (Int32.TryParse(file1.Name.Substring(0, file1.Name.Length - 4), out numero))
+					{
+						filesInt.Add(numero, file);
+					}
+				}
+				var fileSorted = filesInt.OrderBy(f => f.Key);
+
+				//var fileSorted = files.OrderBy(f => f.ToLower());
+				foreach (var file in fileSorted)
+				{
+					if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
+						&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
 					{
 						var fileTree = new TreeViewItem();
-						fileTree.Header = GetFileFolderName(file);
-						fileTree.Tag = GetFileFolderName(file);
+						fileTree.Header = GetFileFolderName(file.Value);
+						fileTree.Tag = GetFileFolderName(file.Value);
 						fileTree.FontWeight = FontWeights.Normal;
 						fileTree.Foreground = Brushes.White;
 						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-						fileInfos.Add(new FileInfo(file));
+						fileInfos.Add(new FileInfo(file.Value));
 						registreAbre.Items.Add(fileTree);
 					}
 				}

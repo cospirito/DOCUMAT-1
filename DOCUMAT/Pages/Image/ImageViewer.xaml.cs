@@ -1655,12 +1655,13 @@ namespace DOCUMAT.Pages.Image
 					tbDateSequence.Focus();
 				}
 			}
-			else if(e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.OemPlus)
+			else if(e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.Add)
 			{
 				Regex regC = new Regex("^[0-9]{1,}/[\\w*]{1,}$");			
 				if (regC.IsMatch(tbReference.Text))
 				{
 					tbListeReferences.Text = "";
+					tbListeReferences.ToolTip = "";
 					tbListeReferences.Visibility = Visibility.Visible;
 					tbxNbRefsList.Visibility = Visibility.Visible;
 					try
@@ -1673,13 +1674,15 @@ namespace DOCUMAT.Pages.Image
 
 					foreach (var reference in References)
 					{
-						tbListeReferences.Text += reference.Value + " ";					
+						tbListeReferences.Text += reference.Value + " ";	
+						tbListeReferences.ToolTip += reference.Value + " ";
 					}
 				}
 			}
-			else if(e.Key == System.Windows.Input.Key.Down || e.Key == System.Windows.Input.Key.OemMinus)
+			else if(e.Key == System.Windows.Input.Key.Down || e.Key == System.Windows.Input.Key.Subtract)
 			{
 				tbListeReferences.Text = "";
+				tbListeReferences.ToolTip =  "";
 				if (References.Count != 0)
 				{
 					References.Remove(References.ElementAt(References.Count - 1).Key);
@@ -1687,9 +1690,10 @@ namespace DOCUMAT.Pages.Image
 					foreach (var reference in References)
 					{
 						tbListeReferences.Text += reference.Value + "  ";
+						tbListeReferences.ToolTip += reference.Value + " ";
 					}
 
-					if(References.Count == 0)
+					if (References.Count == 0)
 					{
 						tbListeReferences.Visibility = Visibility.Collapsed;
 						tbxNbRefsList.Visibility = Visibility.Collapsed;

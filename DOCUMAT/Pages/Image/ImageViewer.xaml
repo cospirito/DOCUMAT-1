@@ -351,6 +351,7 @@
                                      IsReadOnly="True"
                                      FontSize="11"   
                                      MinWidth="200"
+                                     MaxWidth="350"
                                      materialDesign:HintAssist.HelperText="LISTE DES REFERENCES"
                                      Foreground="White"
                                      Margin="10 20 0 5 "/>

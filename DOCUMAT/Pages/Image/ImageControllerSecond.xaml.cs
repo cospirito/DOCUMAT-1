@@ -2,6 +2,7 @@
 using DOCUMAT.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -30,6 +31,8 @@ namespace DOCUMAT.Pages.Image
 		// Numéro de l'image en cours
 		private int currentImage = 1;
 
+		string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
+
 		// Définition de l'aborescence
 		TreeViewItem registreAbre = new TreeViewItem();
 		//Fichier d'image sur le disque dure
@@ -53,46 +56,45 @@ namespace DOCUMAT.Pages.Image
 		/// <param name="currentImage"> Le numéro de l'image à récupérer et à afficher </param>
 		public void ChargerImage(int currentImage)
 		{
-			//try
-			//{
-			#region RECUPERATION ET AFFICHAGE DE L'IMAGE SELECTIONNEE
-			ImageView imageView1 = new ImageView();
-			List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
-			imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
-			//On change l'image actuelle
-			CurrentImageView = imageView1;
-			this.currentImage = currentImage;
+            try
+            {
+                #region RECUPERATION ET AFFICHAGE DE L'IMAGE SELECTIONNEE
+                ImageView imageView1 = new ImageView();
+				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
+				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
+				//On change l'image actuelle
+				CurrentImageView = imageView1;
+				this.currentImage = currentImage;
 
-			if (imageView1.Image.NumeroPage == -1)
-			{
-				tbxNomPage.Text = "PAGE DE GARDE";
-				tbxNumeroPage.Text = "";
-			}
-			else if (imageView1.Image.NumeroPage == 0)
-			{
-				tbxNomPage.Text = "PAGE D'OUVERTURE";
-				tbxNumeroPage.Text = "";
-			}
-			else
-			{
-				tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
-				tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
-			}
+				if (imageView1.Image.NumeroPage == -1)
+				{
+					tbxNomPage.Text = "PAGE DE GARDE";
+					tbxNumeroPage.Text = "";
+				}
+				else if (imageView1.Image.NumeroPage == 0)
+				{
+					tbxNomPage.Text = "PAGE D'OUVERTURE";
+					tbxNumeroPage.Text = "";
+				}
+				else
+				{
+					tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
+					tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
+				}
 
-			// Chargement de la visionneuse
-			if (File.Exists(imageView1.Image.CheminImage))
-				viewImage(imageView1.Image.CheminImage);
-			else
-				throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
+					// Chargement de la visionneuse
+					if (File.Exists(Path.Combine(DossierRacine,imageView1.Image.CheminImage)))
+							viewImage(Path.Combine(DossierRacine,imageView1.Image.CheminImage));
+				else
+					throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
 
-			//Reinitialisation de l'affichage
-			ImageSide.IsExpanded = false;
-			cbxRejetImage.IsChecked = false;
-			cbxSupprimerImage.IsChecked = false;
+				//Reinitialisation de l'affichage
+				ImageSide.IsExpanded = false;
+				cbxRejetImage.IsChecked = false;
+				cbxSupprimerImage.IsChecked = false;
+				#endregion
 
-			#endregion
-
-			#region RECUPERATION DES SEQUENCES DE L'IMAGE
+				#region RECUPERATION DES SEQUENCES DE L'IMAGE
 
 			// On vide le Dictionary des séquences de l'image précédente
 			ListeSequences.Clear();
@@ -132,7 +134,7 @@ namespace DOCUMAT.Pages.Image
 			}
 			#endregion
 
-			#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE
+				#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE
 			// Procédure d'affichage lorsque les statuts d'images changes
 			if (imageView1.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
 			{
@@ -191,13 +193,13 @@ namespace DOCUMAT.Pages.Image
 			}
 			#endregion
 
-			// Actualisation de l'aborescence
-			ActualiserArborescence();
-			//}
-			//catch (Exception ex)
-			//{
-			//	ex.ExceptionCatcher();
-			//}
+				// Actualisation de l'aborescence
+				ActualiserArborescence();
+			}
+			catch (Exception ex)
+			{
+				ex.ExceptionCatcher();
+			}
 		}
 
 		public static string GetFileFolderName(string path)
@@ -265,7 +267,7 @@ namespace DOCUMAT.Pages.Image
 			string EnCours = (Math.Round(((float)imageViews.Where(i => i.Image.StatutActuel == (int)Enumeration.Image.CREEE).Count() / (float)imageViews.Count()) * 100, 1)).ToString() + " %";
 			string Scanne = (Math.Round(((float)imageViews.Where(i => i.Image.StatutActuel == (int)Enumeration.Image.SCANNEE).Count() / (float)imageViews.Count()) * 100, 1)).ToString() + " %";
 			tbxImageTerminer.Text = "Terminé : " + Math.Round(perTerminer, 1) + " %";
-			tbxImageInstance.Text = "En Instance :" + Instance;
+			tbxImageRejete.Text = "En Instance :" + Instance;
 			tbxImageEnCours.Text = "Non Traité : " + EnCours;
 			ArcIndicator.EndAngle = (perTerminer * 360) / 100;
 			TextIndicator.Text = Math.Round(perTerminer, 1) + "%";
@@ -346,125 +348,125 @@ namespace DOCUMAT.Pages.Image
 
 		public ImageControllerSecond(RegistreView registreview, Controle.Controle controle) : this()
 		{
-			//try
-			//{
-			#region INSPECTION DU DOSSIER DE REGISTRE ET CREATION DE L'ABORESCENCE
-			MainParent = controle;
-			RegistreViewParent = registreview;
-			// Chargement de l'aborescence
-			// Récupération de la liste des images contenu dans le dossier du registre
-			var files = Directory.GetFiles(registreview.Registre.CheminDossier);
-
-			// Affichage et configuration de la TreeView
-			registreAbre.Header = registreview.Registre.QrCode;
-			registreAbre.Tag = registreview.Registre.QrCode;
-			registreAbre.FontWeight = FontWeights.Normal;
-			registreAbre.Foreground = Brushes.White;
-
-			// Définition de la lettre de référence pour ce registre
-			if (RegistreViewParent.Registre.Type == "R4")
-				RefInitiale = "T";
-
-			// Ajout de la page de garde comme entête de l'aborescence
-			foreach (var file in files)
+			try
 			{
-				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
-				{
-					var fileTree = new TreeViewItem();
-					fileTree.Header = GetFileFolderName(file);
-					fileTree.Tag = GetFileFolderName(file);
-					fileTree.FontWeight = FontWeights.Normal;
-					fileTree.Foreground = Brushes.White;
-					fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-					fileInfos.Add(new FileInfo(file));
-					registreAbre.Items.Add(fileTree);
-				}
-			}
+				#region INSPECTION DU DOSSIER DE REGISTRE ET CREATION DE L'ABORESCENCE
+				MainParent = controle;
+				RegistreViewParent = registreview;
+				// Chargement de l'aborescence
+				// Récupération de la liste des images contenu dans le dossier du registre
+				var files = Directory.GetFiles(Path.Combine(DossierRacine,registreview.Registre.CheminDossier));
 
-			// Ajout de la page d'ouverture
-			foreach (var file in files)
-			{
-				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
-				{
-					var fileTree = new TreeViewItem();
-					fileTree.Header = GetFileFolderName(file);
-					fileTree.Tag = GetFileFolderName(file);
-					fileTree.FontWeight = FontWeights.Normal;
-					fileTree.Foreground = Brushes.White;
-					fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-					fileInfos.Add(new FileInfo(file));
-					registreAbre.Items.Add(fileTree);
-				}
-			}
+				// Affichage et configuration de la TreeView
+				registreAbre.Header = registreview.Registre.QrCode;
+				registreAbre.Tag = registreview.Registre.QrCode;
+				registreAbre.FontWeight = FontWeights.Normal;
+				registreAbre.Foreground = Brushes.White;
 
-			//Ajout des pages numérotées
-			foreach (var file in files)
-			{
-				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
-					&& GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
-				{
-					var fileTree = new TreeViewItem();
-					fileTree.Header = GetFileFolderName(file);
-					fileTree.Tag = GetFileFolderName(file);
-					fileTree.FontWeight = FontWeights.Normal;
-					fileTree.Foreground = Brushes.White;
-					fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-					fileInfos.Add(new FileInfo(file));
-					registreAbre.Items.Add(fileTree);
-				}
-			}
+				// Définition de la lettre de référence pour ce registre
+				if (RegistreViewParent.Registre.Type == "R4")
+					RefInitiale = "T";
 
-			FolderView.Items.Add(registreAbre);			
-			#endregion
-
-			#region RECUPERATION DES PAGES SPECIAUX
-			// Récupération des Pages Spéciaux : PAGE DE GARDE : numero : -1 ET PAGE D'OUVERTURE : numero : 0			
-			using (var ct = new DocumatContext())
-			{
-				//PAGE DE GARDE N°-1
-				if (ct.Image.FirstOrDefault(i => i.RegistreID == RegistreViewParent.Registre.RegistreID && i.NumeroPage == -1) == null)
+				// Ajout de la page de garde comme entête de l'aborescence
+				foreach (var file in files)
 				{
-					throw new Exception("La PAGE DE GARDE est manquante !!!");
-				}
-
-				//PAGE D'OUVERTURE N°0
-				if (ct.Image.FirstOrDefault(i => i.RegistreID == RegistreViewParent.Registre.RegistreID && i.NumeroPage == 0) == null)
-				{
-					throw new Exception("La PAGE D'OUVERTURE est manquante !!!");
-				}
-			}
-			#endregion
-
-			#region RECUPERATION PAGES NUMEROTEES
-			// Modification des Pages Numerotées / Pré-Indexées
-			// Les Pages doivent être scannées de manière à respecter la nomenclature de fichier standard 
-			ImageView imageView1 = new ImageView();
-			List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
-			foreach (var imageView in imageViews)
-			{
-				if (imageView.Image.StatutActuel == (int)Enumeration.Image.SCANNEE)
-				{
-					FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NumeroPage.ToString());
-					if (file == null)
+					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
 					{
-						throw new Exception("La Page N°" + imageView.Image.NumeroPage + " est introuvable ");
+						var fileTree = new TreeViewItem();
+						fileTree.Header = GetFileFolderName(file);
+						fileTree.Tag = GetFileFolderName(file);
+						fileTree.FontWeight = FontWeights.Normal;
+						fileTree.Foreground = Brushes.White;
+						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
+						fileInfos.Add(new FileInfo(file));
+						registreAbre.Items.Add(fileTree);
 					}
 				}
-			}
-			#endregion
-			
-			// Chargement de la première page
-			currentImage = -1;
-			ChargerImage(currentImage);
 
-			// Modification des information d'entête
-			HeaderInfosGetter();
-			//}
-			//catch (Exception ex)
-			//{
-			//	ex.ExceptionCatcher();
-			//}
-		}
+				// Ajout de la page d'ouverture
+				foreach (var file in files)
+				{
+					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
+					{
+						var fileTree = new TreeViewItem();
+						fileTree.Header = GetFileFolderName(file);
+						fileTree.Tag = GetFileFolderName(file);
+						fileTree.FontWeight = FontWeights.Normal;
+						fileTree.Foreground = Brushes.White;
+						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
+						fileInfos.Add(new FileInfo(file));
+						registreAbre.Items.Add(fileTree);
+					}
+				}
+
+				//Ajout des pages numérotées
+				foreach (var file in files)
+				{
+					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
+						&& GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
+					{
+						var fileTree = new TreeViewItem();
+						fileTree.Header = GetFileFolderName(file);
+						fileTree.Tag = GetFileFolderName(file);
+						fileTree.FontWeight = FontWeights.Normal;
+						fileTree.Foreground = Brushes.White;
+						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
+						fileInfos.Add(new FileInfo(file));
+						registreAbre.Items.Add(fileTree);
+					}
+				}
+
+				FolderView.Items.Add(registreAbre);			
+				#endregion
+
+				#region RECUPERATION DES PAGES SPECIAUX
+				// Récupération des Pages Spéciaux : PAGE DE GARDE : numero : -1 ET PAGE D'OUVERTURE : numero : 0			
+				using (var ct = new DocumatContext())
+				{
+					//PAGE DE GARDE N°-1
+					if (ct.Image.FirstOrDefault(i => i.RegistreID == RegistreViewParent.Registre.RegistreID && i.NumeroPage == -1) == null)
+					{
+						throw new Exception("La PAGE DE GARDE est manquante !!!");
+					}
+
+					//PAGE D'OUVERTURE N°0
+					if (ct.Image.FirstOrDefault(i => i.RegistreID == RegistreViewParent.Registre.RegistreID && i.NumeroPage == 0) == null)
+					{
+						throw new Exception("La PAGE D'OUVERTURE est manquante !!!");
+					}
+				}
+				#endregion
+
+				#region RECUPERATION PAGES NUMEROTEES
+				// Modification des Pages Numerotées / Pré-Indexées
+				// Les Pages doivent être scannées de manière à respecter la nomenclature de fichier standard 
+				ImageView imageView1 = new ImageView();
+				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
+				foreach (var imageView in imageViews)
+				{
+					if (imageView.Image.StatutActuel == (int)Enumeration.Image.SCANNEE)
+					{
+						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NumeroPage.ToString());
+						if (file == null)
+						{
+							throw new Exception("La Page N°" + imageView.Image.NumeroPage + " est introuvable ");
+						}
+					}
+				}
+				#endregion
+			
+				// Chargement de la première page
+				currentImage = -1;
+				ChargerImage(currentImage);
+
+				// Modification des information d'entête
+				HeaderInfosGetter();
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
 
 		private void FileTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{

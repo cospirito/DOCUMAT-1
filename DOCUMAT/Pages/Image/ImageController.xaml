@@ -158,7 +158,15 @@
                          Foreground="SteelBlue"                                                
                          Margin="10 0 0 5"
                          />
-                        <TextBlock x:Name="tbxImageInstance"                         
+                        <TextBlock x:Name="tbxImageValide"                         
+                         Text="En instance : 0,0%"                              
+                         FontSize="15"
+                         Focusable="False"
+                         FontFamily="Agency Fb"
+                         Foreground="LimeGreen"                                                
+                         Margin="10 0 0 5"
+                         />
+                        <TextBlock x:Name="tbxImageRejete"                         
                          Text="En instance : 0,0%"                              
                          FontSize="15"
                          Focusable="False"
@@ -186,8 +194,8 @@
             </Grid.ColumnDefinitions>
 
             <!--Partie dédier à l'aborescence-->
-            <Border BorderBrush="White" BorderThickness="2">
-                <StackPanel Grid.Column="0" Margin="5 5 5 5" Grid.ColumnSpan="2">
+            <Border Grid.Column="0" BorderBrush="White" BorderThickness="2">
+                <StackPanel  Margin="5 5 5 5" Grid.ColumnSpan="2">
                     <TreeView x:Name="FolderView"
                     Foreground="White"
                     MaxHeight="600">
@@ -434,7 +442,6 @@
                                                  Margin="0 5"
                                                  Foreground="White"
                                                  materialDesign:HintAssist.Hint="ex : 1,2,3"
-                                                 materialDesign:HintAssist.HelperText="SEQUENCE MANNQUANTE"                                                                                          
                                                  />
                                         <Button 
                                             x:Name="BtnAnnuleManqueSequences"
@@ -479,15 +486,15 @@
                                     </StackPanel>
                                     <!--Pour les rejet images -->
                                     <StackPanel x:Name="PanelRejetImage" 
+                                                Margin="4"
                                                 Orientation="Horizontal" 
                                                 Visibility="Collapsed"
                                                 HorizontalAlignment="Center">
                                         <ComboBox Name="cbRejetImage" 
-                                                  materialDesign:HintAssist.HelperText="Motif Rejet"
                                                   Foreground="White"
                                                   >
-                                            <ComboBoxItem Content="Qualité Visuelle" 
-                                                          IsSelected="True"/>
+                                            <ComboBoxItem Content="Qualité Visuelle" IsSelected="True"/>
+                                            <ComboBoxItem Content="Ecriture Illisible"/>
                                             <!--<ComboBoxItem Content="Page Incorrecte"/>-->
                                         </ComboBox>
                                         <Button 
@@ -507,8 +514,9 @@
                                         Margin="0 0 0 0"
                                         HorizontalAlignment="Center">
                                 <Button x:Name="BtnTerminerImage"
-                                        Margin="5 0"
+                                        Margin="20 0"
                                         BorderBrush="White"
+                                        BorderThickness="1 0 5 0"
                                         Background="Transparent"
                                         Click="BtnTerminerImage_Click">
                                     <materialDesign:PackIcon Kind="ContentSaveMove"

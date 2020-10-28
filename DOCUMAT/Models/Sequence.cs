@@ -16,6 +16,6 @@ namespace DOCUMAT.Models
         public string isSpeciale { get; set; }
         public int ImageID { get; set; }
         public Image Image { get; set; }
-        public int PhaseActuelle { get; set; }
+        public int PhaseActuelle { get; set; } // Phase de COrrection de la Séquence
     }
 }

@@ -15,16 +15,17 @@ namespace DOCUMAT.Pages.Correction
     /// </summary>
     public partial class Correction : Page
     {
+        public Models.Agent Utilisateur;
+
         public Correction()
         {
             InitializeComponent();
         }
 
-        [DllImport("user32.dll")]
-        static extern bool SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("USER32.DLL")]
-        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        public Correction(Models.Agent user):this()
+        {
+            Utilisateur = user;
+        }
 
         public int CurrentPhase = 1;
 
@@ -130,12 +131,67 @@ namespace DOCUMAT.Pages.Correction
                     case 1:
                         if (TbRechercher.Text != "")
                         {
-                            RegistreView RegistreView = new RegistreView();
+                            //Remplissage de la list de registre
+                            //Les registres de type Phase 1 sont les registre nouvellement indexée 
+                            // Devra être modifié pour empêcher l'affichage des régistres déja attribués
+                            RegistreView registreView = new RegistreView();
+                            List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE1).ToList();
+                            List<Models.Correction> corrections = new List<Models.Correction>();
+                            using (var ct = new DocumatContext())
+                            {
+                                corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
+                                                                  && c.StatutCorrection == 1 && c.PhaseCorrection == 1).ToList();
+                            }
+                            var jointure = from r in registreViews
+                                           join c in corrections
+                                           on r.Registre.RegistreID equals c.RegistreId
+                                           select r;
+
+                            //dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE1);
+                            dgRegistre.ItemsSource = jointure;
+
+
                             switch (cbChoixRecherche.SelectedIndex)
                             {
                                 case 0:
-                                    dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.QrCode.Contains(TbRechercher.Text.ToUpper())
-                                                             && r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
+                                    dgRegistre.ItemsSource = jointure.Where(r => r.Registre.QrCode.Contains(TbRechercher.Text.ToUpper())).ToList();
+                                    break;
+                                case 1:
+                                    // Récupération des registre par service
+                                    List<Models.Service> Services1 = registreView.context.Service.ToList();
+                                    List<Models.Livraison> Livraisons1 = registreView.context.Livraison.ToList();
+                                    List<Models.Versement> Versements1 = registreView.context.Versement.ToList();
+                                    List<RegistreView> registreViews1 = jointure.ToList();
+
+                                    var jointure1 = from r in registreViews1
+                                                    join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
+                                                    from v in table1.ToList()
+                                                    join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
+                                                    from l in table2.ToList()
+                                                    join s in Services1 on l.ServiceID equals s.ServiceID
+                                                    where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
+                                                    select r;
+                                    dgRegistre.ItemsSource = jointure1;
+                                    break;
+                                case 2:
+                                    // Récupération des registre par service
+                                    List<Models.Region> Region2 = registreView.context.Region.ToList();
+                                    List<Models.Service> Services2 = registreView.context.Service.ToList();
+                                    List<Models.Livraison> Livraisons2 = registreView.context.Livraison.ToList();
+                                    List<Models.Versement> Versements2 = registreView.context.Versement.ToList();
+                                    List<RegistreView> registreViews2 = jointure.ToList();
+
+                                    var jointure2 = from r in registreViews2
+                                                    join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
+                                                    from v in table1.ToList()
+                                                    join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
+                                                    from l in table2.ToList()
+                                                    join s in Services2 on l.ServiceID equals s.ServiceID into table3
+                                                    from s in table3.ToList()
+                                                    join rg in Region2 on s.RegionID equals rg.RegionID
+                                                    where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
+                                                    select r;
+                                    dgRegistre.ItemsSource = jointure2;
                                     break;
                                 default:
                                     RefreshRegistrePhase1();
@@ -148,7 +204,7 @@ namespace DOCUMAT.Pages.Correction
                         }
                         break;
                     case 2:
-
+                            RefreshRegistrePhase2();
                         break;
                     default:
                         break;
@@ -165,7 +221,15 @@ namespace DOCUMAT.Pages.Correction
         {
             ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cm;
-            RefreshRegistrePhase1();
+
+            if (CurrentPhase == 1)
+            {
+                RefreshRegistrePhase1();
+            }
+            else
+            {
+                RefreshRegistrePhase2();
+            }
         }
 
         private void BtnRechercher_Click(object sender, RoutedEventArgs e)

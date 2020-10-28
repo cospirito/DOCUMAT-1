@@ -72,7 +72,9 @@ namespace DOCUMAT.Models
             REGISTRE_SCANNE,
             REGISTRE_ATTRIBUE_INDEXATION,
             INDEXATION_REGISTRE_DEBUT,
-            INDEXATION_REGISTRE_TERMINE
+            INDEXATION_REGISTRE_TERMINE,
+            CONTROLE_PH1_DEBUT,
+            CONTROLE_PH1_TERMINE
         }
 
         // Pour les séquences les statut sont :

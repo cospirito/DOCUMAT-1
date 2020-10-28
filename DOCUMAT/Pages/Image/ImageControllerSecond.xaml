@@ -23,111 +23,141 @@
     </Window.Resources>
     <StackPanel>
         <Grid  VerticalAlignment="Center"
-               Height="70" Background="White">
+               Height="125" Background="White">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="2*" 
+                                  MinWidth="350"/>
+                <ColumnDefinition Width="2*" 
+                                  MinWidth="200"  />
+                <ColumnDefinition Width="2*" 
+                                  MinWidth="200"/>
             </Grid.ColumnDefinitions>
-            <Border BorderBrush="White" Grid.Column="0"
-                    VerticalAlignment="Center">
+            <Border BorderBrush="SteelBlue" 
+                    Grid.Column="0"
+                    VerticalAlignment="Center"  
+                    BorderThickness="1"
+                    Focusable="True">
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="AgentImage"
-                       Source="C:\Users\Romyluss\source\repos\DOCUMAT\DOCUMAT\Images\user.png"                       
+                       Source="/Images/user.png"
                        Stretch="UniformToFill"
-                       Width="50"
-                       Height="50"
-                       Margin="10"
-                       />
-                    <StackPanel>
-                        <TextBlock x:Name="tbxAgentId"                                  
-                                TextAlignment="Center"
-                                FontFamily="Agency Fb"
-                                Text="N° 777"                                
+                       Height="100"
+                       Margin="10"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock x:Name="tbxAgentLogin"                         
+                                TextAlignment="Center"   
+                                FontFamily="Androgyne"
+                                Text="Login"     
+                                FontWeight="Bold"
+                                FontSize="15"                                   
                                 Foreground="Black"                                                
                                 Margin="10 10 0 0"
                                 />
                         <TextBlock x:Name="tbxAgentNoms"                         
-                                TextAlignment="Center"   
-                                FontFamily="Agency Fb"                        
+                                TextAlignment="Center"                                      
+                                FontFamily="Androgyne"
+                                FontSize="15"
+                                FontWeight="Bold"
                                 Text="NOM ET PRENOMS"                                
+                                Foreground="Black"                                                
+                                Margin="10 10 0 0"
+                                />
+                        <TextBlock x:Name="tbxAgentType"                         
+                                TextAlignment="Center"                                      
+                                FontFamily="Androgyne"
+                                FontSize="15"
+                                FontWeight="Bold"
+                                Text="TYPE AGENT"                                
                                 Foreground="Black"                                                
                                 Margin="10 10 0 0"
                                 />
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <Border BorderBrush="White" Margin="30 0 30 0"
+            <Border BorderBrush="SteelBlue"
+                    BorderThickness="2"
                     Grid.Column="1">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
-                            HorizontalAlignment="Center">
-                    <TextBlock x:Name="tbxQrCode"                         
-                                TextAlignment="Center"
-                                FontFamily="Agency Fb"                           
-                                Text="QRCODE "     
-                                FontSize="15"
-                                Foreground="Black"                                                
-                                Margin="10 10 0 0"
-                                />
-                    <TextBlock x:Name="tbxService"                         
-                                TextAlignment="Center"
-                                FontFamily="Agency Fb"                           
-                                Text="SERVICE : "  
-                                FontSize="15"                               
-                                Foreground="Black"                                           
-                                Margin="10 10 0 0"
-                                />
-                    <TextBlock x:Name="tbxVersement"                         
-                                TextAlignment="Center"
-                                FontFamily="Agency Fb"                           
-                                Text="VERSEMENT N° : " 
-                                FontSize="15"                               
-                                Foreground="Black"                                                
-                                Margin="10 10 0 0"
-                                />
+                <StackPanel VerticalAlignment="Center" 
+                            HorizontalAlignment="Center"
+                            Orientation="Horizontal">
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Left">
+                        <TextBlock x:Name="tbxQrCode"                         
+                                    TextAlignment="Center"
+                                    FontFamily="Androgyne"                           
+                                    Text="Qrcode "     
+                                    FontSize="15"
+                                    Foreground="Black"                                                
+                                    Margin="10 10 0 0"
+                                    />
+                        <TextBlock x:Name="tbxService"                         
+                                    TextAlignment="Center"
+                                    FontFamily="Androgyne"                           
+                                    Text="Servvice : "  
+                                    FontSize="15"                               
+                                    Foreground="Black"                                           
+                                    Margin="10 10 0 0"
+                                    />
+                        <TextBlock x:Name="tbxVersement"                         
+                                    TextAlignment="Center"
+                                    FontFamily="Androgyne"                           
+                                    Text="N° Versement : " 
+                                    FontSize="15"                               
+                                    Foreground="Black"                                                
+                                    Margin="10 10 0 0"
+                                    />
+                    </StackPanel>
                 </StackPanel>
             </Border>
-            <Border BorderBrush="White"
+            <Border BorderBrush="SteelBlue"
                     Grid.Column="2" 
-                    HorizontalAlignment="Right"
-                    Margin="0 0 50 0" Visibility="Collapsed">
+                    BorderThickness="1" >
                 <StackPanel Orientation="Horizontal" 
-                            VerticalAlignment="Center">
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
                     <Grid x:Name="Grid">
                         <Ellipse  x:Name="SecondCircle"                               
-                             Stroke="Black" 
-                             StrokeThickness="10" 
+                             Stroke="SteelBlue" 
+                             StrokeThickness="1" 
                              Opacity="0.5"/>
 
                         <id:Arc Name="ArcIndicator" 
                              ArcThickness="10" 
                              ArcThicknessUnit="Pixel" 
-                             EndAngle="360"                               
-                             Width="71" 
-                             Height="71"
-                             Fill="Blue" 
+                             EndAngle="0"                               
+                             Width="110" 
+                             Height="110"
+                             Fill="SteelBlue" 
                              Stretch="None" 
                              StartAngle="0" />
 
                         <TextBlock 
-                             Text="100%"
+                             Text="0%"
                              Name="TextIndicator"
-                             Foreground="Blue" FontSize="20" FontFamily="Agency Fb" 
+                             Foreground="SteelBlue" FontSize="20" FontFamily="Agency Fb" 
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center"/>
                     </Grid>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="tbxImageTerminer"                         
                          Text="Terminé : 0,0%"
-                         FontSize="10"
+                         FontSize="15"
                          Focusable="False"
                          FontFamily="Agency Fb"
                          Foreground="SteelBlue"                                                
                          Margin="10 0 0 5"
                          />
-                        <TextBlock x:Name="tbxImageInstance"                         
+                        <TextBlock x:Name="tbxImageValide"                         
                          Text="En instance : 0,0%"                              
-                         FontSize="10"
+                         FontSize="15"
+                         Focusable="False"
+                         FontFamily="Agency Fb"
+                         Foreground="LimeGreen"                                                
+                         Margin="10 0 0 5"
+                         />
+                        <TextBlock x:Name="tbxImageRejete"                         
+                         Text="En instance : 0,0%"                              
+                         FontSize="15"
                          Focusable="False"
                          FontFamily="Agency Fb"
                          Foreground="Firebrick"                                                
@@ -135,7 +165,7 @@
                          />
                         <TextBlock x:Name="tbxImageEnCours"                         
                          Text="Non Traité 0,0%"                          
-                         FontSize="10"    
+                         FontSize="15"    
                          Focusable="False"
                          FontFamily="Agency Fb"
                          Foreground="Black"                                                

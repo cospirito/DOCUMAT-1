@@ -27,6 +27,8 @@ namespace DOCUMAT
         Pages.Preindexation.Preindexation Preindexation;
         Pages.Scannerisation.Scannerisation Scannerisation;
         Pages.Indexation.Indexation Indexation;
+        Pages.Controle.Controle Controle;
+        Pages.Correction.Correction Correction;
         
         Pages.Parametre.Parametre Parametre;
         Pages.Agent.GestionAgent GestionAgent;
@@ -191,11 +193,11 @@ namespace DOCUMAT
                     //ContenuAdd.Content = new Pages.Indexation.Indexation();
                     break;
                 case 5:
-                    this.ContenuAdd.Navigate(new Pages.Controle.Controle(Utilisateur));
+                    this.ContenuAdd.Navigate(Controle);
                     //ContenuAdd.Content = new Pages.Controle.Controle();
                     break;
                 case 6:
-                    this.ContenuAdd.Navigate(new Pages.Correction.Correction());
+                    this.ContenuAdd.Navigate(Correction);
                     //ContenuAdd.Content = new Pages.Correction.Correction();
                     break;
                 default:
@@ -217,6 +219,8 @@ namespace DOCUMAT
             Parametre = new Pages.Parametre.Parametre();
             GestionAgent = new Pages.Agent.GestionAgent(Utilisateur);
             Dispatching = new Pages.Dispatching.Dispatching();
+            Controle = new Pages.Controle.Controle(Utilisateur);
+            Correction = new Pages.Correction.Correction(Utilisateur);
             this.ContenuAdd.Navigate(Accueil);
 
             // Vérouillage des onglet de contrôle et de correction 

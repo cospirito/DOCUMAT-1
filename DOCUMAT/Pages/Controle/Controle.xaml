@@ -86,7 +86,6 @@
                          materialDesign:HintAssist.Hint="RECHERCHER" 
                          Foreground="White" 
                          HorizontalAlignment="Center"
-                         CharacterCasing="Upper"
                          VerticalAlignment="Center"
                          Margin="20 20 20 20"
                          TextChanged="TbRechercher_TextChanged"
@@ -113,13 +112,7 @@
                             <ComboBoxItem Content="CODE REGISTRE"/>
                             <ComboBoxItem Content="SERVICE" IsSelected="True" />
                             <ComboBoxItem Content="REGION" />
-                            <!--<ComboBoxItem Content="SERVICE"/>-->
                         </ComboBox>
-
-                        <!--<CheckBox x:Name="AfficherImage"
-                          Content="Afficher les Images"
-                          Foreground="White"
-                          Click="AfficherRegistre_Click"/>-->
                     </StackPanel>
 
                     <!--Zone de donnée-->
@@ -146,17 +139,16 @@
                             LoadingRowDetails="dgRegistre_LoadingRowDetails" Grid.ColumnSpan="2">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
-                                        <DataGridTextColumn Header="Id" Binding="{Binding Registre.RegistreID}" Visibility="Collapsed" />
-                                        <DataGridTextColumn Header="Numéro Versement" Binding="{Binding Versement.NumeroVers}" />
                                         <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />
                                         <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Registre.Numero}" />
-                                        <DataGridTextColumn Header="Nom du service versant" Binding="{Binding  ServiceVersant.Nom}" />
+                                        <DataGridTextColumn Header="Service versant" Binding="{Binding  ServiceVersant.Nom}" />
+                                        <DataGridTextColumn Header="Region" Binding="{Binding  ServiceVersant.Region.Nom}" />
                                         <DataGridTextColumn Header="pages attendues " Binding="{Binding Registre.NombrePage}" />
-                                        <DataGridTextColumn Header="pages scannées" Binding="{Binding NombreImageScan}" />
+                                        <DataGridTextColumn Header="pages scannées " Binding="{Binding NombreImageScan}" />
                                         <DataGridTextColumn Header="pages enregistrées" Binding="{Binding NombreImageCompte}" />
+                                        <DataGridTextColumn Header="Agent Traitant" Binding="{Binding AgentTraitant.Noms}" />
                                         <DataGridTextColumn Header="Type de registre" Binding="{Binding Registre.Type}" />
-                                        <DataGridTextColumn Header="Statut" Binding="{Binding StatutName}" />
-                                        <DataGridTextColumn Header="Date Versement" Binding="{Binding Versement.DateVers, Converter={StaticResource DateConverter}}" />
+                                        <DataGridTextColumn Header="Date Création" Binding="{Binding Registre.DateCreation, Converter={StaticResource DateConverter}}" />
                                     </DataGrid.Columns>
 
                                     <!--Details sur le versement-->
@@ -164,16 +156,20 @@
                                         <DataTemplate>
                                             <DockPanel>
                                                 <Image DockPanel.Dock="Left" 
-                                               x:Name="QrCode"
-                                               Source="{Binding QrCode}" 
-                                               Height="70"
-                                               Width="70"
-                                               Stretch="UniformToFill"
-                                               Margin="10" />
+                                                   x:Name="QrCode"
+                                                   Source="{Binding QrCode}" 
+                                                   Height="70"
+                                                   Width="70"
+                                                   Stretch="UniformToFill"
+                                                   Margin="10" />
                                                 <StackPanel Orientation="Vertical" Margin="10,10,10,10">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Agent Versant : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding AgentVersant.Noms}" Grid.Column="1" Grid.Row="2" />
+                                                        <TextBlock Text="Numéro de Versement : " FontWeight="Bold" Grid.Row="2" />
+                                                        <TextBlock Text="{Binding Versement.NumeroVers}" Grid.Column="1" Grid.Row="2" />
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Date de Versement : " FontWeight="Bold" Grid.Row="2" />
+                                                        <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
                                                     </StackPanel>
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="Numéro dépôt du début : " FontWeight="Bold" Grid.Row="2" />
@@ -199,6 +195,10 @@
                                                     </StackPanel>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Vertical" Margin="10,10,10,10">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Statut du registre : " FontWeight="Bold" Grid.Row="2" />
+                                                        <TextBlock Text="{Binding StatutName}" Grid.Column="1" Grid.Row="2" />
+                                                    </StackPanel>
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="Date de Création : " FontWeight="Bold" Grid.Row="2" />
                                                         <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />

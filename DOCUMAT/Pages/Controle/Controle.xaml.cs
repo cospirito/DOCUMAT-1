@@ -1,6 +1,7 @@
 ﻿using DOCUMAT.Models;
 using DOCUMAT.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -107,27 +108,64 @@ namespace DOCUMAT.Pages.Controle
                 {
                     // Recherche des registre en phase 1
                     case 1:
-                            if (TbRechercher.Text != "")
+                        if (TbRechercher.Text != "")
+                        {
+                            RegistreView RegistreView = new RegistreView();
+                            switch (cbChoixRecherche.SelectedIndex)
                             {
-                                RegistreView RegistreView = new RegistreView();
-                                switch (cbChoixRecherche.SelectedIndex)
-                                {
-                                    case 0:
-                                        dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.QrCode.Contains(TbRechercher.Text.ToUpper())
-                                                                 && r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
-                                        break;
-                                    default:
-                                        RefreshRegistrePhase1();
-                                        break;
-                                }
+                                case 0:
+                                    dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.QrCode.Contains(TbRechercher.Text.ToUpper())
+                                                                && r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
+                                    break;
+                                case 1:   
+                                    // Récupération des registre par service
+                                    List<Models.Service> Services1 = RegistreView.context.Service.ToList();
+                                    List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
+                                    List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
+                                    List<RegistreView> registreViews1 = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
+
+                                    var jointure1 = from r in registreViews1
+                                                    join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
+                                                    from v in table1.ToList()
+                                                    join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
+                                                    from l in table2.ToList()
+                                                    join s in Services1 on l.ServiceID equals s.ServiceID
+                                                    where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
+                                                    select r;
+                                    dgRegistre.ItemsSource = jointure1;
+                                break;
+                                case 2:
+                                    // Récupération des registre par service
+                                    List<Models.Region> Region2 = RegistreView.context.Region.ToList();
+                                    List<Models.Service> Services2 = RegistreView.context.Service.ToList();
+                                    List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
+                                    List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
+                                    List<RegistreView> registreViews2 = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
+
+                                    var jointure2 = from r in registreViews2
+                                                    join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
+                                                    from v in table1.ToList()
+                                                    join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
+                                                    from l in table2.ToList()
+                                                    join s in Services2 on l.ServiceID equals s.ServiceID into table3
+                                                    from s in table3.ToList()
+                                                    join rg in Region2 on s.RegionID equals rg.RegionID
+                                                    where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
+                                                    select r;
+                                    dgRegistre.ItemsSource = jointure2;
+                                break;
+                                default:
+                                    RefreshRegistrePhase1();
+                                    break;
                             }
-                            else
-                            {
-                                RefreshRegistrePhase1();
-                            }
+                        }
+                        else
+                        {
+                            RefreshRegistrePhase1();
+                        }
                         break;
                     case 2:
-
+                            RefreshRegistrePhase2();
                         break;
                     default:
                         break;
@@ -144,7 +182,15 @@ namespace DOCUMAT.Pages.Controle
         {
             ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cm;
-            RefreshRegistrePhase1();
+
+            if (CurrentPhase == 1)
+            {
+                RefreshRegistrePhase1();
+            }
+            else
+            {
+                RefreshRegistrePhase2();
+            }
         }
 
         private void BtnRechercher_Click(object sender, RoutedEventArgs e)

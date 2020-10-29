@@ -113,7 +113,6 @@ namespace DOCUMAT.Pages.Image
 			PageContent PageContent;
 
             ImageSource img = BitmapFrame.Create(new Uri(ImagePath), BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
-            //ImageSource img = BitmapFrame.Create(new Uri(ImagePath),new System.Net.Cache.RequestCachePolicy());
             Image = new System.Windows.Controls.Image();
 			Image.Source = img;
 			FixedPage = new FixedPage();

@@ -545,10 +545,9 @@ namespace DOCUMAT.Pages.Image
 				#endregion
 
 				#region RECUPERATION DES SEQUENCES DE L'IMAGE
-
 				// On vide le Dictionary des séquences de l'image précédente
 				ListeSequences.Clear();
-				// Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
+				// Récupération des sequences déja renseignées
 				List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
 
 				//Récupération des contrôles de séquences rejetés
@@ -582,8 +581,7 @@ namespace DOCUMAT.Pages.Image
 				}
 				#endregion
 
-				#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE
-				
+				#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE				
 				btnValiderImageImporte.Foreground = Brushes.White;
 				btnImporterImage.Tag = "";
 				//On vide les références
@@ -611,7 +609,7 @@ namespace DOCUMAT.Pages.Image
 						{							
 							if(ct.Controle.FirstOrDefault(c=>c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
 															&& c.PhaseControle == 1 && c.StatutControle == 1 
-															&& c.RejetImage_idx == 1 && c.MotifRejetImage_idx.Equals("Qualité Visuelle")) != null)
+															&& c.RejetImage_idx == 1) != null)
 							{
 								PanelRejetImage.Visibility = Visibility.Visible;
 							}
@@ -665,8 +663,8 @@ namespace DOCUMAT.Pages.Image
 				bool valide = true;
 				foreach(TreeViewItem item in registreAbre.Items)
 				{
-				if (!item.Tag.ToString().Equals("valide"))
-					valide = false;
+					if (!item.Tag.ToString().Equals("valide"))
+						valide = false;
 				}				
 				
 				if(valide)
@@ -1406,7 +1404,8 @@ namespace DOCUMAT.Pages.Image
 							//On vide les références
 							References.Clear();
 							tbListeReferences.Visibility = Visibility.Collapsed;
-							tbListeReferences.Text = "";							
+							tbListeReferences.Text = "";
+
 
 							ActualiseDataIndexer();
 						}
@@ -1434,7 +1433,7 @@ namespace DOCUMAT.Pages.Image
 			}
 
 			ChargerImage(currentImage);
-		}
+		} 
 
 		private void cbxSautOrdre_Checked(object sender, RoutedEventArgs e)
 		{
@@ -1468,7 +1467,6 @@ namespace DOCUMAT.Pages.Image
 					}
 				}
 			}
-
 		}
 
 		private void cbxBisOrdre_Checked(object sender, RoutedEventArgs e)
@@ -1560,195 +1558,198 @@ namespace DOCUMAT.Pages.Image
 
 		private void BtnTerminerImage_Click(object sender, RoutedEventArgs e)
 		{
-			if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
-			{
-				#region FINALISATION DES IMAGES NOUVELLEMENT INDEXEE 
-				using (var ct = new DocumatContext())
+			if(MessageBox.Show("Voulez vous terminer cette image ?","TERMINER IMAGE",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+				if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
 				{
-					var LastSequence = ct.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID
-									   && s.References.ToLower() != "defaut").OrderByDescending(i => i.NUmeroOdre).FirstOrDefault();
-					if (LastSequence != null)
+					#region FINALISATION DES IMAGES NOUVELLEMENT INDEXEE 
+					using (var ct = new DocumatContext())
 					{
-						if (LastSequence.NUmeroOdre == CurrentImageView.Image.FinSequence)
+						var LastSequence = ct.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID
+										   && s.References.ToLower() != "defaut").OrderByDescending(i => i.NUmeroOdre).FirstOrDefault();
+						if (LastSequence != null)
 						{
-							//Déclaration des séquences de la vue en tant que Manquant						
-							List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID).ToList();
-							// Recherche de la date de manquant de l'image
-							Models.ManquantImage manquantImage = ct.ManquantImage.FirstOrDefault(mq => mq.IdImage == CurrentImageView.Image.ImageID);
-							List<ManquantSequence> ManquantSequences = new List<ManquantSequence>();
-							foreach (var sequence in sequences)
+							if (LastSequence.NUmeroOdre == CurrentImageView.Image.FinSequence)
 							{
-								//Pour Chaque séquence on ajoute une séquence Manquante et une séquence corrigée
-								Models.ManquantSequence DeclareManquant = new ManquantSequence()
+								//Déclaration des séquences de la vue en tant que Manquant						
+								List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID).ToList();
+								// Recherche de la date de manquant de l'image
+								Models.ManquantImage manquantImage = ct.ManquantImage.FirstOrDefault(mq => mq.IdImage == CurrentImageView.Image.ImageID);
+								List<ManquantSequence> ManquantSequences = new List<ManquantSequence>();
+								foreach (var sequence in sequences)
 								{
-									IdSequence = sequence.SequenceID,
-									IdImage = sequence.ImageID,
-									statutManquant = 1,
-									DateCreation = DateTime.Now,
-									DateDeclareManquant = manquantImage.DateDeclareManquant,
-									DateModif = DateTime.Now,
-									NumeroOrdre = sequence.NUmeroOdre,
-								};
-								ManquantSequences.Add(DeclareManquant);
+									//Pour Chaque séquence on ajoute une séquence Manquante et une séquence corrigée
+									Models.ManquantSequence DeclareManquant = new ManquantSequence()
+									{
+										IdSequence = sequence.SequenceID,
+										IdImage = sequence.ImageID,
+										statutManquant = 1,
+										DateCreation = DateTime.Now,
+										DateDeclareManquant = manquantImage.DateDeclareManquant,
+										DateModif = DateTime.Now,
+										NumeroOrdre = sequence.NUmeroOdre,
+									};
+									ManquantSequences.Add(DeclareManquant);
 
-								Models.ManquantSequence SequenceCorrige = new ManquantSequence()
+									Models.ManquantSequence SequenceCorrige = new ManquantSequence()
+									{
+										IdSequence = sequence.SequenceID,
+										IdImage = sequence.ImageID,
+										statutManquant = 0,
+										DateCreation = DateTime.Now,
+										DateDeclareManquant = manquantImage.DateDeclareManquant,
+										DateModif = DateTime.Now,
+										NumeroOrdre = sequence.NUmeroOdre,
+										DateCorrectionManquant = DateTime.Now,
+									};
+									ManquantSequences.Add(SequenceCorrige);
+								}
+								ct.ManquantSequences.AddRange(ManquantSequences);
+								ct.SaveChanges();
+
+								//Ajout d'un Manquant Image Corrigé
+								Models.ManquantImage manquantImageFirst = new ManquantImage()
 								{
-									IdSequence = sequence.SequenceID,
-									IdImage = sequence.ImageID,
+									IdRegistre = CurrentImageView.Image.RegistreID,
+									IdImage = CurrentImageView.Image.ImageID,
+									NumeroPage = CurrentImageView.NumeroOrdre,
 									statutManquant = 0,
-									DateCreation = DateTime.Now,
 									DateDeclareManquant = manquantImage.DateDeclareManquant,
-									DateModif = DateTime.Now,
-									NumeroOrdre = sequence.NUmeroOdre,
 									DateCorrectionManquant = DateTime.Now,
+									DateCreation = DateTime.Now,
+									DateModif = DateTime.Now,
+									DebutSequence = manquantImage.DebutSequence,
+									DateSequenceDebut = manquantImage.DateSequenceDebut,
+									FinSequence = manquantImage.FinSequence,
 								};
-								ManquantSequences.Add(SequenceCorrige);
+								ct.ManquantImage.Add(manquantImageFirst);
+								ct.SaveChanges();
+
+								//Modifiication du Manque séquence non corrigé
+								manquantImage.DateModif = DateTime.Now;
+								ct.SaveChanges();
+
+								// Changement du statut de l'image directement en phase 2
+								Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
+
+								//Récupération du statut de l'image pour changer sa date de modif 
+								Models.StatutImage statutImage = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID
+																								&& s.Code == CurrentImageView.Image.StatutActuel);
+								statutImage.DateModif = DateTime.Now;
+								statutImage.DateFin = DateTime.Now;
+								ct.SaveChanges();  
+
+								//Création du nouveau statut de type PHASE 2
+								Models.StatutImage NewStatutImage = new StatutImage()
+								{
+									ImageID = CurrentImageView.Image.ImageID,
+									Code = (int)Enumeration.Image.PHASE2,
+									DateModif = DateTime.Now,
+									DateCreation = DateTime.Now,
+									DateDebut = DateTime.Now,
+								};
+								ct.StatutImage.Add(NewStatutImage);
+								ct.SaveChanges();
+
+								image.StatutActuel = (int)Enumeration.Image.PHASE2;
+								image.DateModif = DateTime.Now;
+								ct.SaveChanges();
+
+								this.BtnImageSuivante_Click(sender, e);
 							}
-							ct.ManquantSequences.AddRange(ManquantSequences);
-							ct.SaveChanges();
-
-							//Ajout d'un Manquant Image Corrigé
-							Models.ManquantImage manquantImageFirst = new ManquantImage()
+							else
 							{
-								IdRegistre = CurrentImageView.Image.RegistreID,
-								IdImage = CurrentImageView.Image.ImageID,
-								NumeroPage = CurrentImageView.NumeroOrdre,
-								statutManquant = 0,
-								DateDeclareManquant = manquantImage.DateDeclareManquant,
-								DateCorrectionManquant = DateTime.Now,
-								DateCreation = DateTime.Now,
-								DateModif = DateTime.Now,
-								DebutSequence = manquantImage.DebutSequence,
-								DateSequenceDebut = manquantImage.DateSequenceDebut,
-								FinSequence = manquantImage.FinSequence,
-							};
-							ct.ManquantImage.Add(manquantImageFirst);
-							ct.SaveChanges();
+								throw new Exception("Certaines séquences sont Manquantes !!!");
+							}
+						}
+					}
+					#endregion
+				}
+				else if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
+				{
+					#region FINALISATION DES IMAGES EN CORRECTION
+					//Vérification que l'image est totalement corrigée
+					//On vérifie que le tableau des séquences erroné est vide cela évite de faire des réquêtes supplementaires
+					//On vérifie aussi que le panel rejet image est fermé !!!
+					if (dgSequence.Items.Count == 0 && PanelRejetImage.Visibility == Visibility.Collapsed)
+					{
+						using (var ct = new DocumatContext())
+						{
+							//Récupération de la demande de correction 
+							Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID
+																&& c.SequenceID == null && c.ImageID == CurrentImageView.Image.ImageID);
 
-							//Modifiication du Manque séquence non corrigé
-							manquantImage.DateModif = DateTime.Now;
-							ct.SaveChanges();
-
-							// Changement du statut de l'image directement en phase 2
-							Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
-
-							//Récupération du statut de l'image pour changer sa date de modif 
-							Models.StatutImage statutImage = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID
-																							&& s.Code == CurrentImageView.Image.StatutActuel);
-							statutImage.DateModif = DateTime.Now;
-							statutImage.DateFin = DateTime.Now;
-							ct.SaveChanges();  
-
-							//Création du nouveau statut de type PHASE 2
-							Models.StatutImage NewStatutImage = new StatutImage()
+							// Création d'une correction pour de l'image 
+							Models.Correction correction = new Models.Correction()
 							{
+								RegistreId = RegistreViewParent.Registre.RegistreID,
 								ImageID = CurrentImageView.Image.ImageID,
-								Code = (int)Enumeration.Image.PHASE2,
-								DateModif = DateTime.Now,
+								SequenceID = null,
+
+								//Indexes Image mis à null
+								RejetImage_idx = CorrectionOld.RejetImage_idx,
+								MotifRejetImage_idx = CorrectionOld.MotifRejetImage_idx,
+								ASupprimer = CorrectionOld.ASupprimer,
+
+								//Indexes de la séquence de l'image
+								OrdreSequence_idx = null,
+								DateSequence_idx = null,
+								RefSequence_idx = null,
+								RefRejetees_idx = null,
+
+								DateCorrection = DateTime.Now,
 								DateCreation = DateTime.Now,
-								DateDebut = DateTime.Now,
+								DateModif = DateTime.Now,
+								PhaseCorrection = 1,
+								StatutCorrection = 0,
 							};
-							ct.StatutImage.Add(NewStatutImage);
+							ct.Correction.Add(correction);
 							ct.SaveChanges();
 
+							//Récupération du statut pour le Modifier
+							Models.StatutImage statutOld = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID
+																						&& s.Code == CurrentImageView.Image.StatutActuel);
+							statutOld.DateFin = DateTime.Now;
+							statutOld.DateModif = DateTime.Now;
+							ct.SaveChanges();
+
+							//Création du nouveau statut en PHASE 2
+							Models.StatutImage statutNew = new StatutImage()
+							{
+								Code = (int)Enumeration.Image.PHASE2,
+								ImageID = CurrentImageView.Image.ImageID,
+								DateModif = DateTime.Now,
+								DateDebut = DateTime.Now,
+								DateCreation = DateTime.Now,
+							};
+							ct.StatutImage.Add(statutNew);
+							ct.SaveChanges();
+
+							Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
 							image.StatutActuel = (int)Enumeration.Image.PHASE2;
 							image.DateModif = DateTime.Now;
 							ct.SaveChanges();
 
 							this.BtnImageSuivante_Click(sender, e);
-						}
-						else
-						{
-							throw new Exception("Certaines séquences sont Manquantes !!!");
+							ActualiserArborescence();
 						}
 					}
+					#endregion
 				}
-				#endregion
-			}
-			else if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
-			{
-				#region FINALISATION DES IMAGES EN CORRECTION
-				//Vérification que l'image est totalement corrigée
-				//On vérifie que le tableau des séquences erroné est vide cela évite de faire des réquêtes supplementaires
-				//On vérifie aussi que le panel rejet image est fermé !!!
-				if (dgSequence.Items.Count == 0 && PanelRejetImage.Visibility == Visibility.Collapsed)
+
+				using (var ct = new DocumatContext())
 				{
-					using (var ct = new DocumatContext())
+					if (ct.Image.All(i => i.RegistreID == RegistreViewParent.Registre.RegistreID
+										&& i.StatutActuel == (int)Enumeration.Image.PHASE2))
 					{
-						//Récupération de la demande de correction 
-						Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID
-															&& c.SequenceID == null && c.ImageID == CurrentImageView.Image.ImageID);
-
-						// Création d'une correction pour de l'image 
-						Models.Correction correction = new Models.Correction()
-						{
-							RegistreId = RegistreViewParent.Registre.RegistreID,
-							ImageID = CurrentImageView.Image.ImageID,
-							SequenceID = null,
-
-							//Indexes Image mis à null
-							RejetImage_idx = CorrectionOld.RejetImage_idx,
-							MotifRejetImage_idx = CorrectionOld.MotifRejetImage_idx,
-							ASupprimer = CorrectionOld.ASupprimer,
-
-							//Indexes de la séquence de l'image
-							OrdreSequence_idx = null,
-							DateSequence_idx = null,
-							RefSequence_idx = null,
-							RefRejetees_idx = null,
-
-							DateCorrection = DateTime.Now,
-							DateCreation = DateTime.Now,
-							DateModif = DateTime.Now,
-							PhaseCorrection = 1,
-							StatutCorrection = 0,
-						};
-						ct.Correction.Add(correction);
-						ct.SaveChanges();
-
-						//Récupération du statut pour le Modifier
-						Models.StatutImage statutOld = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID
-																					&& s.Code == CurrentImageView.Image.StatutActuel);
-						statutOld.DateFin = DateTime.Now;
-						statutOld.DateModif = DateTime.Now;
-						ct.SaveChanges();
-
-						//Création du nouveau statut en PHASE 2
-						Models.StatutImage statutNew = new StatutImage()
-						{
-							Code = (int)Enumeration.Image.PHASE2,
-							ImageID = CurrentImageView.Image.ImageID,
-							DateModif = DateTime.Now,
-							DateDebut = DateTime.Now,
-							DateCreation = DateTime.Now,
-						};
-						ct.StatutImage.Add(statutNew);
-						ct.SaveChanges();
-
-						Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
-						image.StatutActuel = (int)Enumeration.Image.PHASE2;
-						image.DateModif = DateTime.Now;
-						ct.SaveChanges();
-
-						this.BtnImageSuivante_Click(sender, e);
-						ActualiserArborescence();
+						btnValideCorrection.Visibility = Visibility.Visible;
+					}
+					else
+					{
+						btnValideCorrection.Visibility = Visibility.Collapsed;
 					}
 				}
-				#endregion
-			}
-
-			using (var ct = new DocumatContext())
-			{
-				if (ct.Image.All(i => i.RegistreID == RegistreViewParent.Registre.RegistreID
-									&& i.StatutActuel == (int)Enumeration.Image.PHASE2))
-				{
-					btnValideCorrection.Visibility = Visibility.Visible;
-				}
-				else
-				{
-					btnValideCorrection.Visibility = Visibility.Collapsed;
-				}
-			}
+            }
         }
 
 		private void tbDateSequence_TextChanged(object sender, TextChangedEventArgs e)
@@ -2083,7 +2084,7 @@ namespace DOCUMAT.Pages.Image
 		private void btnImporterImage_Click(object sender, RoutedEventArgs e)
 		{
 			OpenFileDialog open = new OpenFileDialog();
-			open.Filter = "JPEG|*.jpg|TIFF|*.tif";
+			open.Filter = "Fichier image |*.jpg;*.png;*.tif";
 			open.Multiselect = false;
 			string NomFichier = "";
 

@@ -177,27 +177,27 @@ namespace DOCUMAT
                     //ContenuAdd.Content = new Pages.Home.Admin();
                     break;
                 case 1:
-                    this.ContenuAdd.Navigate(Inventaire);
+                    this.ContenuAdd.Navigate(new Pages.Inventaire.Inventaire(Utilisateur));
                     //ContenuAdd.Content = new Pages.Inventaire.Inventaire();
                     break;
                 case 2:
-                    this.ContenuAdd.Navigate(Preindexation);
+                    this.ContenuAdd.Navigate(new Pages.Preindexation.Preindexation(Utilisateur));
                     //ContenuAdd.Content = new Pages.Preindexation.Preindexation();                    
                     break;
                 case 3:
                     // SCANNERISATION
-                    this.ContenuAdd.Navigate(Scannerisation);
+                    this.ContenuAdd.Navigate(new Pages.Scannerisation.Scannerisation(Utilisateur));
                     break;
                 case 4:
-                    this.ContenuAdd.Navigate(Indexation);
+                    this.ContenuAdd.Navigate(new Pages.Indexation.Indexation(Utilisateur));
                     //ContenuAdd.Content = new Pages.Indexation.Indexation();
                     break;
                 case 5:
-                    this.ContenuAdd.Navigate(Controle);
+                    this.ContenuAdd.Navigate(new Pages.Controle.Controle(Utilisateur));
                     //ContenuAdd.Content = new Pages.Controle.Controle();
                     break;
                 case 6:
-                    this.ContenuAdd.Navigate(Correction);
+                    this.ContenuAdd.Navigate(new Pages.Correction.Correction(Utilisateur));
                     //ContenuAdd.Content = new Pages.Correction.Correction();
                     break;
                 default:
@@ -212,15 +212,15 @@ namespace DOCUMAT
         {
             //Service = new Main();
             Accueil = new Pages.Home.Admin();
-            Inventaire = new Pages.Inventaire.Inventaire(Utilisateur);
-            Preindexation = new Pages.Preindexation.Preindexation(Utilisateur);
-            Scannerisation = new Pages.Scannerisation.Scannerisation(Utilisateur);
-            Indexation = new Pages.Indexation.Indexation(Utilisateur);
+            //Inventaire = new Pages.Inventaire.Inventaire(Utilisateur);
+            //Preindexation = new Pages.Preindexation.Preindexation(Utilisateur);
+            //Scannerisation = new Pages.Scannerisation.Scannerisation(Utilisateur);
+            //Indexation = new Pages.Indexation.Indexation(Utilisateur);
+            //Controle = new Pages.Controle.Controle(Utilisateur);
+            //Correction = new Pages.Correction.Correction(Utilisateur);
             Parametre = new Pages.Parametre.Parametre();
             GestionAgent = new Pages.Agent.GestionAgent(Utilisateur);
             Dispatching = new Pages.Dispatching.Dispatching();
-            Controle = new Pages.Controle.Controle(Utilisateur);
-            Correction = new Pages.Correction.Correction(Utilisateur);
             this.ContenuAdd.Navigate(Accueil);
 
             // Vérouillage des onglet de contrôle et de correction 
@@ -231,16 +231,23 @@ namespace DOCUMAT
             Timer = new System.Timers.Timer() { AutoReset = true, Interval = 1 * 60 * 1000 };
             Timer.Elapsed += Timer_Elapsed;
             Timer.Start();
-        }
+        }   
 
         private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             // Mise à jour de la session de Travail
             using(var ct = new DocumatContext())
             {
-                SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
-                sessionTravail.DateModif = DateTime.Now;
-                ct.SaveChanges();
+                try
+                {
+                    SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
+                    sessionTravail.DateModif = DateTime.Now;
+                    ct.SaveChanges();
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "ERREUR ARRET SESSION", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -311,9 +318,15 @@ namespace DOCUMAT
                     {
                         SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
                         sessionTravail.DateFin = sessionTravail.DateModif = DateTime.Now;
-                        ct.SaveChanges();
-                        Timer.Stop();
-                        Application.Current.Shutdown();
+                        if(ct.SaveChanges() > 0)
+                        {
+                            Timer.Stop();
+                            Application.Current.Shutdown();
+                        }
+                        else
+                        {
+                            MessageBox.Show("La session n'a pas pu être arrêter !!!", "ERREUR ARRET SESSION", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
                     }
                 }
             }

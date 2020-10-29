@@ -194,7 +194,9 @@
             </Grid.ColumnDefinitions>
 
             <!--Partie dédier à l'aborescence-->
-            <Border Grid.Column="0" BorderBrush="White" BorderThickness="2">
+            <Border Grid.Column="0" 
+                    BorderBrush="White" 
+                    BorderThickness="2">
                 <StackPanel  Margin="5 5 5 5" Grid.ColumnSpan="2">
                     <TreeView x:Name="FolderView"
                     Foreground="White"

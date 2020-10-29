@@ -7,7 +7,7 @@
         xmlns:local1="clr-namespace:DOCUMAT.Converter"
         xmlns:local="clr-namespace:DOCUMAT.Converter"
         xmlns:id="http://schemas.microsoft.com/expression/2010/drawing"
-        Title="CONTROLEUR PHASE 2"
+        Title="Controleur Phase 2"
         mc:Ignorable="d"        
         WindowState="Maximized"
         MinWidth="1280"
@@ -35,8 +35,7 @@
             <Border BorderBrush="SteelBlue" 
                     Grid.Column="0"
                     VerticalAlignment="Center"  
-                    BorderThickness="1"
-                    Focusable="True">
+                    BorderThickness="1">
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="AgentImage"
                        Source="/Images/user.png"
@@ -177,40 +176,42 @@
         </Grid>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="50*"/>
-                <ColumnDefinition Width="300*"/>
-                <ColumnDefinition Width="120*"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="7*" MinWidth="600"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
             <!--Partie dédier à l'aborescence-->
-            <StackPanel Grid.Column="0" Margin="5 5 5 5" Grid.ColumnSpan="2">
-                <TreeView x:Name="FolderView"
+            <Border Grid.Column="0" 
+                    BorderBrush="White" 
+                    BorderThickness="2">
+                <StackPanel Grid.Column="0" Margin="5 5 5 5" Grid.ColumnSpan="2">
+                    <TreeView x:Name="FolderView"
                     Foreground="White"
                     MaxHeight="600">
-                    <TreeView.Resources>
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Setter Property="HeaderTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image Height="30"
+                        <TreeView.Resources>
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="HeaderTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Height="30"
                                                    Width="30"
                                                    Margin="3"
                                                    Stretch="Fill"
                                              Source="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TreeViewItem}},
                                             Path=Tag,
                                             Converter={x:Static local:HeaderToImageConverter.Instance}}" />
-                                            <TextBlock VerticalAlignment="Center" Text="{Binding}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </TreeView.Resources>
-                </TreeView>
+                                                <TextBlock VerticalAlignment="Center" Text="{Binding}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TreeView.Resources>
+                    </TreeView>
 
-                <Button x:Name="btnValideControle"    
+                    <Button x:Name="btnValideControle"    
                         Margin="10" 
                         Visibility="Collapsed"
                         Background="{x:Null}"
@@ -219,16 +220,17 @@
                         Height="100"
                         Click="btnValideControle_Click"
                         ToolTip="Valider l'indexation du registre"                                                    >
-                    <materialDesign:PackIcon Kind="CheckAll"
+                        <materialDesign:PackIcon Kind="CheckAll"
                                         Width="50"
                                         Height="50"
                                         Foreground="GreenYellow"/>
-                </Button>
-            </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
 
             <!--Partie d'dier à la visionneuse d'image-->
-            <Border Grid.Column="2"  BorderThickness="1" 
-                    BorderBrush="white" Margin="5">
+            <Border Grid.Column="1"  BorderThickness="1" 
+                    BorderBrush="white" Margin="0">
                 <StackPanel Grid.Column="0">
                     <DocumentViewer Name="DocumentViewer" 
                                     Height="700"/>
@@ -237,15 +239,18 @@
             </Border>
 
             <!--Partie dédiée a Séquence d'Image-->
-            <Border Grid.Column="3" BorderBrush="White" 
-                    BorderThickness="1" Margin="5">
+            <Border Grid.Column="2" BorderBrush="White" 
+                    BorderThickness="1" Margin="0">
                 <StackPanel>
-                    <TextBlock Text="CONTROLE D'IMAGE"
-                                Foreground="White"
-                                FontSize="15"
-                                HorizontalAlignment="Center"
-                                Margin="5"
-                                />
+                    <StackPanel Background="White">
+                        <TextBlock Text="CONTROLE D'IMAGE"
+                                    Foreground="SteelBlue"
+                                    FontSize="15"
+                                    FontWeight="Bold"
+                                    HorizontalAlignment="Center"
+                                    Margin="5"
+                                    />
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal" 
                                 Margin="0">
                         <TextBlock x:Name="tbxNomPage" 
@@ -260,14 +265,30 @@
                         FontSize="10"          
                         InputScope="Number"                        
                         Margin="10"/>
+                        <TextBlock x:Name="tbxDebSeq" 
+                        Foreground="White"
+                        Text="N° Debut : "
+                        FontSize="10"          
+                        InputScope="Number"                        
+                        Margin="10"/>
+                        <TextBlock x:Name="tbxFinSeq" 
+                        Foreground="White"
+                        Text="N° Fin : "
+                        FontSize="10"          
+                        InputScope="Number"                        
+                        Margin="10"/>
                     </StackPanel>
 
                     <StackPanel Visibility="Visible"
                                 x:Name="PanelControleEnCours">
-                        <TextBlock Text="Séquences de l'image" 
-                               HorizontalAlignment="Center"
-                               Padding="5" FontSize="12" 
-                               Foreground="White"/>
+                        <StackPanel Background="white">
+                            <TextBlock Text="Séquences de l'image" 
+                                   HorizontalAlignment="Center"
+                                   Padding="5" 
+                                   FontSize="12" 
+                                   FontWeight="Bold"
+                                   Foreground="SteelBlue"/>
+                        </StackPanel>
                         <DataGrid 
                             Name="dgSequence" 
                             AutoGenerateColumns="False" 

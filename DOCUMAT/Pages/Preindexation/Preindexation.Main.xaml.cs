@@ -15,22 +15,6 @@ namespace DOCUMAT.Pages.Preindexation
     /// </summary>
     public partial class Preindexation : Page
     {
-        #region FONCTIONS
-        private void ForceNombre(object sender)
-        {
-            Regex regex = new Regex("^[0-9]{1,}$");
-            TextBox textBox = ((TextBox)sender);
-            string text = textBox.Text;
-            if (text.Length > 0)
-            {
-                if (!regex.IsMatch(text.Substring(text.Length - 1)))
-                {
-                    textBox.Text = textBox.Text.Remove(text.Length - 1);
-                    textBox.CaretIndex = text.Length;
-                }
-            }
-        }
-        #endregion
 
         Models.Registre registre = new Models.Registre();
         List<Sequence> Sequences = new List<Sequence>();
@@ -59,11 +43,11 @@ namespace DOCUMAT.Pages.Preindexation
         //Pour la préindexation le registre doit être au statut Créer
         private void AfficherFeuillets_Click(object sender, RoutedEventArgs e)
         {            
-            if(AfficherFeuillets.IsChecked == true && TbQrCode.Text.Trim() != "")
+            if(AfficherFeuillets.IsChecked == true && dgRegistre.SelectedItems.Count == 1)
             {
                 using (var ct = new DocumatContext())
                 {
-                    registre = ct.Registre.FirstOrDefault(r => r.QrCode.Trim().ToLower() == TbQrCode.Text.Trim().ToLower() && r.StatutActuel == (int)Enumeration.Registre.CREE);
+                    registre = ((RegistreView)dgRegistre.SelectedItem).Registre;
 
                     if (registre != null)
                     {
@@ -97,56 +81,68 @@ namespace DOCUMAT.Pages.Preindexation
 
                             if(registreEnCours !=null || registreNonTermines.Count == 0)
                             {
-                                // Cas où c'est un nouveau registre qui est ouvert 
-                                if(registreEnCours == null)
+                                // Vérification des images déclaré de ce registre 
+                                if(registre.NombrePage > 0)
                                 {
-                                    if(MessageBox.Show("Voulez vous commencer la préindexation de ce Registre, en acceptant, vous serez le seul à pouvoir y travailler ?", "COMMENCER LA PREINDEXATION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                                    // Cas où c'est un nouveau registre qui est ouvert 
+                                    if (registreEnCours == null)
                                     {
-                                        AfficherFeuillets.IsChecked = false;
-                                        return;
+                                        if (MessageBox.Show("Voulez vous commencer la préindexation de ce Registre, en acceptant, vous serez le seul à pouvoir y travailler ?", "COMMENCER LA PREINDEXATION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                                        {
+                                            AfficherFeuillets.IsChecked = false;
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            if (ct.Traitement.Any(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper()
+                                                     && t.TableID == registre.RegistreID && t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE && t.AgentID != Utilisateur.AgentID))
+                                            {
+                                                DocumatContext.AddTraitement(DocumatContext.TbRegistre, registre.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE);
+                                            }
+                                            else
+                                            {
+                                                MessageBox.Show("Ce registre viens malheureusement d'être attribué à un autre Agent !!!", "Registre Attribué !!!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                                return;
+                                            }
+                                        }
                                     }
-                                }
 
-                                // Chargement de l'image du Qrcode de la ligne
-                                Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
-                                var image = qrcode.Draw(registre.QrCode, 40);
-                                var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
-                                QrCodeImage.Source = imageConvertie.Source;
+                                    // Chargement de l'image du Qrcode de la ligne
+                                    Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
+                                    var image = qrcode.Draw(registre.QrCode, 40);
+                                    var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
+                                    QrCodeImage.Source = imageConvertie.Source;
 
-                                ImageView imageView = new ImageView();
-                                List<ImageView> imageViews = imageView.GetSimpleViewsList(registre);
-                                dgFeuillet.ItemsSource = imageViews;
-                                if (imageViews.Count() > 0)
-                                {
-                                    LastImage = imageViews.OrderByDescending(i => i.Image.ImageID).FirstOrDefault().Image;
-                                    tbNumeroFeuillet.Text = (LastImage.NumeroPage + 1) + "";
-                                    tbNumeroOrdreDebut.Text = (LastImage.FinSequence + 1).ToString();
-                                    if (registre.NombrePage == imageViews.Count)
+                                    ImageView imageView = new ImageView();
+                                    List<ImageView> imageViews = imageView.GetSimpleViewsList(registre);
+                                    dgFeuillet.ItemsSource = imageViews;
+                                    if (imageViews.Count() > 0)
                                     {
-                                        MarquerPreindexer.Visibility = Visibility.Visible;
-                                        btnSaveFeuillet.IsEnabled = false;
+                                        LastImage = imageViews.OrderByDescending(i => i.Image.ImageID).FirstOrDefault().Image;
+                                        tbNumeroFeuillet.Text = (LastImage.NumeroPage + 1) + "";
+                                        tbNumeroOrdreDebut.Text = (LastImage.FinSequence + 1).ToString();
+                                        if (registre.NombrePage == imageViews.Count)
+                                        {
+                                            MarquerPreindexer.Visibility = Visibility.Visible;
+                                            btnSaveFeuillet.IsEnabled = false;
+                                        }
+                                        else
+                                        {
+                                            MarquerPreindexer.Visibility = Visibility.Collapsed;
+                                            btnSaveFeuillet.IsEnabled = true;
+                                        }
                                     }
                                     else
                                     {
-                                        MarquerPreindexer.Visibility = Visibility.Collapsed;
+                                        tbNumeroFeuillet.Text = "1";
+                                        tbNumeroFeuillet.IsEnabled = false;
+                                        tbNumeroOrdreDebut.Text = "1";
                                         btnSaveFeuillet.IsEnabled = true;
                                     }
-                                }
-                                else
-                                {
-                                    tbNumeroFeuillet.Text = "1";
-                                    tbNumeroFeuillet.IsEnabled = false;
-                                    tbNumeroOrdreDebut.Text = "1";
-                                    btnSaveFeuillet.IsEnabled = true;
-                                }
-                                // Hide dgRegistre et Show du dgFeuillet
-                                dgRegistre.Visibility = Visibility.Collapsed;
-                                PanelFeuillet.Visibility = Visibility.Visible;
-                                PanelRecherche.Visibility = Visibility.Collapsed;
-
-                                if(registreEnCours == null)
-                                {
-                                    DocumatContext.AddTraitement(DocumatContext.TbRegistre, registre.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE);
+                                    // Hide dgRegistre et Show du dgFeuillet
+                                    dgRegistre.Visibility = Visibility.Collapsed;
+                                    PanelFeuillet.Visibility = Visibility.Visible;
+                                    PanelRecherche.Visibility = Visibility.Collapsed;
                                 }
                             }
                             else if(registreNonTermines.Count > 0) 
@@ -203,17 +199,47 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void tbNumeroFeuillet_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ForceNombre(sender);
+            Regex regex = new Regex("^[0-9]{1,}$");
+            TextBox textBox = ((TextBox)sender);
+            string text = textBox.Text;
+            if (text.Length > 0)
+            {
+                if (!regex.IsMatch(text.Substring(text.Length - 1)))
+                {
+                    textBox.Text = textBox.Text.Remove(text.Length - 1);
+                    textBox.CaretIndex = text.Length;
+                }
+            }
         }
 
         private void tbNumeroOrdreDebut_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ForceNombre(sender);
+            Regex regex = new Regex("^[0-9]{1,}$");
+            TextBox textBox = ((TextBox)sender);
+            string text = textBox.Text;
+            if (text.Length > 0)
+            {
+                if (!regex.IsMatch(text.Substring(text.Length - 1)))
+                {
+                    textBox.Text = textBox.Text.Remove(text.Length - 1);
+                    textBox.CaretIndex = text.Length;
+                }
+            }
         }
 
         private void tbNumeroOrdreFin_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ForceNombre(sender);
+            Regex regex = new Regex("^[0-9]{1,}$");
+            TextBox textBox = ((TextBox)sender);
+            string text = textBox.Text;
+            if (text.Length > 0)
+            {
+                if (!regex.IsMatch(text.Substring(text.Length - 1)))
+                {
+                    textBox.Text = textBox.Text.Remove(text.Length - 1);
+                    textBox.CaretIndex = text.Length;
+                }
+            }
         }
 
         private void btnAnnuleFeuillet_Click(object sender, RoutedEventArgs e)
@@ -225,96 +251,99 @@ namespace DOCUMAT.Pages.Preindexation
         {
             try
             {
-                ImageView imageView = new ImageView();
-
-                if (MarquerPreindexer.Visibility != Visibility.Visible)
+                if (MessageBox.Show("Attention en Terminant ce feuillet, Vous ne pourrez plus le Modifier !!", "TERMINER LE FEUILLET ?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    int numeroPage = 0;
-                    if (Int32.TryParse(tbNumeroFeuillet.Text, out numeroPage))
-                        imageView.Image.NumeroPage = numeroPage;
-                    else
-                        throw new Exception("le numero de page du feuillet doit être de type numérique");
+                    ImageView imageView = new ImageView();
 
-                    int numeroFeuilletDebut = 0;
-                    if (Int32.TryParse(tbNumeroOrdreDebut.Text, out numeroFeuilletDebut))
-                        imageView.Image.DebutSequence = numeroFeuilletDebut;
-                    else
-                        throw new Exception("le premier numero d'ordre doit être de type numérique");
-
-                    int numeroFeuilletFin = 0;
-                    if (Int32.TryParse(tbNumeroOrdreFin.Text, out numeroFeuilletFin))
-                        imageView.Image.FinSequence = numeroFeuilletFin;
-                    else
-                        throw new Exception("le dernier numéro d'ordre doit être de type numérique");
-
-                    if (dtDateSequence.SelectedDate == null)
-                        throw new Exception("La date de la première séquence doit être renseignée !!!");
-
-                    if (imageView.Image.DebutSequence > imageView.Image.FinSequence)
-                        throw new Exception("Le numéro d'ordre de début doit être inférieur au numéro d'ordre de fin");
-
-                    //imageView.Image.NumeroPageDeclare = 0;
-                    imageView.Image.RegistreID = registre.RegistreID;
-                    //imageView.Image.CheminImage = "Defaut";
-                    imageView.Image.DateCreation = DateTime.Now;
-                    imageView.Image.DateModif = DateTime.Now;
-                    imageView.Image.DateScan = DateTime.Now;
-                    imageView.Image.DateDebutSequence = dtDateSequence.SelectedDate.Value;
-                    //imageView.Image.StatutActuel = 0;
-                    //imageView.Image.Taille = "0"; // Doit être changer en type numéric
-                    //imageView.Image.Type = "Defaut";                
-                    LastImage =  imageView.AddPreIndex();
-
-                    //Ajout de la liste des séquences à multiréférences
-                    if (Sequences.Count > 0)
+                    if (MarquerPreindexer.Visibility != Visibility.Visible)
                     {
-                        foreach (var seq in Sequences)
+                        int numeroPage = 0;
+                        if (Int32.TryParse(tbNumeroFeuillet.Text, out numeroPage))
+                            imageView.Image.NumeroPage = numeroPage;
+                        else
+                            throw new Exception("le numero de page du feuillet doit être de type numérique");
+
+                        int numeroFeuilletDebut = 0;
+                        if (Int32.TryParse(tbNumeroOrdreDebut.Text, out numeroFeuilletDebut))
+                            imageView.Image.DebutSequence = numeroFeuilletDebut;
+                        else
+                            throw new Exception("le premier numero d'ordre doit être de type numérique");
+
+                        int numeroFeuilletFin = 0;
+                        if (Int32.TryParse(tbNumeroOrdreFin.Text, out numeroFeuilletFin))
+                            imageView.Image.FinSequence = numeroFeuilletFin;
+                        else
+                            throw new Exception("le dernier numéro d'ordre doit être de type numérique");
+
+                        if (dtDateSequence.SelectedDate == null)
+                            throw new Exception("La date de la première séquence doit être renseignée !!!");
+
+                        if (imageView.Image.DebutSequence > imageView.Image.FinSequence)
+                            throw new Exception("Le numéro d'ordre de début doit être inférieur au numéro d'ordre de fin");
+
+                        //imageView.Image.NumeroPageDeclare = 0;
+                        imageView.Image.RegistreID = registre.RegistreID;
+                        //imageView.Image.CheminImage = "Defaut";
+                        imageView.Image.DateCreation = DateTime.Now;
+                        imageView.Image.DateModif = DateTime.Now;
+                        imageView.Image.DateScan = DateTime.Now;
+                        imageView.Image.DateDebutSequence = dtDateSequence.SelectedDate.Value;
+                        //imageView.Image.StatutActuel = 0;
+                        //imageView.Image.Taille = "0"; // Doit être changer en type numéric
+                        //imageView.Image.Type = "Defaut";                
+                        LastImage = imageView.AddPreIndex();
+
+                        //Ajout de la liste des séquences à multiréférences
+                        if (Sequences.Count > 0)
                         {
-                            seq.ImageID = LastImage.ImageID;
+                            foreach (var seq in Sequences)
+                            {
+                                seq.ImageID = LastImage.ImageID;
+                            }
+                            imageView.AddSequencesPreIndex(Sequences.OrderBy(s => s.NUmeroOdre).ToList());
                         }
-                        imageView.AddSequencesPreIndex(Sequences.OrderBy(s => s.NUmeroOdre).ToList());
+
+                        //On change d'interface 
+                        // Pour cacher le formulaire des séquences si elle est visible
+                        // On affiche les elements de la préindex de l'image s'ils était cachés
+                        Sequences.Clear();
+                        dgSequence.Items.Clear();
+                        btnSupprimerFeuillet.IsEnabled = true;
+                        tbNumeroFeuillet.Visibility = Visibility.Visible;
+                        titreFormFeuillet.Visibility = Visibility.Visible;
+                        tbNumeroOrdreDebut.Visibility = Visibility.Visible;
+                        tbNumeroOrdreFin.Visibility = Visibility.Visible;
+
+                        // Refresh de la datagrid et des TextBox  
+                        List<ImageView> imageViews = imageView.GetSimpleViewsList(registre);
+                        dgFeuillet.ItemsSource = imageViews;
+                        if (dgFeuillet.Items.Count > 0)
+                        {
+                            dgFeuillet.ScrollIntoView(imageViews.Last());
+                        }
+
+                        //tbNumeroFeuillet.Text = (imageViews.Count() + 1).ToString();                    
+                        tbNumeroFeuillet.Text = (LastImage.NumeroPage + 1).ToString();
+                        //var imageAvant = imageViews.FirstOrDefault(i => i.Image.NumeroPage == imageViews.Count());
+                        tbNumeroOrdreDebut.Text = (LastImage.FinSequence + 1).ToString();
+                        tbNumeroOrdreFin.Text = "";
+                        tbNumeroOrdreSequence.Text = "";
+                        tbNombreReferences.Text = "";
+
+                        if (registre.NombrePage == imageView.GetSimpleViewsList(registre).Count)
+                        {
+                            btnSaveFeuillet.IsEnabled = false;
+                            MarquerPreindexer.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            btnSaveFeuillet.IsEnabled = true;
+                            MarquerPreindexer.Visibility = Visibility.Collapsed;
+                        }
+
+                        // Enregistrement de l'action effectué par l'agent
+                        DocumatContext.AddTraitement(DocumatContext.TbImage, LastImage.ImageID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "PREINDEXATION AJOUT IMAGE N° " + LastImage.NumeroPage + " AU REGISTRE ID N° " + LastImage.RegistreID);
                     }
-
-                    //On change d'interface 
-                    // Pour cacher le formulaire des séquences si elle est visible
-                    // On affiche les elements de la préindex de l'image s'ils était cachés
-                    Sequences.Clear();
-                    dgSequence.Items.Clear();
-                    btnSupprimerFeuillet.IsEnabled = true;
-                    tbNumeroFeuillet.Visibility = Visibility.Visible;
-                    titreFormFeuillet.Visibility = Visibility.Visible;
-                    tbNumeroOrdreDebut.Visibility = Visibility.Visible;
-                    tbNumeroOrdreFin.Visibility = Visibility.Visible;
-
-                    // Refresh de la datagrid et des TextBox  
-                    List<ImageView> imageViews = imageView.GetSimpleViewsList(registre);
-                    dgFeuillet.ItemsSource = imageViews;
-                    if (dgFeuillet.Items.Count > 0)
-                    {
-                        dgFeuillet.ScrollIntoView(imageViews.Last());
-                    }
-
-                    //tbNumeroFeuillet.Text = (imageViews.Count() + 1).ToString();                    
-                    tbNumeroFeuillet.Text = (LastImage.NumeroPage + 1).ToString();
-                    //var imageAvant = imageViews.FirstOrDefault(i => i.Image.NumeroPage == imageViews.Count());
-                    tbNumeroOrdreDebut.Text = (LastImage.FinSequence + 1).ToString();
-                    tbNumeroOrdreFin.Text = "";
-                    tbNumeroOrdreSequence.Text = "";
-                    tbNombreReferences.Text = "";
-
-                    if (registre.NombrePage == imageView.GetSimpleViewsList(registre).Count)
-                    {
-                        btnSaveFeuillet.IsEnabled = false;
-                        MarquerPreindexer.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        btnSaveFeuillet.IsEnabled = true;
-                        MarquerPreindexer.Visibility = Visibility.Collapsed;
-                    }
-
-                    // Enregistrement de l'action effectué par l'agent
-                    DocumatContext.AddTraitement(DocumatContext.TbImage, LastImage.ImageID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "PREINDEXATION AJOUT IMAGE N° " + LastImage.NumeroPage + " AU REGISTRE ID N° " + LastImage.RegistreID);
                 }
             }
             catch (Exception ex)
@@ -518,7 +547,6 @@ namespace DOCUMAT.Pages.Preindexation
                     PanelFeuillet.Visibility = Visibility.Collapsed;
                     dgRegistre.Visibility = Visibility.Visible;
                     QrCodeImage.Source = null;
-                    TbQrCode.Text = "";
                     AfficherFeuillets.IsChecked = false;
                     MarquerPreindexer.IsChecked = false;
                     MarquerPreindexer.Visibility = Visibility.Collapsed;
@@ -540,10 +568,7 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(dgRegistre.SelectedItems.Count == 1)
-            {
-                TbQrCode.Text = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
-            }
+           
         }
 
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
@@ -604,69 +629,6 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
         {
-            try
-            {
-                if (TbRechercher.Text != "")
-                {
-                    RegistreView RegistreView = new RegistreView();
-                    List<RegistreView> registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, false).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
-                    registreViews.AddRange(RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, true).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList());
-
-                    switch (cbChoixRecherche.SelectedIndex)
-                    {
-
-                        case 0:
-                            // Récupération des registre par code registre                            
-                            dgRegistre.ItemsSource = registreViews.Where(r=>r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
-                            break;
-                        case 1:
-                            // Récupération des registre par service
-                            List<Models.Service> Services1 = RegistreView.context.Service.ToList();
-                            List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
-                            List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
-
-                            var jointure1 = from r in registreViews                                           
-                                           join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
-                                           from v in table1.ToList()
-                                           join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
-                                           from l in table2.ToList()
-                                           join s in Services1 on l.ServiceID equals s.ServiceID where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                           select r;                          
-                            dgRegistre.ItemsSource = jointure1;                            
-                            break;
-                        case 2:
-                            // Récupération des registre par service
-                            List<Models.Region> Region2 = RegistreView.context.Region.ToList();
-                            List<Models.Service> Services2 = RegistreView.context.Service.ToList();
-                            List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
-                            List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
-
-                            var jointure2 = from r in registreViews
-                                           join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
-                                           from v in table1.ToList()
-                                           join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
-                                           from l in table2.ToList()
-                                           join s in Services2 on l.ServiceID equals s.ServiceID into table3
-                                           from s in table3.ToList()
-                                           join rg in Region2  on s.RegionID equals rg.RegionID  
-                                           where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                           select r;
-                            dgRegistre.ItemsSource = jointure2;
-                            break;
-                        default:
-                            RefreshRegistre();
-                            break;
-                    }
-                }
-                else
-                {
-                    RefreshRegistre();
-                }
-            }
-            catch (Exception ex)
-            {
-                ex.ExceptionCatcher();
-            }
         }
 
         private void RefreshRegistre()
@@ -729,6 +691,74 @@ namespace DOCUMAT.Pages.Preindexation
             if(e.Key == System.Windows.Input.Key.Enter)
             {
                 tbNombreReferences.Focus();
+            }
+        }
+
+        private void BtnRechercher_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (TbRechercher.Text != "")
+                {
+                    RegistreView RegistreView = new RegistreView();
+                    List<RegistreView> registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, false).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
+                    registreViews.AddRange(RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, true).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList());
+
+                    switch (cbChoixRecherche.SelectedIndex)
+                    {
+
+                        case 0:
+                            // Récupération des registre par code registre                            
+                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            break;
+                        case 1:
+                            // Récupération des registre par service
+                            List<Models.Service> Services1 = RegistreView.context.Service.ToList();
+                            List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
+                            List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
+
+                            var jointure1 = from r in registreViews
+                                            join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
+                                            from v in table1.ToList()
+                                            join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
+                                            from l in table2.ToList()
+                                            join s in Services1 on l.ServiceID equals s.ServiceID
+                                            where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
+                                            select r;
+                            dgRegistre.ItemsSource = jointure1;
+                            break;
+                        case 2:
+                            // Récupération des registre par service
+                            List<Models.Region> Region2 = RegistreView.context.Region.ToList();
+                            List<Models.Service> Services2 = RegistreView.context.Service.ToList();
+                            List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
+                            List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
+
+                            var jointure2 = from r in registreViews
+                                            join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
+                                            from v in table1.ToList()
+                                            join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
+                                            from l in table2.ToList()
+                                            join s in Services2 on l.ServiceID equals s.ServiceID into table3
+                                            from s in table3.ToList()
+                                            join rg in Region2 on s.RegionID equals rg.RegionID
+                                            where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
+                                            select r;
+                            dgRegistre.ItemsSource = jointure2;
+                            break;
+                        default:
+                            RefreshRegistre();
+                            break;
+                    }
+                }
+                else
+                {
+                    RefreshRegistre();
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
             }
         }
     }

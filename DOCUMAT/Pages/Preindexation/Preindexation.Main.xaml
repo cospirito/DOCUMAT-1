@@ -29,10 +29,6 @@
                       Name="EditFeuillets"
                       Icon="{materialDesign:PackIcon Kind=ImageEdit}"
                       Click="EditFeuillets_Click"/>
-            <!--<MenuItem Header="Supprimer"   
-                      Name="SupprimerFeuillet"
-                      Icon="{materialDesign:PackIcon Kind=Remove}"
-                      Click="SupprimerFeuillet_Click"/>-->
         </ContextMenu>
     </Page.Resources>
 
@@ -68,7 +64,7 @@
                                             Height="25"
                                             Foreground="White"/>
                     </Button>
-                    <TextBox x:Name="TbQrCode" 
+                    <!--<TextBox x:Name="TbQrCode" 
                      materialDesign:HintAssist.Hint="QRCODE DU REGISTRE" 
                      materialDesign:HintAssist.HelperText="QRCODE DU REGISTRE"
                      Foreground="White" 
@@ -77,7 +73,7 @@
                      CharacterCasing="Upper"
                      VerticalAlignment="Center"
                      Margin="20 20 20 20"                     
-                     MinWidth="200"/>
+                     MinWidth="200"/>-->
 
                     <CheckBox x:Name="AfficherFeuillets"
                       Content="Préindexer les Feuillets"
@@ -97,21 +93,23 @@
                 <StackPanel Grid.Column="1" 
                             Orientation="Horizontal"
                             Name="PanelRecherche">
-                    <Button Margin="10" Background="{x:Null}"
-                        BorderBrush="CornflowerBlue"
-                        ToolTip="Rechercher"
-                        x:Name="BtnRechercher"
-                        KeyboardNavigation.AcceptsReturn="False"
-                        KeyboardNavigation.TabNavigation="None"
-                        KeyboardNavigation.ControlTabNavigation="None"
-                        KeyboardNavigation.DirectionalNavigation="None"
-                        KeyboardNavigation.IsTabStop="True"                    
+                    <Button Margin="10" 
+                            Background="{x:Null}"
+                            BorderBrush="CornflowerBlue"
+                            ToolTip="Rechercher"
+                            x:Name="BtnRechercher"
+                            KeyboardNavigation.AcceptsReturn="False"
+                            KeyboardNavigation.TabNavigation="None"
+                            KeyboardNavigation.ControlTabNavigation="None"
+                            KeyboardNavigation.DirectionalNavigation="None"
+                            KeyboardNavigation.IsTabStop="True"
+                            Click="BtnRechercher_Click"
                         >
                         <materialDesign:PackIcon Kind="Search"
                                             Width="25"
                                             Height="25"
                                             Foreground="White"/>
-                    </Button>
+                    </Button> 
                     <TextBox x:Name="TbRechercher" 
                      materialDesign:HintAssist.Hint="RECHERCHER" 
                      Foreground="White" 
@@ -390,7 +388,7 @@
                                     Grid.ColumnSpan="2">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="N° Ordre " Binding="{Binding NUmeroOdre}" />
-                                        <DataGridTextColumn Header="Nombre de Références" Binding="{Binding NombreDeReferences}" />
+                                        <DataGridTextColumn Header="Nb Refs" Binding="{Binding NombreDeReferences}" />
                                         <DataGridTextColumn Header="Dou. / Bis" Binding="{Binding isSpeciale}" />
                                     </DataGrid.Columns>
                                 </DataGrid>

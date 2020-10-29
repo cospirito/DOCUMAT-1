@@ -92,6 +92,44 @@ namespace DOCUMAT.Pages.Indexation
 
         private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
         {
+            
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
+            dgRegistre.ContextMenu = cm;
+            RefreshRegistre();
+            MenuItem menuItemRegistre = (MenuItem)cm.Items.GetItemAt(1);
+
+            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR 
+                || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+            {
+                menuItemRegistre.IsEnabled = true;
+            }
+            else
+            {
+                menuItemRegistre.IsEnabled = false;
+            }
+        }
+
+        private void IndexerImage_Click(object sender, RoutedEventArgs e)
+        {
+            if(dgRegistre.SelectedItems.Count == 1)
+            {
+                Image.ImageViewer imageViewer = new Image.ImageViewer((RegistreView)dgRegistre.SelectedItem,this);
+                this.IsEnabled = false;
+                imageViewer.Show();
+            }
+        }
+
+        private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void BtnRechercher_Click(object sender, RoutedEventArgs e)
+        {
             try
             {
                 if (TbRechercher.Text != "")
@@ -123,7 +161,7 @@ namespace DOCUMAT.Pages.Indexation
 
                         case 0:
                             // Récupération des registre par code registre
-                            dgRegistre.ItemsSource = registreViews.Where(r=>r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
                             break;
                         case 1:
                             // Récupération des registre par service
@@ -176,44 +214,6 @@ namespace DOCUMAT.Pages.Indexation
             {
                 ex.ExceptionCatcher();
             }
-        }
-
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
-            dgRegistre.ContextMenu = cm;
-            RefreshRegistre();
-            MenuItem menuItemRegistre = (MenuItem)cm.Items.GetItemAt(1);
-
-            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR 
-                || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
-            {
-                menuItemRegistre.IsEnabled = true;
-            }
-            else
-            {
-                menuItemRegistre.IsEnabled = false;
-            }
-        }
-
-        private void IndexerImage_Click(object sender, RoutedEventArgs e)
-        {
-            if(dgRegistre.SelectedItems.Count == 1)
-            {
-                Image.ImageViewer imageViewer = new Image.ImageViewer((RegistreView)dgRegistre.SelectedItem,this);
-                this.IsEnabled = false;
-                imageViewer.Show();
-            }
-        }
-
-        private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
-        private void BtnRechercher_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void BtnRechercher_PreviewKeyUp(object sender, KeyEventArgs e)

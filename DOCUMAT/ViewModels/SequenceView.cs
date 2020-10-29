@@ -198,9 +198,9 @@ namespace DOCUMAT.ViewModels
                 Models.Correction correction = new Models.Correction();
                 
                 #region CAS D'UNE DEMANDE DE CORRECTION EN PHASE 1
-                sequenceView.En_Correction = false;
                 if(sequence.PhaseActuelle == 1)
                 { 
+                    sequenceView.En_Correction = false;
                     using (var ct = new DocumatContext())
                     {
                         correction = ct.Correction.FirstOrDefault(c => c.StatutCorrection == 1 && c.PhaseCorrection == 1
@@ -267,9 +267,9 @@ namespace DOCUMAT.ViewModels
                 #endregion
 
                 #region CAS DE STATUT EN CORRECTION PHASE 3
-                sequenceView.En_Correction = false;
                 if (sequence.PhaseActuelle == 3)
                 {
+                    sequenceView.En_Correction = false;
                     using (var ct = new DocumatContext())
                     {
                         correction = ct.Correction.FirstOrDefault(c => c.StatutCorrection == 1 && c.PhaseCorrection == 3

@@ -145,8 +145,8 @@ namespace DOCUMAT.Pages.Image
 			string Valide = (Math.Round(((float)imagesValide.Count() / (float)imageViews.Count()) * 100, 1)).ToString() + " %"; ;
 
 			tbxImageTerminer.Text = "Terminé : " + Math.Round(perTerminer, 1) + " %";
-			tbxImageRejete.Text   = "En Correction : " + EnCorrection + " / " + imagesEnCorrection.Count();
-			tbxImageValide.Text   = "Validé : " + Valide + " / " + imagesValide.Count();
+			tbxImageRejete.Text   = "En Correction : " + EnCorrection /*+ imagesEnCorrection.Count()*/;
+			tbxImageValide.Text   = "Validé : " + Valide /*+ imagesValide.Count()*/;
 			tbxImageEnCours.Text  = "Non Traité : " + EnCorrection;
 			ArcIndicator.EndAngle = (perTerminer * 360) / 100;
 			TextIndicator.Text    = Math.Round(perTerminer, 1) + "%";
@@ -510,174 +510,203 @@ namespace DOCUMAT.Pages.Image
                 ImageView imageView1 = new ImageView();
 				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
 				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
-				//On change l'image actuelle
-				CurrentImageView = imageView1;
-				this.currentImage = currentImage;
 
-				if (imageView1.Image.NumeroPage == -1)
-				{
-					tbxNomPage.Text = "PAGE DE GARDE";
-					tbxNumeroPage.Text = "";
-					tbxDebSeq.Text = "";
-					tbxFinSeq.Text = "";
-				}
-				else if (imageView1.Image.NumeroPage == 0)
-				{
-					tbxNomPage.Text = "PAGE D'OUVERTURE";
-					tbxNumeroPage.Text = "";
-					tbxDebSeq.Text = "";
-					tbxFinSeq.Text = "";
-				}
-				else
-				{
-					tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
-					tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
-					tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
-					tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
-				}
+				if(imageView1 != null)
+                {
 
-				// Chargement de la visionneuse
-				if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
-					viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
-				else
-					throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
+					//On change l'image actuelle
+					CurrentImageView = imageView1;
+					this.currentImage = currentImage;
 
-				#endregion
-
-				#region RECUPERATION DES SEQUENCES DE L'IMAGE
-				// On vide le Dictionary des séquences de l'image précédente
-				ListeSequences.Clear();
-				// Récupération des sequences déja renseignées
-				List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
-
-				//Récupération des contrôles de séquences rejetés
-				List<SequenceView> sequenceViews = SequenceView.GetViewsList(sequences).Where(s=>s.En_Correction == true).ToList();
-				List<SequenceView> manquantSequences = SequenceView.GetManquants(CurrentImageView.Image).Where(s => s.En_Correction == true).ToList();
-				sequenceViews.AddRange(manquantSequences);
-				dgSequence.Visibility = Visibility.Visible;
-				dgSequenceIndex.Visibility = Visibility.Collapsed;
-				if(sequenceViews.Count() > 0)
-				{
-					dgSequence.ItemsSource = sequenceViews;					
-					dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
-					tbNumeroOrdreSequence.IsEnabled = false;
-					tbDateSequence.IsEnabled = false;
-					tbReference.IsEnabled = false;
-					cbxBisOrdre.IsEnabled = false;
-					cbxDoublonOrdre.IsEnabled = false;
-					BtnModifierSequence.IsEnabled = false;
-					BtnSupprimerSequence.IsEnabled = false;
-				}
-				else
-				{
-					dgSequence.ItemsSource = null;
-					tbNumeroOrdreSequence.IsEnabled = false;
-					tbDateSequence.IsEnabled = false;
-					tbReference.IsEnabled = false;
-					cbxBisOrdre.IsEnabled = false;
-					cbxDoublonOrdre.IsEnabled = false;
-					BtnModifierSequence.IsEnabled = false;
-					BtnSupprimerSequence.IsEnabled = false;
-				}
-				#endregion
-
-				#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE				
-				btnValiderImageImporte.Foreground = Brushes.White;
-				btnImporterImage.Tag = "";
-				//On vide les références
-				References.Clear();
-				tbListeReferences.Visibility = Visibility.Collapsed;
-				tbListeReferences.Text = "";
-
-				// Procédure d'affichage lorsque les statuts d'images changes
-				if (imageView1.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
-				{
-					using (var ct = new DocumatContext())
+					if (imageView1.Image.NumeroPage == -1)
 					{
-						if (ct.Controle.FirstOrDefault(c => c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
-							&& c.PhaseControle == 1 && c.StatutControle == 0) != null)
+						tbxNomPage.Text = "PAGE DE GARDE";
+						tbxNumeroPage.Text = "";
+						tbxDebSeq.Text = "";
+						tbxFinSeq.Text = "";
+					}
+					else if (imageView1.Image.NumeroPage == 0)
+					{
+						tbxNomPage.Text = "PAGE D'OUVERTURE";
+						tbxNumeroPage.Text = "";
+						tbxDebSeq.Text = "";
+						tbxFinSeq.Text = "";
+					}
+					else
+					{
+						tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
+						tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
+						tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
+						tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
+					}
+
+					// Chargement de la visionneuse
+					if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
+						viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
+					else
+						throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
+
+					#endregion
+
+					#region RECUPERATION DES SEQUENCES DE L'IMAGE
+					// On vide le Dictionary des séquences de l'image précédente
+					ListeSequences.Clear();
+					// Récupération des sequences déja renseignées
+					List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
+
+					//Récupération des contrôles de séquences rejetés
+					List<SequenceView> sequenceViews = SequenceView.GetViewsList(sequences).Where(s=>s.En_Correction == true).ToList();
+					List<SequenceView> manquantSequences = SequenceView.GetManquants(CurrentImageView.Image).Where(s => s.En_Correction == true).ToList();
+					sequenceViews.AddRange(manquantSequences);
+					dgSequence.Visibility = Visibility.Visible;
+					dgSequenceIndex.Visibility = Visibility.Collapsed;
+					if(sequenceViews.Count() > 0)
+					{
+						dgSequence.ItemsSource = sequenceViews;					
+						dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+						tbNumeroOrdreSequence.IsEnabled = false;
+						tbDateSequence.IsEnabled = false;
+						tbReference.IsEnabled = false;
+						cbxBisOrdre.IsEnabled = false;
+						cbxDoublonOrdre.IsEnabled = false;
+						BtnModifierSequence.IsEnabled = false;
+						BtnSupprimerSequence.IsEnabled = false;
+					}
+					else
+					{
+						dgSequence.ItemsSource = null;
+						tbNumeroOrdreSequence.IsEnabled = false;
+						tbDateSequence.IsEnabled = false;
+						tbReference.IsEnabled = false;
+						cbxBisOrdre.IsEnabled = false;
+						cbxDoublonOrdre.IsEnabled = false;
+						BtnModifierSequence.IsEnabled = false;
+						BtnSupprimerSequence.IsEnabled = false;
+					}
+					#endregion
+
+					#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE				
+					btnValiderImageImporte.Foreground = Brushes.White;
+					btnImporterImage.Tag = "";
+					//On vide les références
+					References.Clear();
+					tbListeReferences.Visibility = Visibility.Collapsed;
+					tbListeReferences.Text = "";
+
+					// Procédure d'affichage lorsque les statuts d'images changes
+					if (imageView1.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
+					{
+						using (var ct = new DocumatContext())
 						{
-							//Affichage des images validées 
-							PanelCorrectionEnCours.Visibility = Visibility.Collapsed;
-							PanelCorrectionEffectue.Visibility = Visibility.Visible;
-							ImgCorrecte.Visibility = Visibility.Visible;
-							ImgEdit.Visibility = Visibility.Collapsed;
-							PanelRejetImage.Visibility = Visibility.Collapsed;
-							tbxControleStatut.Text = "VALIDE";
-						}
-						else
-						{							
-							if(ct.Controle.FirstOrDefault(c=>c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
-															&& c.PhaseControle == 1 && c.StatutControle == 1 
-															&& c.RejetImage_idx == 1) != null)
+							// Image est Valide
+							if (ct.Controle.FirstOrDefault(c => c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
+								&& c.PhaseControle == 1 && c.StatutControle == 0) != null)
 							{
-								PanelRejetImage.Visibility = Visibility.Visible;
+								//Affichage des images validées 
+								PanelCorrectionEnCours.Visibility = Visibility.Collapsed;
+								PanelCorrectionEffectue.Visibility = Visibility.Visible;
+								ImgCorrecte.Visibility = Visibility.Visible;
+								ImgEdit.Visibility = Visibility.Collapsed;
+								PanelRejetImage.Visibility = Visibility.Collapsed;
+								BtnSupprimerImage.Visibility = Visibility.Collapsed;
+								tbxControleStatut.Text = "VALIDE";
 							}
 							else
 							{
-								PanelRejetImage.Visibility = Visibility.Collapsed;
+								// Image à Supprimer
+								if (ct.Controle.FirstOrDefault(c => c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
+											 && c.PhaseControle == 1 && c.StatutControle == 1 && c.ASupprimer == 1) != null)
+								{
+									PanelRejetImage.Visibility = Visibility.Collapsed;
+									PanelCorrectionEnCours.Visibility = Visibility.Visible;
+									PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
+									BtnSupprimerImage.Visibility = Visibility.Visible;
+									BtnTerminerImage.Visibility = Visibility.Collapsed;
+								}
+								else
+								{
+									if (ct.Controle.FirstOrDefault(c => c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
+																	&& c.PhaseControle == 1 && c.StatutControle == 1
+																	&& c.RejetImage_idx == 1) != null)
+									{
+										PanelRejetImage.Visibility = Visibility.Visible;
+									}
+									else
+									{
+										PanelRejetImage.Visibility = Visibility.Collapsed;
+									}
+									PanelCorrectionEnCours.Visibility = Visibility.Visible;
+									PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
+									BtnSupprimerImage.Visibility = Visibility.Collapsed;
+									BtnTerminerImage.Visibility = Visibility.Visible;
+								}
 							}
-							PanelCorrectionEnCours.Visibility = Visibility.Visible;
-							PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
 						}
+
+						ActualiseDataCorriger();
+					}
+					else if(imageView1.Image.StatutActuel == (int)Enumeration.Image.CREEE)
+					{					
+						//Affichage des images validées 
+						PanelCorrectionEnCours.Visibility = Visibility.Visible;
+						PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
+						PanelRejetImage.Visibility = Visibility.Collapsed;
+						BtnSupprimerImage.Visibility = Visibility.Collapsed;
+						BtnTerminerImage.Visibility = Visibility.Visible;
+						dgSequence.ItemsSource = null;
+						tbNumeroOrdreSequence.IsEnabled = true;
+						tbDateSequence.IsEnabled = true;
+						tbReference.IsEnabled = true;
+						cbxSautOrdre.IsEnabled = true;
+						cbxBisOrdre.IsEnabled = true;
+						cbxDoublonOrdre.IsEnabled = true;
+						BtnAddSequence.IsEnabled = true;
+						BtnModifierSequence.IsEnabled = true;
+						BtnSupprimerSequence.IsEnabled = true;
+
+						ActualiseDataIndexer();
+					}
+					else if(imageView1.Image.StatutActuel == (int)Enumeration.Image.PHASE2)
+					{
+						//Affichage des images validées 
+						PanelCorrectionEnCours.Visibility = Visibility.Collapsed;
+						PanelCorrectionEffectue.Visibility = Visibility.Visible;
+						ImgCorrecte.Visibility = Visibility.Visible;
+						ImgEdit.Visibility = Visibility.Collapsed;
+						PanelRejetImage.Visibility = Visibility.Collapsed;
+						BtnSupprimerImage.Visibility = Visibility.Collapsed;
+						tbxControleStatut.Text = "VALIDE";
 					}
 
-					ActualiseDataCorriger();
-				}
-				else if(imageView1.Image.StatutActuel == (int)Enumeration.Image.CREEE)
-				{					
-					//Affichage des images validées 
-					PanelCorrectionEnCours.Visibility = Visibility.Visible;
-					PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
-					PanelRejetImage.Visibility = Visibility.Collapsed;
-					dgSequence.ItemsSource = null;
-					tbNumeroOrdreSequence.IsEnabled = true;
-					tbDateSequence.IsEnabled = true;
-					tbReference.IsEnabled = true;
-					cbxSautOrdre.IsEnabled = true;
-					cbxBisOrdre.IsEnabled = true;
-					cbxDoublonOrdre.IsEnabled = true;
-					BtnAddSequence.IsEnabled = true;
-					BtnModifierSequence.IsEnabled = true;
-					BtnSupprimerSequence.IsEnabled = true;
+					#endregion
 
-					ActualiseDataIndexer();
-				}
-				else if(imageView1.Image.StatutActuel == (int)Enumeration.Image.PHASE2)
-				{
-					//Affichage des images validées 
-					PanelCorrectionEnCours.Visibility = Visibility.Collapsed;
-					PanelCorrectionEffectue.Visibility = Visibility.Visible;
-					ImgCorrecte.Visibility = Visibility.Visible;
-					ImgEdit.Visibility = Visibility.Collapsed;
-					PanelRejetImage.Visibility = Visibility.Collapsed;
-					tbxControleStatut.Text = "VALIDE";
-				}
+					// Actualisation de l'aborescence
+					ActualiserArborescence();
 
-				#endregion
-
-				// Actualisation de l'aborescence
-				ActualiserArborescence();
-
-				//Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
-				bool valide = true;
-				foreach(TreeViewItem item in registreAbre.Items)
-				{
-					if (!item.Tag.ToString().Equals("valide"))
-						valide = false;
-				}				
+					//Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
+					bool valide = true;
+					foreach(TreeViewItem item in registreAbre.Items)
+					{
+						if (!item.Tag.ToString().Equals("valide"))
+							valide = false;
+					}				
 				
-				if(valide)
-				{
-					btnValideCorrection.Visibility = Visibility.Visible;
-				}
-				else
-				{
-					btnValideCorrection.Visibility = Visibility.Collapsed;
-				}
+					if(valide)
+					{
+						btnValideCorrection.Visibility = Visibility.Visible;
+					}
+					else
+					{
+						btnValideCorrection.Visibility = Visibility.Collapsed;
+					}
 
-				// Rafraichissement de l'entête 
-				HeaderInfosGetter();
+					// Rafraichissement de l'entête 
+					HeaderInfosGetter();
+                }
+				else
+                {
+					MessageBox.Show("L'image N° : " + currentImage + " est Introuvable dans la Base de Données !!!", "IMAGE INTROUVABLE", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
 			}
             catch (Exception ex)
             {
@@ -929,7 +958,12 @@ namespace DOCUMAT.Pages.Image
 			{				
 				SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
 
-				if(CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
+				// On décoche les cases à cocher à chaque changement de séquence
+				cbxSautOrdre.IsChecked = false;
+				cbxBisOrdre.IsChecked = false;
+				cbxDoublonOrdre.IsChecked = false;
+
+				if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
 				{
                     #region CAS DES NOUVELLE SEQUENCE D'IMAGE MANQUANTE
                     tbNumeroOrdreSequence.IsEnabled = true;
@@ -963,9 +997,10 @@ namespace DOCUMAT.Pages.Image
                 else
 				{
 					#region CAS DES SEQUENCES EXISTANTES A CORRIGER
-					tbNumeroOrdreSequence.Text = sequenceView.strOrdre;
+					tbNumeroOrdreSequence.Text = sequenceView.Sequence.NUmeroOdre.ToString();
 					tbDateSequence.Text = sequenceView.strDate;
 					tbReference.Text = "";
+					References.Clear();
 
 					if(sequenceView.ASupprimer)
 					{					
@@ -1028,9 +1063,9 @@ namespace DOCUMAT.Pages.Image
 
 		private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
 		{
-			//try
-			//{
-				SequenceView sequenceView = (SequenceView)e.Row.Item;
+            try
+            {
+                SequenceView sequenceView = (SequenceView)e.Row.Item;
 				//if(sequenceView.Sequence.isSpeciale == "saut" || sequenceView.ASupprimer)
 				//{
 				//	((DockPanel)e.DetailsElement.FindName("DockPanel")).Visibility = Visibility.Collapsed;
@@ -1044,11 +1079,11 @@ namespace DOCUMAT.Pages.Image
 					element.Value.Click += cbxReadOnly_Click;
 				}
 				//}
-			//}
-			//catch (Exception ex)
-			//{
-			//	ex.ExceptionCatcher();
-			//}
+			}
+			catch (Exception ex)
+			{
+				ex.ExceptionCatcher();
+			}
 		}
 
 		private void btnNext_Click(object sender, RoutedEventArgs e)
@@ -1088,9 +1123,9 @@ namespace DOCUMAT.Pages.Image
 
 		private void BtnModifierSequence_Click(object sender, RoutedEventArgs e)
 		{
-			try
-			{
-				if (dgSequence.SelectedItems.Count == 1)
+            try
+            {
+                if (dgSequence.SelectedItems.Count == 1)
 				{
 					if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
 					{
@@ -1102,32 +1137,50 @@ namespace DOCUMAT.Pages.Image
 							{
 								int NewOrdre = sequenceView.Sequence.NUmeroOdre;
 								string NewDate = sequenceView.Sequence.DateSequence.ToShortDateString()
-									, NewRefs = ""
+									, NewRefs = sequenceView.Sequence.References
 									, isSpecial = sequenceView.Sequence.isSpeciale;
 								if (sequenceView.OrdreFaux && !string.IsNullOrWhiteSpace(tbNumeroOrdreSequence.Text))
 								{
 									if (cbxBisOrdre.IsChecked == true)
-										isSpecial = "bis";
+									{
+										Models.Sequence bisseq = ct.Sequence.Where(s => s.NUmeroOdre == NewOrdre && s.isSpeciale.ToLower().Contains("bis") && s.ImageID == sequenceView.Sequence.ImageID).OrderByDescending(s => s.SequenceID).FirstOrDefault();
+									if (bisseq != null)
+										{
+											string isBisNum = bisseq.isSpeciale;
+											isBisNum = isBisNum.Split('_')[1];
+											int bisNum = Int32.Parse(isBisNum);
+											isSpecial = "bis_" + (bisNum + 1);
+										}
+										else
+										{
+											isSpecial = "bis_1";
+										}
+									}
 									else if (cbxDoublonOrdre.IsChecked == true)
-										isSpecial = "doublon";
-									NewOrdre = Int32.Parse(tbNumeroOrdreSequence.Text);
-								}
-								else
-								{
-									throw new Exception("Le numéro d'ordre est incorrecte !!!");
+									{
+										Models.Sequence doubseq = ct.Sequence.Where(s => s.NUmeroOdre == NewOrdre && s.isSpeciale.ToLower().Contains("doublon") && s.ImageID == sequenceView.Sequence.ImageID).OrderByDescending(s => s.SequenceID).FirstOrDefault();
+										if (doubseq != null)
+										{
+											string isDoubNum = doubseq.isSpeciale;
+											isDoubNum = isDoubNum.Split('_')[1];
+											int DoubNum = Int32.Parse(isDoubNum);
+											isSpecial = "doublon_" + (DoubNum + 1);
+										}
+										else
+										{
+											isSpecial = "doublon_1";
+										}
+									}
 								}
 
 								if (sequenceView.DateFausse && !string.IsNullOrWhiteSpace(tbDateSequence.Text))
 								{
 									NewDate = tbDateSequence.Text;
 								}
-								else
-								{
-									throw new Exception("La date de référence est incorrecte !!!");
-								}
 
 								if (!string.IsNullOrEmpty(sequenceView.ListReferenceFausse))
 								{
+									NewRefs = "";
 									string[] refsfausse = sequenceView.ListReferenceFausse.Split(',');
 									int nbrefat = refsfausse.Where(r => !string.IsNullOrWhiteSpace(r)).Count();
 									if (nbrefat != References.Count)
@@ -1137,21 +1190,24 @@ namespace DOCUMAT.Pages.Image
 
 									foreach (var ref1 in sequenceView.Sequence.References.Split(','))
 									{
-										if (refsfausse.FirstOrDefault(rf => rf.Equals(ref1) && !string.IsNullOrWhiteSpace(rf)) != null)
+										if (!refsfausse.Any(rf => rf.Equals(ref1)) && string.IsNullOrWhiteSpace(ref1))
+                                        {
 											NewRefs += ref1 + ",";
+                                        }
 									}
 
 									foreach (var ref1 in References)
 									{
-										if (!NewRefs.Contains(ref1.Value) && !string.IsNullOrWhiteSpace(ref1.Value))
+										if (!NewRefs.Split(',').Any(rf=>rf.Equals(ref1.Value)) && !string.IsNullOrWhiteSpace(ref1.Value))
+                                        {
 											NewRefs += ref1.Value + ",";
+                                        }
 										else
+                                        {
 											throw new Exception("La référence : " + ref1.Value + ", existe déja !!!");
+                                        }
 									}
-								}
-								else if (!string.IsNullOrEmpty(tbReference.Text))
-								{
-									throw new Exception("Veuillez ajouter une référence");
+									NewRefs = NewRefs.Remove(NewRefs.Length - 1);
 								}
 
 								//Modification de la ligne de séquence
@@ -1190,6 +1246,9 @@ namespace DOCUMAT.Pages.Image
 								ct.Correction.Add(correction);
 								ct.SaveChanges();
 
+								// Enregistrement de L'action Agent
+								DocumatContext.AddTraitement(DocumatContext.TbSequence, sequenceView.Sequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION,"CORRECTION PH1 : SEQUENCE ID : " + sequenceView.Sequence.SequenceID + " DE L'IMAGE ID : " + sequenceView.Sequence.ImageID);
+
 								ActualiseDataCorriger();
 							}
 							#endregion
@@ -1200,44 +1259,67 @@ namespace DOCUMAT.Pages.Image
 							string isSpecial = "", NewRefs = "", dateOrdre = "";
 							int NewOrdre;
 
-							if (References.Count != 0)
-							{
-								foreach (var ref1 in References)
-								{
-									NewRefs += ref1.Value + ",";
-								}
-							}
-							else if (!string.IsNullOrEmpty(tbReference.Text))
-							{
-								NewRefs = tbReference.Text;
-							}
-							else
-							{
-								throw new Exception("Veuillez ajouter une référence");
-							}
-
-							if (cbxBisOrdre.IsChecked == true || cbxDoublonOrdre.IsChecked == true)
-							{
-								if (cbxBisOrdre.IsChecked == true)
-									isSpecial = "bis";
-								else if (cbxDoublonOrdre.IsChecked == true)
-									isSpecial = "doublon";
-							}
-
-							if (!string.IsNullOrEmpty(tbDateSequence.Text))
-							{
-								dateOrdre = tbDateSequence.Text;
-							}
-							else
-							{
-								throw new Exception("La date de la séquence est incorrecte !!!");
-							}
-
 							if (Int32.TryParse(tbNumeroOrdreSequence.Text, out NewOrdre))
 							{
 								using (var ct = new DocumatContext())
 								{
-									if (!ct.Sequence.Any(s => s.NUmeroOdre == NewOrdre) || !string.IsNullOrWhiteSpace(isSpecial))
+									if (References.Count != 0)
+									{
+										foreach (var ref1 in References)
+										{
+											NewRefs += ref1.Value + ",";
+										}			
+										NewRefs = NewRefs.Remove(NewRefs.Length - 1);
+									}
+									else
+									{
+										throw new Exception("Veuillez ajouter au moins une référence");
+									}
+
+									if (cbxBisOrdre.IsChecked == true || cbxDoublonOrdre.IsChecked == true)
+									{									
+										if (cbxBisOrdre.IsChecked == true)
+										{
+											Models.Sequence bisseq = ct.Sequence.Where(s => s.NUmeroOdre == NewOrdre && s.isSpeciale.ToLower().Contains("bis") && s.ImageID == sequenceView.Image.ImageID ).OrderByDescending(s => s.SequenceID).FirstOrDefault();
+										if (bisseq != null)
+											{
+												string isBisNum = bisseq.isSpeciale;
+												isBisNum = isBisNum.Split('_')[1];
+												int bisNum = Int32.Parse(isBisNum);
+												isSpecial = "bis_" + (bisNum + 1);
+											}
+											else
+											{
+												isSpecial = "bis_1";
+											}
+										}
+										else if (cbxDoublonOrdre.IsChecked == true)
+										{
+											Models.Sequence doubseq = ct.Sequence.Where(s => s.NUmeroOdre == NewOrdre && s.isSpeciale.ToLower().Contains("doublon") && s.ImageID == sequenceView.Image.ImageID).OrderByDescending(s => s.SequenceID).FirstOrDefault();
+										if (doubseq != null)
+											{
+												string isDoubNum = doubseq.isSpeciale;
+												isDoubNum = isDoubNum.Split('_')[1];
+												int DoubNum = Int32.Parse(isDoubNum);
+												isSpecial = "doublon_" + (DoubNum + 1);
+											}
+											else
+											{
+												isSpecial = "doublon_1";
+											}
+										}
+									}
+
+									if (!string.IsNullOrEmpty(tbDateSequence.Text))
+									{
+										dateOrdre = tbDateSequence.Text;
+									}
+									else
+									{
+										throw new Exception("La date de la séquence est incorrecte !!!");
+									}
+
+									if (!ct.Sequence.Any(s => s.NUmeroOdre == NewOrdre && s.ImageID == sequenceView.Image.ImageID) || !string.IsNullOrWhiteSpace(isSpecial))
 									{
 										// Création d'une nouvelle séquence
 										Models.Sequence newsequence = new Models.Sequence()
@@ -1276,17 +1358,18 @@ namespace DOCUMAT.Pages.Image
 										ct.ManquantSequences.Add(manquantSequence);
 										ct.SaveChanges();
 
+										// Enregistrement de L'action Agent
+										DocumatContext.AddTraitement(DocumatContext.TbSequence, newsequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH1 : AJOUT MANQUANT SEQUENCE ID : " + newsequence.SequenceID + " A L'IMAGE ID : " + newsequence.ImageID);
 									}
 									else
 									{
-										throw new Exception("Ce numéro d'ordre séquences existe déja marqué là comme doublon ou bis !!!");
+										throw new Exception("Ce numéro d'ordre séquences existe déja marqué le comme doublon ou bis !!!");
 									}
 								}
 							}
 							ActualiseDataCorriger();
 							#endregion
 						}
-
 					}
 					else if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
 					{
@@ -1303,6 +1386,7 @@ namespace DOCUMAT.Pages.Image
 								{
 									references += refin.Value + ",";
 								}
+								references = references.Remove(references.Length - 1);
 
 								if (!Int32.TryParse(tbNumeroOrdreSequence.Text, out OrdreSequence))
 								{
@@ -1334,15 +1418,18 @@ namespace DOCUMAT.Pages.Image
 								UpSequence.DateModif = DateTime.Now;
 								ct.SaveChanges();
 
+								// Enregistrement de L'action Agent
+								DocumatContext.AddTraitement(DocumatContext.TbSequence, UpSequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH1 : AJOUT NEW SEQUENCE ID : " + UpSequence.SequenceID + " A L'IMAGE ID : " + UpSequence.ImageID);
+
 								ActualiseDataIndexer();
 							}
 						}
 					}
 				}
-			}
-			catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-				ex.ExceptionCatcher();
+                ex.ExceptionCatcher();
             }
         }
 
@@ -1406,6 +1493,8 @@ namespace DOCUMAT.Pages.Image
 							tbListeReferences.Visibility = Visibility.Collapsed;
 							tbListeReferences.Text = "";
 
+							// Enregistrement de L'action Agent
+							DocumatContext.AddTraitement(DocumatContext.TbSequence, NewSequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH1 : AJOUT NEW SEQUENCE ID : " + NewSequence.SequenceID + " A L'IMAGE ID : " + NewSequence.ImageID);
 
 							ActualiseDataIndexer();
 						}
@@ -1447,9 +1536,16 @@ namespace DOCUMAT.Pages.Image
 			cbxSautOrdre.IsChecked = false;
 			BtnModifierSequence.IsEnabled = true;
 			
-			if(dgSequence.SelectedItems.Count != 0 && ((SequenceView)dgSequence.SelectedItem).strDate.Equals("manquant"))
+			if(dgSequence.SelectedItems.Count == 1)
 			{
-				tbNumeroOrdreSequence.Text = ((SequenceView)dgSequence.SelectedItem).strOrdre;
+				if (((SequenceView)dgSequence.SelectedItem).strDate.Equals("manquant"))
+				{
+					tbNumeroOrdreSequence.Text = ((SequenceView)dgSequence.SelectedItem).strOrdre;
+				}
+				else
+				{
+					tbNumeroOrdreSequence.Text = ((SequenceView)dgSequence.SelectedItem).Sequence.NUmeroOdre.ToString();
+				}
 			}
 			else
 			{
@@ -1474,7 +1570,7 @@ namespace DOCUMAT.Pages.Image
 			cbxDoublonOrdre.IsChecked = false;
 			cbxSautOrdre.IsChecked = false;
 
-			if (dgSequence.SelectedItems.Count != 0 && ((SequenceView)dgSequence.SelectedItem).strDate.Equals("manquant"))
+			if (dgSequence.SelectedItems.Count == 1 && ((SequenceView)dgSequence.SelectedItem).strDate.Equals("manquant"))
 			{
 				tbNumeroOrdreSequence.Text = ((SequenceView)dgSequence.SelectedItem).strOrdre;
 			}
@@ -1525,9 +1621,16 @@ namespace DOCUMAT.Pages.Image
 
 		private void cbxDoublonOrdre_Unchecked(object sender, RoutedEventArgs e)
 		{
-			if (dgSequence.SelectedItems.Count != 0 && ((SequenceView)dgSequence.SelectedItem).strDate.Equals("manquant"))
+			if (dgSequence.SelectedItems.Count == 1)
 			{
-				tbNumeroOrdreSequence.Text = ((SequenceView)dgSequence.SelectedItem).strOrdre;
+				if(((SequenceView)dgSequence.SelectedItem).strDate.Equals("manquant"))
+                {
+					tbNumeroOrdreSequence.Text = ((SequenceView)dgSequence.SelectedItem).strOrdre;
+                }
+				else
+                {
+					tbNumeroOrdreSequence.Text = ((SequenceView)dgSequence.SelectedItem).Sequence.NUmeroOdre.ToString();
+				}
 			}
 			else
 			{
@@ -1781,7 +1884,7 @@ namespace DOCUMAT.Pages.Image
 
 		private void tbDateSequence_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
 		{
-			if (e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.OemPlus)
+			if (e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.Add)
 			{
 				DateTime date;
 				if (DateTime.TryParse(tbDateSequence.Text, out date))
@@ -1789,7 +1892,7 @@ namespace DOCUMAT.Pages.Image
 					tbDateSequence.Text = date.AddDays(1).ToShortDateString();
 				}
 			}
-			else if (e.Key == System.Windows.Input.Key.Down || e.Key == System.Windows.Input.Key.OemMinus)
+			else if (e.Key == System.Windows.Input.Key.Down || e.Key == System.Windows.Input.Key.Subtract)
 			{
 				DateTime date;
 				if (DateTime.TryParse(tbDateSequence.Text, out date))
@@ -1893,7 +1996,7 @@ namespace DOCUMAT.Pages.Image
 					tbDateSequence.Focus();
 				}
 			}
-			else if (e.Key == System.Windows.Input.Key.Up)
+			else if (e.Key == System.Windows.Input.Key.Up || e.Key == Key.Add)
 			{
 				tbListeReferences.Text = "";
 				Regex regC = new Regex("^[0-9]{1,}/");			
@@ -1912,7 +2015,7 @@ namespace DOCUMAT.Pages.Image
 					}
 				}
 			}
-			else if (e.Key == System.Windows.Input.Key.Down)
+			else if (e.Key == System.Windows.Input.Key.Down || e.Key == Key.Subtract)
 			{
 				tbListeReferences.Text = "";
 				if (References.Count != 0)
@@ -2078,7 +2181,74 @@ namespace DOCUMAT.Pages.Image
 
 		private void btnSupprimerImage_Click(object sender, RoutedEventArgs e)
 		{
+			if (MessageBox.Show("Voulez vous Supprimer Cette Image et Passer à la Suivante?", "SUPPRIMER/TERMINER IMAGE", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+			{
+				#region SUPPRESSION DE L'IMAGE ET DES INDEX DE SEQUENCES
+				using (var ct = new DocumatContext())
+				{
+					//Récupération de la demande de correction 
+					Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.ImageID == CurrentImageView.Image.ImageID && c.SequenceID == null
+										 && c.PhaseCorrection == 1 && c.StatutCorrection == 1 && c.ASupprimer == 1);
+					if (CorrectionOld != null)
+                    {
+						//Suppression Image in BD
+						ct.Image.Remove(ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID && i.RegistreID == RegistreViewParent.Registre.RegistreID));
 
+						// Suppression Image on Folder
+						if(File.Exists(Path.Combine(DossierRacine, CurrentImageView.Image.CheminImage)))
+						{
+							File.Delete(Path.Combine(DossierRacine, CurrentImageView.Image.CheminImage));
+						}
+
+						// Création d'une correction pour de l'image 
+						Models.Correction correction = new Models.Correction()
+						{
+							RegistreId = RegistreViewParent.Registre.RegistreID,
+							ImageID = CurrentImageView.Image.ImageID,
+							SequenceID = null,
+
+							//Indexes Image mis à null
+							RejetImage_idx = CorrectionOld.RejetImage_idx,
+							MotifRejetImage_idx = CorrectionOld.MotifRejetImage_idx,
+							ASupprimer = CorrectionOld.ASupprimer,
+
+							//Indexes de la séquence de l'image
+							OrdreSequence_idx = null,
+							DateSequence_idx = null,
+							RefSequence_idx = null,
+							RefRejetees_idx = null,
+
+							DateCorrection = DateTime.Now,
+							DateCreation = DateTime.Now,
+							DateModif = DateTime.Now,
+							PhaseCorrection = 1,
+							StatutCorrection = 0,
+						};
+						ct.Correction.Add(correction);
+						ct.SaveChanges();
+
+						//Enregistrement de l'action Agent
+						DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION, "CORRECTION PH1 : SUPPRESSION IMAGE N° : " + CurrentImageView.Image.NumeroPage + " DU REGISTRE ID : " + CurrentImageView.Image.RegistreID);
+
+						this.BtnImageSuivante_Click(sender, e);
+						ActualiserArborescence();
+					}
+				}
+				#endregion
+
+				using (var ct = new DocumatContext())
+				{
+					if (ct.Image.All(i => i.RegistreID == RegistreViewParent.Registre.RegistreID
+										&& i.StatutActuel == (int)Enumeration.Image.PHASE2))
+					{
+						btnValideCorrection.Visibility = Visibility.Visible;
+					}
+					else
+					{
+						btnValideCorrection.Visibility = Visibility.Collapsed;
+					}
+				}
+			}
 		}
 
 		private void btnImporterImage_Click(object sender, RoutedEventArgs e)
@@ -2139,5 +2309,5 @@ namespace DOCUMAT.Pages.Image
 				}			
 			}
 		}
-	}
+    }
 }

@@ -800,8 +800,7 @@ namespace DOCUMAT.Pages.Image
 		}
 
         private void FileTree_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        {
-			throw new NotImplementedException();
+        {			
         }
 
         private void SupprimeSequence_Click(object sender, RoutedEventArgs e)

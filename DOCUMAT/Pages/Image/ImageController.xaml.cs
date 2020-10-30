@@ -115,14 +115,14 @@ namespace DOCUMAT.Pages.Image
 				&& s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
 				if (sequences.Count != 0)
 				{
-					dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);					
-					dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+					//dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
 					//Ajout des séquences dans le Dictionary					
 					foreach(var seq in SequenceView.GetViewsList(sequences))
 					{
 						ListeSequences.Add(seq.Sequence.SequenceID, seq);
 					}
 
+					dgSequence.ItemsSource = ListeSequences.Values.ToList();					
 				}
 				else
 				{
@@ -459,26 +459,25 @@ namespace DOCUMAT.Pages.Image
 
 		private void dgSequence_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-			//SequenceView sequenceView = (SequenceView)e.Row.Item;			
-        }
+		}
 
         private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
-			try
-			{
-				SequenceView sequenceView = (SequenceView)e.Row.Item;
-				StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");			
-				foreach (var element in sequenceView.ListeRefecrences)
-				{
-					element.Value.Click += CheckBoxReferences_Click;
-					panel.Children.Add(element.Value);
-				}
-			}
-			catch(Exception ex)
-			{
-				ex.ExceptionCatcher();
-			}
-		}
+            try
+            {
+                SequenceView sequenceView = (SequenceView)e.Row.Item;
+                StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
+                if (panel.Children.Count == 0)
+                {
+                    foreach (var element in sequenceView.ListeRefecrences)
+                    {
+                        element.Value.Click += CheckBoxReferences_Click;
+                        panel.Children.Add(element.Value);
+                    }
+                }
+            }
+            catch (Exception ex) { ex.ExceptionCatcher(); }
+        }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -636,7 +635,6 @@ namespace DOCUMAT.Pages.Image
 				// Modification des information d'entête
 				HeaderInfosGetter();
 
-
 				#region VERIFICATION DE L'AGENT 				
 				using (var ct = new DocumatContext())
 				{
@@ -720,8 +718,7 @@ namespace DOCUMAT.Pages.Image
 
 		private void dgSequence_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
-        }
+		}
 
         private void tbDateSequence_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -1056,29 +1053,36 @@ namespace DOCUMAT.Pages.Image
 
         private void CheckBoxReferences_Click(object sender, RoutedEventArgs e)
 		{
-			CheckBox cbxReference = (CheckBox)sender;
-			SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
-			if (dgSequence.SelectedItems.Count == 1)
-			{
-				if (cbxReference.IsChecked == true)
+			try
+            {
+				CheckBox cbxReference = (CheckBox)sender;
+				SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
+				if (dgSequence.SelectedItems.Count == 1)
 				{
-					SequenceView newseq = new SequenceView();
-					ListeSequences.TryGetValue(sequenceView.Sequence.SequenceID, out newseq);
-					ListeSequences.Remove(sequenceView.Sequence.SequenceID);
-					newseq.References_Is_Check = true;
-					newseq.ListeRefecrences_check.Add(cbxReference.Content.ToString(), cbxReference.Content.ToString());
-					ListeSequences.Add(sequenceView.Sequence.SequenceID, newseq);
-				}
-				else
-				{
-					SequenceView newseq = new SequenceView();
-					ListeSequences.TryGetValue(sequenceView.Sequence.SequenceID, out newseq);
-					ListeSequences.Remove(sequenceView.Sequence.SequenceID);
-					newseq.References_Is_Check = false;
-					newseq.ListeRefecrences_check.Remove(cbxReference.Content.ToString());
-					ListeSequences.Add(sequenceView.Sequence.SequenceID, newseq);					
+					if (cbxReference.IsChecked == true)
+					{
+						SequenceView newseq = new SequenceView();
+						ListeSequences.TryGetValue(sequenceView.Sequence.SequenceID, out newseq);
+						ListeSequences.Remove(sequenceView.Sequence.SequenceID);
+						newseq.References_Is_Check = true;
+						newseq.ListeRefecrences_check.Add(cbxReference.Content.ToString(), cbxReference.Content.ToString());
+						ListeSequences.Add(sequenceView.Sequence.SequenceID, newseq);
+					}
+					else
+					{
+						SequenceView newseq = new SequenceView();
+						ListeSequences.TryGetValue(sequenceView.Sequence.SequenceID, out newseq);
+						ListeSequences.Remove(sequenceView.Sequence.SequenceID);
+						newseq.References_Is_Check = false;
+						newseq.ListeRefecrences_check.Remove(cbxReference.Content.ToString());
+						ListeSequences.Add(sequenceView.Sequence.SequenceID, newseq);					
+					}
 				}
 			}
+			catch(Exception ex)
+            {
+				ex.ExceptionCatcher();
+            }
 		}
 
 		private void cbxNumOrdre_Click(object sender, RoutedEventArgs e)
@@ -1444,5 +1448,23 @@ namespace DOCUMAT.Pages.Image
 				}
 			}
 		}
-	}
+
+        private void dgSequence_KeyUp(object sender, KeyEventArgs e)
+        {
+        }
+
+        private void dgSequence_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+			//e.Handled = true;
+        }
+
+        private void dgSequence_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+			//e.Handled = true;
+        }
+
+        private void dgSequence_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        {
+        }
+    }
 }

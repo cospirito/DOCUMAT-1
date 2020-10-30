@@ -26,10 +26,14 @@
             </Style.Triggers>
         </Style>
         <ContextMenu x:Key="cmRegistre">
-            <MenuItem Header="Corriger les index"
+            <MenuItem Header="Corriger Le Registre"
                       Name="CorrectionImage"
-                      Click="ControleImage_Click"
-                      Icon="{materialDesign:PackIcon Kind=FileEye}"                      />
+                      Click="CorrectionImage_Click"
+                      Icon="{materialDesign:PackIcon Kind=FileSettingsCog}"/>
+            <MenuItem Header="Ouvrir le Dossier de Scan"   
+                      Name="OuvrirDossierScan"
+                      Icon="{materialDesign:PackIcon Kind=FolderOpen}"
+                      Click="OuvrirDossierScan_Click"/>
         </ContextMenu>
     </Page.Resources>
 

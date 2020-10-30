@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows.Controls;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace DOCUMAT.ViewModels
 {
@@ -28,6 +29,30 @@ namespace DOCUMAT.ViewModels
         public bool References_Is_Check { get; set; }
         public bool ASupprimer_Is_Check { get; set; }
         public Dictionary<String, String> ListeRefecrences_check = new Dictionary<String, String>();
+        public List<String> RefsList = new List<String>();
+
+        public ObservableCollection<BoolStringClass> TheList { get; set; }
+        public class BoolStringClass
+        {
+            public string TheText { get; set; }
+            public bool TheValue { get; set; }
+        }
+
+        //public void CreateCheckBoxList()
+        //{
+        //    TheList = new ObservableCollection<BoolStringClass>();
+        //    TheList.Add(new BoolStringClass { TheText = "EAST", TheValue = 1 });
+        //    TheList.Add(new BoolStringClass { TheText = "WEST", TheValue = 2 });
+        //    TheList.Add(new BoolStringClass { TheText = "NORTH", TheValue = 3 });
+        //    TheList.Add(new BoolStringClass { TheText = "SOUTH", TheValue = 4 });
+        //    //this.DataContext = this;
+        //}
+
+        public SequenceView()
+        {
+            //CreateCheckBoxList();
+        }
+
 
         // Propriété de récupération lors de la correction
         public string ListReferenceFausse { get; set; }
@@ -159,15 +184,15 @@ namespace DOCUMAT.ViewModels
 
 
 
-                if (sequence.isSpeciale == "doublon")
+                if (sequence.isSpeciale.Contains("doublon"))
                 {
                     sequenceView.strOrdre = sequence.NUmeroOdre + "d";
                 }
-                else if(sequence.isSpeciale == "bis")
+                else if(sequence.isSpeciale.Contains("bis"))
                 {
                     sequenceView.strOrdre = sequence.NUmeroOdre + "b";
                 }
-                else if(sequence.isSpeciale == "saut")
+                else if(sequence.isSpeciale.Contains("saut"))
                 {
                     sequenceView.strOrdre = sequence.NUmeroOdre + "";
                     sequenceView.strDate = "saut";
@@ -176,10 +201,11 @@ namespace DOCUMAT.ViewModels
 
                 sequenceView.OrdreFaux = false;
                 sequenceView.DateFausse = false;
-                sequenceView.ASupprimer = false;
+                sequenceView.ASupprimer = false;               
 
                 //Cas d'un contôle : Références Multiples
                 string[] ListReferences = sequence.References.Split(',');
+                sequenceView.TheList = new ObservableCollection<BoolStringClass>();
                 var i = 0;
                 foreach (var reference in ListReferences)
                 {
@@ -192,6 +218,8 @@ namespace DOCUMAT.ViewModels
                             Foreground = Brushes.White,
                             Background = Brushes.Red
                         });
+                        sequenceView.RefsList.Add(reference);
+                        sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = false });
                     }
                 }
 

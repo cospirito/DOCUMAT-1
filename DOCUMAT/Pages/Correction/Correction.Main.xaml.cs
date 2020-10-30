@@ -1,7 +1,11 @@
 ﻿using DOCUMAT.Models;
 using DOCUMAT.ViewModels;
+using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -16,6 +20,7 @@ namespace DOCUMAT.Pages.Correction
     public partial class Correction : Page
     {
         public Models.Agent Utilisateur;
+        string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
 
         public Correction()
         {
@@ -88,16 +93,6 @@ namespace DOCUMAT.Pages.Correction
             }
         }
         #endregion
-
-        private void ImprimerQrCode_Click(object sender, RoutedEventArgs e)
-        {
-            if (dgRegistre.SelectedItems.Count == 1)
-            {
-                string qrCode = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
-                Impression.QrCode PageImp = new Impression.QrCode(qrCode);
-                PageImp.Show();
-            }
-        }
 
         private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
         {
@@ -358,7 +353,7 @@ namespace DOCUMAT.Pages.Correction
             RefreshRegistrePhase2();
         }
 
-        private void ControleImage_Click(object sender, RoutedEventArgs e)
+        private void CorrectionImage_Click(object sender, RoutedEventArgs e)
         {
             if(dgRegistre.SelectedItems.Count == 1)
             {
@@ -371,6 +366,36 @@ namespace DOCUMAT.Pages.Correction
                 {
                     Image.ImageCorrecteurSecond imageCorrecteur = new Image.ImageCorrecteurSecond((RegistreView)dgRegistre.SelectedItem,this);
                     imageCorrecteur.Show(); 
+                }
+            }
+        }
+
+        private void OuvrirDossierScan_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgRegistre.SelectedItems.Count == 1)
+            {
+
+                RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
+                DirectoryInfo RegistreDossier = new DirectoryInfo(Path.Combine(DossierRacine, registreView.Registre.CheminDossier));
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                var dlg = new CommonOpenFileDialog();
+                dlg.Title = "Dossier de Scan du Registre : " + registreView.Registre.QrCode;
+                dlg.IsFolderPicker = false;
+                //dlg.InitialDirectory = currentDirectory;
+                dlg.AddToMostRecentlyUsedList = false;
+                dlg.AllowNonFileSystemItems = false;
+                //dlg.DefaultDirectory = currentDirectory;
+                //dlg.FileOk += Dlg_FileOk;
+                dlg.EnsureFileExists = true;
+                dlg.EnsurePathExists = true;
+                dlg.EnsureReadOnly = false;
+                dlg.EnsureValidNames = true;
+                dlg.Multiselect = true;
+                dlg.ShowPlacesList = true;
+                dlg.InitialDirectory = RegistreDossier.FullName;
+
+                if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
+                {
                 }
             }
         }

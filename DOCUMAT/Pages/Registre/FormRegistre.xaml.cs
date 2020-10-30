@@ -92,7 +92,7 @@ namespace DOCUMAT.Pages.Registre
             using(var ct = new DocumatContext())
             {
                 Livraison livraison = ct.Livraison.FirstOrDefault(l => l.LivraisonID == registreView.Versement.LivraisonID);
-                tbService.Text = ct.Service.FirstOrDefault(s => s.ServiceID == livraison.LivraisonID).Nom;
+                tbService.Text = ct.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).Nom;
                 tbVersement.Text = registreView.Versement.NumeroVers.ToString();
             }
             dtDepotDebut.SelectedDate = RegistreViewParent.Registre.DateDepotDebut;

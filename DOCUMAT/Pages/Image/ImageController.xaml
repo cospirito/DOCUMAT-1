@@ -31,7 +31,7 @@
                       Click="cmBtnDeclareManquant_Click" />
         </ContextMenu>
     </Window.Resources>
-    <StackPanel>
+    <StackPanel Margin="0 0 0 0">
         <Grid  VerticalAlignment="Center"
                     Height="125"
                Background="White">
@@ -228,7 +228,8 @@
                         BorderThickness="0 7" 
                         Margin="0 20 0 0"
                         Visibility="Collapsed">
-                        <StackPanel HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center"
+                                        Background="SteelBlue">
                             <TextBlock Text="IMAGE MANQUANTE"
                                HorizontalAlignment="Center"
                                Foreground="White"
@@ -300,11 +301,10 @@
             <!--Partie d'dier à la visionneuse d'image-->
             <Border Grid.Column="1"  
                     BorderThickness="2" 
-                    BorderBrush="white" 
-                    Margin="0">
+                    BorderBrush="white" >
                 <StackPanel Grid.Column="0">
                     <DocumentViewer Name="DocumentViewer" 
-                                    Height="700"/>
+                                    MinHeight="700"/>
                     <!--<Image x:Name="ImageBitmapSource" />-->
                 </StackPanel>
             </Border>
@@ -312,8 +312,7 @@
             <!--Partie dédiée a Séquence d'Image-->
             <Border Grid.Column="2" 
                     BorderBrush="White" 
-                    BorderThickness="2" 
-                    Margin="0">
+                    BorderThickness="2">
                 <StackPanel>
                     <StackPanel Background="White">
                         <TextBlock Text="CONTROLE D'IMAGE"
@@ -363,17 +362,23 @@
                         </StackPanel>
                         <DataGrid 
                             Name="dgSequence" 
-                            AutoGenerateColumns="False" 
+                            AutoGenerateColumns="False"                             
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
                             CanUserSortColumns="False"                              
-                            MaxHeight="500"                            
-                            SelectionMode="Single"
+                            MaxHeight="400"                            
+                            SelectionMode="Single"                            
                             IsReadOnly="True"
                             RowDetailsVisibilityMode="VisibleWhenSelected"                                                 
                             SelectionChanged="dgSequence_SelectionChanged"
                             AreRowDetailsFrozen="False"
                             LoadingRow="dgSequence_LoadingRow"
+                            PreviewKeyUp="dgSequence_PreviewKeyUp"
+                            PreviewKeyDown="dgSequence_PreviewKeyUp"
+                            KeyUp="dgSequence_KeyUp"
+                            KeyDown="dgSequence_KeyUp"
+                            ScrollBar.Scroll="dgSequence_Scroll"
+                            GotKeyboardFocus="dgSequence_GotKeyboardFocus"
                             LoadingRowDetails="dgSequence_LoadingRowDetails">
                             <DataGrid.Columns>
                                 <DataGridTextColumn IsReadOnly="True" Header="N° Ordre" Binding="{Binding strOrdre}" />
@@ -381,9 +386,10 @@
                                 <DataGridTemplateColumn  Header="A Supprimer">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox x:Name="SuppSequence" 
+                                            <CheckBox 
                                                       Background="Red"
-                                                      Click="SuppSequence_Click"/>
+                                                      Click="SuppSequence_Click"
+                                                      IsChecked="{Binding ASupprimer_Is_Check}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -393,18 +399,28 @@
                             <DataGrid.RowDetailsTemplate>
                                 <DataTemplate>
                                     <DockPanel Margin="5 10 20 10">
-                                        <CheckBox x:Name="cbxNumOrdre"
-                                                  Content="{Binding strOrdre}"
+                                        <CheckBox Content="{Binding strOrdre}"
                                                   Margin="10"
                                                   Background="Red"
+                                                  IsChecked="{Binding Ordre_Is_Check}"
                                                   Click="cbxNumOrdre_Click"/>
-                                        <CheckBox x:Name="cbxDate"
-                                                  Content="{Binding strDate}"
+                                        <CheckBox Content="{Binding strDate}"
                                                   Margin="10"
                                                   Background="Red"
+                                                  IsChecked="{Binding Date_Is_Check}"
                                                   Click="cbxDate_Click"/>
-                                        <StackPanel x:Name="ListeReferences" 
-                                                    Margin="10">
+                                        <StackPanel x:Name="ListeReferences"
+                                                    Margin="5">
+                                            <ListBox ItemsSource="{Binding TheList}">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox Name="CheckBoxZone" Content="{Binding TheText}"
+                                                                  IsChecked="{Binding TheValue}"
+                                                                  Background="Red"
+                                                                  Click="CheckBoxReferences_Click"/>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
                                         </StackPanel>
                                     </DockPanel>
                                  </DataTemplate>
@@ -499,16 +515,6 @@
                                             <ComboBoxItem Content="Ecriture Illisible"/>
                                             <!--<ComboBoxItem Content="Page Incorrecte"/>-->
                                         </ComboBox>
-                                        <Button 
-                                            x:Name="BtnRejetImage"
-                                            Margin="5 0"
-                                            BorderBrush="White"
-                                            Background="Transparent">
-                                            <materialDesign:PackIcon Kind="Check"
-                                            Width="15"
-                                            Height="15"
-                                            Foreground="White"/>
-                                        </Button>
                                     </StackPanel>
                                 </StackPanel>
                             </Expander>
@@ -530,9 +536,7 @@
                         </StackPanel>
                     </StackPanel>
                     
-                    <StackPanel Margin="31,30"
-                                Height="500"
-                                HorizontalAlignment="Center"
+                    <StackPanel HorizontalAlignment="Center"
                                 Visibility="Collapsed"
                                 x:Name="PanelControleEffectue">
                         <Image x:Name="ImgCorrecte"

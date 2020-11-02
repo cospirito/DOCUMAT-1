@@ -287,17 +287,17 @@
                                    Foreground="SteelBlue"/>
                         </StackPanel>
                         <DataGrid Name="dgSequenceIndex" 
-                        AutoGenerateColumns="False" 
-                        VerticalScrollBarVisibility="Auto"
-                        HorizontalScrollBarVisibility="Auto"
-                        IsReadOnly="True"                        
-                        MaxHeight="500"       
-                        Visibility="Collapsed"
-                        RowDetailsVisibilityMode="VisibleWhenSelected"                         
-                        LoadingRow="dgSequence_LoadingRow"
-                        SelectionChanged="dgSequence_SelectionChanged"
-                        AreRowDetailsFrozen="False"
-                        LoadingRowDetails="dgSequence_LoadingRowDetails">
+                            AutoGenerateColumns="False" 
+                            VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Auto"
+                            IsReadOnly="True"                        
+                            MaxHeight="200"       
+                            Visibility="Collapsed"
+                            RowDetailsVisibilityMode="VisibleWhenSelected"                         
+                            LoadingRow="dgSequence_LoadingRow"
+                            SelectionChanged="dgSequence_SelectionChanged"
+                            AreRowDetailsFrozen="False"
+                            LoadingRowDetails="dgSequence_LoadingRowDetails">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="N° Ordre" Binding="{Binding strOrdre}" />
                                 <DataGridTextColumn Header="Date " Binding="{Binding strDate}" />
@@ -310,7 +310,7 @@
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
                             CanUserSortColumns="False"                              
-                            MaxHeight="500"                            
+                            MaxHeight="200"                            
                             SelectionMode="Single"
                             IsReadOnly="True"
                             RowDetailsVisibilityMode="VisibleWhenSelected"                                                 

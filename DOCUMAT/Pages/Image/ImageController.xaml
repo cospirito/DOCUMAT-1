@@ -223,76 +223,18 @@
                         </TreeView.Resources>
                     </TreeView>
 
-                    <Border x:Name="panelImageManquant"
-                        BorderBrush="White" 
-                        BorderThickness="0 7" 
-                        Margin="0 20 0 0"
-                        Visibility="Collapsed">
-                        <StackPanel HorizontalAlignment="Center"
-                                        Background="SteelBlue">
-                            <TextBlock Text="IMAGE MANQUANTE"
-                               HorizontalAlignment="Center"
-                               Foreground="White"
-                               Margin="0"
-                               />
-                            <TextBox x:Name="tbNumeroImageManquant"
-                             materialDesign:HintAssist.HelperText="PAGE"                             
-                             Foreground="White"
-                             Margin="0 10 0 0"
-                             TextChanged="tbNumeroImageManquant_TextChanged"/>
-                            <TextBox x:Name="tbDebutSequenceManquant"
-                             materialDesign:HintAssist.HelperText="DEBUT"
-                             Foreground="White"
-                             Margin="0 10 0 0"
-                                 TextChanged="tbDebutSequenceManquant_TextChanged"/>
-                            <TextBox x:Name="tbFinSequenceManquant"
-                             materialDesign:HintAssist.HelperText="FIN"
-                             Foreground="White"
-                             Margin="0 10 0 0"
-                             TextChanged="tbFinSequenceManquant_TextChanged"/>
-                            <DatePicker x:Name="dtDateSequenceManquant"
-                             materialDesign:HintAssist.HelperText="DATE DEBUT"
-                             Foreground="White"
-                             Margin="0 10 0 0"/>
-                            <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Margin="0 30 0 10 ">
-                                <Button x:Name="btnAnnulerManquant" 
-                                Background="{x:Null}"                   
-                                BorderBrush="White"
-                                Height="25"
-                                Margin="0 0 5 0"
-                                Click="btnAnnulerManquant_Click"
-                                >
-                                    <materialDesign:PackIcon Kind="RemoveCircle"
-                                                     />
-                                </Button>
-                                <Button x:Name="btnValiderManquant" 
-                                Background="{x:Null}"                   
-                                BorderBrush="White"
-                                Height="25"
-                                Margin="0 0 5 0"
-                                Click="btnValiderManquant_Click"
-                                >
-                                    <materialDesign:PackIcon Kind="Check"
-                                                     />
-                                </Button>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
                     <Button x:Name="btnValideControle"    
                         Margin="10" 
                         Visibility="Collapsed"
                         Background="{x:Null}"
                         BorderBrush="GreenYellow"
-                        BorderThickness="1"
-                        Height="100"
+                        BorderThickness="15 1"
+                        Height="70"                        
                         Click="btnValideControle_Click"
                         ToolTip="Valider l'indexation du registre"                                                    >
                         <materialDesign:PackIcon Kind="CheckAll"
-                                        Width="50"
-                                        Height="50"
+                                        Width="40"
+                                        Height="40"
                                         Foreground="GreenYellow"/>
                     </Button>
                 </StackPanel>
@@ -444,6 +386,7 @@
                                                   x:Name="cbxManqueSequences"
                                                   Content="Manque"
                                                   Foreground="White"
+                                                  Background="White"
                                                   Margin="10"
                                                   Checked="cbxManqueSequences_Checked"
                                                   Unchecked="cbxManqueSequences_Unchecked"/>
@@ -491,12 +434,14 @@
                                                   x:Name="cbxRejetImage"
                                                   Content="Rejet"
                                                   Foreground="White"  
+                                                  Background="White"
                                                   Margin="0 10"
                                                   Checked="cbxRejetImage_Checked"
                                                   Unchecked="cbxRejetImage_Unchecked"/>
                                         <CheckBox x:Name="cbxSupprimerImage"
                                                   Content="Supprimé"
                                                   Foreground="White"
+                                                  Background="White"                                                  
                                                   Margin="10 0"
                                                   Checked="cbxSupprimerImage_Checked"
                                                   Unchecked="cbxSupprimerImage_Unchecked"

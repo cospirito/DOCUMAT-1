@@ -22,10 +22,10 @@ namespace DOCUMAT.Pages.Image
     {
         #region ATTRIBUTS
         // Controle Parent par lequel la vue ImageControlle à été lancé
-        Controle.Controle MainParent;
+        public Controle.Controle MainParent;
 
 		//Registre parent des images à controler
-        RegistreView RegistreViewParent;
+        public RegistreView RegistreViewParent;
 		// ImageView de l'image en cours 
         ImageView CurrentImageView;
 		// Numéro de l'image en cours
@@ -56,10 +56,10 @@ namespace DOCUMAT.Pages.Image
         /// <param name="currentImage"> Le numéro de l'image à récupérer et à afficher </param>
         public void ChargerImage(int currentImage)
 		{
-			//try
-			//{
-				#region RECUPERATION ET AFFICHAGE DE L'IMAGE SELECTIONNEE
-				ImageView imageView1 = new ImageView();
+            try
+            {
+                #region RECUPERATION ET AFFICHAGE DE L'IMAGE SELECTIONNEE
+                ImageView imageView1 = new ImageView();
 				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
 				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
 				//On change l'image actuelle
@@ -183,11 +183,11 @@ namespace DOCUMAT.Pages.Image
 
 				// Actualisation de l'aborescence
 				ActualiserArborescence();
-			//}
-			//catch (Exception ex)
-			//{
-			//	ex.ExceptionCatcher();
-			//}
+			}
+			catch (Exception ex)
+			{
+				ex.ExceptionCatcher();
+			}
 		}
 
 		public static string GetFileFolderName(string path)
@@ -286,7 +286,7 @@ namespace DOCUMAT.Pages.Image
 			string EnCorrection = (Math.Round(((float)imagesEnCorrection.Count() / (float)imageViews.Count()) * 100, 1)).ToString() + " %";;
 			string Valide = (Math.Round(((float)imagesValide.Count() / (float)imageViews.Count()) * 100, 1)).ToString() + " %";;
 
-			tbxImageTerminer.Text = "Terminé : " + Math.Round(perTerminer, 1) + " %";
+			tbxImageTerminer.Text = "Terminé : " + Math.Round(perTerminer, 1) + " % ";
 			tbxImageRejete.Text = "En Correction : " + EnCorrection;
 			tbxImageValide.Text = "Validé : " + Valide;
 			tbxImageEnCours.Text = "Non Traité : " + EnCours;
@@ -295,9 +295,116 @@ namespace DOCUMAT.Pages.Image
 		}
 
 		/// <summary>
-		/// Actualise l'aborescence en fonction des changements lors de l'indexation !!!
+		/// Chargement des éléments de l'Aborescence
 		/// </summary>
-		private void ActualiserArborescence()
+		public void LoadAborescence()
+		{
+			#region INSPECTION DU DOSSIER DE REGISTRE ET CREATION DE L'ABORESCENCE
+			// Chargement de l'aborescence
+			// Récupération de la liste des images contenu dans le dossier du registre
+			var files = Directory.GetFiles(Path.Combine(DossierRacine, RegistreViewParent.Registre.CheminDossier));
+
+			// Affichage et configuration de la TreeView
+			registreAbre.Items.Clear();
+			registreAbre.Header = RegistreViewParent.Registre.QrCode;
+			registreAbre.Tag = RegistreViewParent.Registre.QrCode;
+			registreAbre.FontWeight = FontWeights.Normal;
+			registreAbre.Foreground = Brushes.White;
+
+			// Définition de la lettre de référence pour ce registre
+			if (RegistreViewParent.Registre.Type == "R4")
+				RefInitiale = "T";
+
+			// Ajout de la page de garde comme entête de l'aborescence
+			foreach (var file in files)
+			{
+				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
+				{
+					var fileTree = new TreeViewItem();
+					fileTree.Header = GetFileFolderName(file);
+					fileTree.Tag = GetFileFolderName(file);
+					fileTree.FontWeight = FontWeights.Normal;
+					fileTree.Foreground = Brushes.White;
+					fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
+					fileInfos.Add(new FileInfo(file));
+					registreAbre.Items.Add(fileTree);
+				}
+			}
+
+			// Ajout de la page d'ouverture
+			foreach (var file in files)
+			{
+				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
+				{
+					var fileTree = new TreeViewItem();
+					fileTree.Header = GetFileFolderName(file);
+					fileTree.Tag = GetFileFolderName(file);
+					fileTree.FontWeight = FontWeights.Normal;
+					fileTree.Foreground = Brushes.White;
+					fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
+					fileInfos.Add(new FileInfo(file));
+					registreAbre.Items.Add(fileTree);
+				}
+			}
+
+			// Ensuite les autres pages numérotées 
+			//Système de trie des images de l'aborescence !!
+			Dictionary<int, string> filesInt = new Dictionary<int, string>();
+			foreach (var file in files)
+			{
+				FileInfo file1 = new FileInfo(file);
+				int numero = 0;
+				if (Int32.TryParse(file1.Name.Substring(0, file1.Name.Length - 4), out numero))
+				{
+					filesInt.Add(numero, file);
+				}
+			}
+			var fileSorted = filesInt.OrderBy(f => f.Key);
+
+			//var fileSorted = files.OrderBy(f => f.ToLower());
+			foreach (var file in fileSorted)
+			{
+				if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
+					&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
+				{
+					var fileTree = new TreeViewItem();
+					fileTree.Header = GetFileFolderName(file.Value);
+					fileTree.Tag = GetFileFolderName(file.Value);
+					fileTree.FontWeight = FontWeights.Normal;
+					fileTree.Foreground = Brushes.White;
+					fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
+					fileInfos.Add(new FileInfo(file.Value));
+					registreAbre.Items.Add(fileTree);
+				}
+			}
+
+			//Ajout des pages manquantes
+			using (var ct = new DocumatContext())
+			{
+				// Images Manquantes
+				List<Models.ManquantImage> manquantImages = ct.ManquantImage.Where(m => m.IdRegistre == RegistreViewParent.Registre.RegistreID).OrderBy(m => m.NumeroPage).ToList();
+				foreach (var mqImage in manquantImages)
+				{
+					var fileTree = new TreeViewItem();
+					fileTree.Header = mqImage.NumeroPage.ToString();
+					fileTree.Tag = "manquant";
+					fileTree.FontWeight = FontWeights.Normal;
+					fileTree.Foreground = Brushes.White;
+					fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
+					registreAbre.Items.Add(fileTree);
+				}
+			}
+
+			FolderView.Items.Clear();
+			FolderView.Items.Add(registreAbre);
+			ActualiserArborescence();
+			#endregion
+		}
+
+		/// <summary>
+		/// Actualise l'aborescence les étiquettes de l'aborescence!!!
+		/// </summary>
+		public void ActualiserArborescence()
 		{
 			// Définition des types d'icon dans l'aborescence en fonction des statuts des images
 			foreach (TreeViewItem item in registreAbre.Items)
@@ -378,9 +485,10 @@ namespace DOCUMAT.Pages.Image
 		public ImageController()
         {
             InitializeComponent();
-        }
+			FolderView.ContextMenu = (ContextMenu)this.FindResource("cmManquantImage");
+		}
 
-        public ImageController(RegistreView registreview, Controle.Controle controle) :this()
+		public ImageController(RegistreView registreview, Controle.Controle controle) :this()
         {
 			MainParent = controle;
 			RegistreViewParent = registreview;
@@ -488,104 +596,8 @@ namespace DOCUMAT.Pages.Image
         {
             try
             {
-                #region INSPECTION DU DOSSIER DE REGISTRE ET CREATION DE L'ABORESCENCE
-                // Chargement de l'aborescence
-                // Récupération de la liste des images contenu dans le dossier du registre
-                var files = Directory.GetFiles(Path.Combine(DossierRacine, RegistreViewParent.Registre.CheminDossier));
-
-				// Affichage et configuration de la TreeView
-				registreAbre.Header = RegistreViewParent.Registre.QrCode;
-				registreAbre.Tag = RegistreViewParent.Registre.QrCode;
-				registreAbre.FontWeight = FontWeights.Normal;
-				registreAbre.Foreground = Brushes.White;
-
-				// Définition de la lettre de référence pour ce registre
-				if (RegistreViewParent.Registre.Type == "R4")
-					RefInitiale = "T";
-
-				// Ajout de la page de garde comme entête de l'aborescence
-				foreach (var file in files)
-				{
-					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
-					{
-						var fileTree = new TreeViewItem();
-						fileTree.Header = GetFileFolderName(file);
-						fileTree.Tag = GetFileFolderName(file);
-						fileTree.FontWeight = FontWeights.Normal;
-						fileTree.Foreground = Brushes.White;
-						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-						fileInfos.Add(new FileInfo(file));
-						registreAbre.Items.Add(fileTree);
-					}
-				}
-
-				// Ajout de la page d'ouverture
-				foreach (var file in files)
-				{
-					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
-					{
-						var fileTree = new TreeViewItem();
-						fileTree.Header = GetFileFolderName(file);
-						fileTree.Tag = GetFileFolderName(file);
-						fileTree.FontWeight = FontWeights.Normal;
-						fileTree.Foreground = Brushes.White;
-						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-						fileInfos.Add(new FileInfo(file));
-						registreAbre.Items.Add(fileTree);
-					}
-				}
-
-				// Ensuite les autres pages numérotées 
-				//Système de trie des images de l'aborescence !!
-				Dictionary<int, string> filesInt = new Dictionary<int, string>();
-				foreach (var file in files)
-				{
-					FileInfo file1 = new FileInfo(file);
-					int numero = 0;
-					if (Int32.TryParse(file1.Name.Substring(0, file1.Name.Length - 4), out numero))
-					{
-						filesInt.Add(numero, file);
-					}
-				}
-				var fileSorted = filesInt.OrderBy(f => f.Key);
-
-				//var fileSorted = files.OrderBy(f => f.ToLower());
-				foreach (var file in fileSorted)
-				{
-					if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
-						&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
-					{
-						var fileTree = new TreeViewItem();
-						fileTree.Header = GetFileFolderName(file.Value);
-						fileTree.Tag = GetFileFolderName(file.Value);
-						fileTree.FontWeight = FontWeights.Normal;
-						fileTree.Foreground = Brushes.White;
-						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-						fileInfos.Add(new FileInfo(file.Value));
-						registreAbre.Items.Add(fileTree);
-					}
-				}
-
-				//Ajout des pages manquantes
-				using (var ct = new DocumatContext())
-				{
-					// Images Manquantes
-					List<Models.ManquantImage> manquantImages = ct.ManquantImage.Where(m => m.IdRegistre == RegistreViewParent.Registre.RegistreID).OrderBy(m => m.NumeroPage).ToList();
-					foreach (var mqImage in manquantImages)
-					{
-						var fileTree = new TreeViewItem();
-						fileTree.Header = mqImage.NumeroPage.ToString();
-						fileTree.Tag = "manquant";
-						fileTree.FontWeight = FontWeights.Normal;
-						fileTree.Foreground = Brushes.White;
-						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-						registreAbre.Items.Add(fileTree);
-					}
-				}
-
-				FolderView.Items.Add(registreAbre);
-				FolderView.ContextMenu = (ContextMenu)this.FindResource("cmManquantImage");
-				#endregion
+				// Chargement de l'aborescence
+				LoadAborescence();
 
 				#region RECUPERATION DES PAGES SPECIAUX
 				// Récupération des Pages Spéciaux : PAGE DE GARDE : numero : -1 ET PAGE D'OUVERTURE : numero : 0			
@@ -1320,88 +1332,12 @@ namespace DOCUMAT.Pages.Image
 		private void AddSequence_Click(object sender, RoutedEventArgs e)
 		{
 
-		}
-
-		private void btnValiderManquant_Click(object sender, RoutedEventArgs e)
-		{
-			try
-			{
-				using (var ct = new DocumatContext())
-				{
-					int numPage = 0;
-					if (!Int32.TryParse(tbNumeroImageManquant.Text.Trim(), out numPage))
-						throw new Exception("Numero de Page Incorrect");
-
-					int numDebut = 0;
-					if (!Int32.TryParse(tbDebutSequenceManquant.Text.Trim(), out numDebut))
-						throw new Exception("Numero de Séquence de début Incorrect");
-
-					int numFin = 0;
-					if (!Int32.TryParse(tbFinSequenceManquant.Text.Trim(), out numFin))
-						throw new Exception("Numero de Séquence de fin Incorrect");
-
-					if (!dtDateSequenceManquant.SelectedDate.HasValue)
-						throw new Exception("La date de la première séquence est incorrecte !!!");
-					Models.ManquantImage manquantImage = new ManquantImage()
-					{
-						IdRegistre = RegistreViewParent.Registre.RegistreID,
-						IdImage = null,
-						NumeroPage = numPage,
-						DebutSequence = numDebut,
-						FinSequence = numFin,
-						statutManquant = 1,
-						DateDeclareManquant = DateTime.Now,
-						DateSequenceDebut = dtDateSequenceManquant.SelectedDate.Value,
-						DateCreation = DateTime.Now,
-						DateModif = DateTime.Now,
-					};
-					ct.ManquantImage.Add(manquantImage);
-					ct.SaveChanges();
-
-					//Ajout de l'image dans l'aborescence
-					var fileTree = new TreeViewItem();
-					fileTree.Header = numPage.ToString();
-					fileTree.Tag = "manquant";
-					fileTree.FontWeight = FontWeights.Normal;
-					fileTree.Foreground = Brushes.White;
-					fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-					registreAbre.Items.Add(fileTree);
-
-					//Actualisation de l'aborescence 
-					tbNumeroImageManquant.Text = "";
-					tbDebutSequenceManquant.Text = "";
-					tbFinSequenceManquant.Text = "";
-					dtDateSequenceManquant.SelectedDate = null;
-					ActualiserArborescence();
-					panelImageManquant.Visibility = Visibility.Collapsed;
-
-					//Enregistrement de la tâche
-					DocumatContext.AddTraitement(DocumatContext.TbManquantImage, manquantImage.ManquantImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CONTROLE PH1 : AJOUT D'UNE IMAGE MANQUANT DE NUMERO PAGE : " + manquantImage.NumeroPage + " AU REGISTRE ID N° " + RegistreViewParent.Registre.RegistreID);
-
-				}
-			}catch (Exception ex)
-			{
-				ex.ExceptionCatcher();
-			}
-		}
-
-		private void btnAnnulerManquant_Click(object sender, RoutedEventArgs e)
-		{
-			panelImageManquant.Visibility = Visibility.Collapsed;			
-		}
+		}	
 
 		private void cmBtnDeclareManquant_Click(object sender, RoutedEventArgs e)
-		{		
-			if(panelImageManquant.Visibility == Visibility.Visible)
-			{
-				panelImageManquant.Visibility = Visibility.Collapsed;
-				//((MenuItem)sender).Header = "Déclarer un Manquant";
-			}
-			else
-			{
-				panelImageManquant.Visibility = Visibility.Visible;
-				//((MenuItem)sender).Header = "Annuler";
-			}
+		{
+			FormManquantImage formManquantImage = new FormManquantImage(this);
+			formManquantImage.Show();
 		}
 
 		private void tbNumeroImageManquant_TextChanged(object sender, TextChangedEventArgs e)

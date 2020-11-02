@@ -78,12 +78,14 @@
                     <CheckBox x:Name="AfficherFeuillets"
                       Content="Préindexer les Feuillets"
                       Foreground="White"
+                      Background="White"
                       Click="AfficherFeuillets_Click"
                       />
 
                     <CheckBox x:Name="MarquerPreindexer"
                       HorizontalAlignment="Right"
                       Foreground="White"
+                      Background="White"                              
                       Margin="30 0 0 0"
                       Visibility="Collapsed"
                       Content="Terminer la Pré-Indexation "                      
@@ -278,6 +280,23 @@
                             <!--<DataGridTextColumn Header="Multi-Références" Binding="{Binding NombreMulti}" />-->
                         </DataGrid.Columns>
                     </DataGrid>
+
+                    <Button 
+                            x:Name="btnSupprimerFeuillet" 
+                            Margin="10"
+                            BorderBrush="White"
+                            BorderThickness="0 0 0 1"
+                            Background="Transparent"                               
+                            Click="btnSupprimerFeuillet_Click">
+                        <StackPanel Orientation="Horizontal" 
+                                    VerticalAlignment="Center" 
+                                    HorizontalAlignment="Center">
+                            <materialDesign:PackIcon Width="20" Height="20" Kind="RemoveCircle" 
+                                                     VerticalAlignment="Center"/>
+                            <TextBlock VerticalAlignment="Center"
+                                       Margin="10 0"> SUPPRIMER LE DERNIER FEUILLET </TextBlock>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
                 <!--Formulaire des feuillets-->
@@ -340,22 +359,21 @@
                             <StackPanel Orientation="Horizontal" 
                                 HorizontalAlignment="Center">
                                 <Button 
-                            x:Name="btnSupprimerFeuillet" 
-                            Margin="10"
-                            BorderBrush="White"
-                            BorderThickness="0 0 0 1"
-                            Background="Transparent"                              
-                            Content="SUPPRIMER" 
-                            Click="btnSupprimerFeuillet_Click"/>
-
-                                <Button 
-                            x:Name="btnSaveFeuillet" 
-                            Margin="10"
-                            BorderBrush="White"
-                            BorderThickness="0 0 0 1"
-                            Background="Transparent"
-                            Content="ENREGISTRE" 
-                            Click="btnSaveFeuillet_Click"/>
+                                    x:Name="btnSaveFeuillet" 
+                                    Margin="10"
+                                    BorderBrush="White"
+                                    BorderThickness="0 0 0 1"
+                                    Background="Transparent"
+                                    Click="btnSaveFeuillet_Click">
+                                    <StackPanel Orientation="Horizontal" 
+                                    VerticalAlignment="Center" 
+                                    HorizontalAlignment="Center">
+                                        <materialDesign:PackIcon Width="20" Height="20" Kind="CheckAll" 
+                                                     VerticalAlignment="Center"/>
+                                        <TextBlock VerticalAlignment="Center"
+                                       Margin="10 0"> ENREGISTRER </TextBlock>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
                         <!--Formulaire de références-->
@@ -397,14 +415,15 @@
                                             Width="25"
                                             Height="25"
                                             Foreground="White"
-                                            Margin="0 27 0 0"/>
+                                            Margin="0 27 -20 0"/>
                                     <TextBox x:Name="tbNumeroOrdreSequence" 
                                         Foreground="White"
                                         CharacterCasing="Upper"
                                         InputScope="Number"
                                         Typography.NumeralAlignment="Proportional"
-                                        materialDesign:HintAssist.Hint="ORDRE         "
-                                        materialDesign:HintAssist.HelperText="NUMERO D'ORDRE"
+                                        materialDesign:HintAssist.Hint="0"
+                                        Width="50"
+                                        materialDesign:HintAssist.HelperText="N° Ordre"
                                         Margin="20"
                                         TextChanged="tbNumeroOrdreSequence_TextChanged"
                                         KeyUp="tbNumeroOrdreSequence_KeyUp"/>
@@ -413,9 +432,10 @@
                                         Foreground="White"
                                         CharacterCasing="Upper"
                                         InputScope="Number"
+                                        Width="50"
                                         Typography.NumeralAlignment="Proportional"
-                                        materialDesign:HintAssist.Hint="NOMBRE"
-                                        materialDesign:HintAssist.HelperText="NOMBRE"
+                                        materialDesign:HintAssist.Hint="0"
+                                        materialDesign:HintAssist.HelperText="Nb Refs"
                                         Margin="20"
                                         TextChanged="tbNombreReferences_TextChanged"
                                         KeyUp="tbNombreReferences_KeyUp"/>

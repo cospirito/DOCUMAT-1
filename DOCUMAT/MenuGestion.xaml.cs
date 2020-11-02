@@ -244,10 +244,7 @@ namespace DOCUMAT
                     sessionTravail.DateModif = DateTime.Now;
                     ct.SaveChanges();
                 }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "ERREUR ARRET SESSION", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                catch(Exception ex){ /*MessageBox.Show(ex.Message, "ERREUR ARRET SESSION", MessageBoxButton.OK, MessageBoxImage.Error);*/ }
             }
         }
 

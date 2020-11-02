@@ -213,13 +213,13 @@
                         Visibility="Collapsed"
                         Background="{x:Null}"
                         BorderBrush="GreenYellow"
-                        BorderThickness="1"
-                        Height="100"
-                        ToolTip="Valider l'indexation du registre"                        
-                        Click="btnValideCorrection_Click">
+                        BorderThickness="15 1"
+                        Height="70"                        
+                        Click="btnValideCorrection_Click"
+                        ToolTip="Valider l'indexation du registre"                                                    >
                         <materialDesign:PackIcon Kind="CheckAll"
-                                        Width="50"
-                                        Height="50"
+                                        Width="40"
+                                        Height="40"
                                         Foreground="GreenYellow"/>
                     </Button>
                 </StackPanel>
@@ -291,7 +291,7 @@
                         VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Auto"
                         IsReadOnly="True"                        
-                        MaxHeight="500"       
+                        MaxHeight="400"       
                         Visibility="Collapsed"
                         RowDetailsVisibilityMode="VisibleWhenSelected"                         
                         LoadingRow="dgSequence_LoadingRow"
@@ -310,7 +310,7 @@
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
                             CanUserSortColumns="False"                              
-                            MaxHeight="500"                            
+                            MaxHeight="400"                            
                             SelectionMode="Single"
                             IsReadOnly="True"
                             RowDetailsVisibilityMode="VisibleWhenSelected"                                                 
@@ -457,11 +457,12 @@
                                             Margin="0 ">
                                     <StackPanel Background="White">
                                         <TextBlock 
-                                           Foreground="SteelBlue"
+                                            x:Name="tbxRejetImage"
+                                            Foreground="SteelBlue"
                                             Padding="5"
                                             HorizontalAlignment="Center"
                                             FontWeight="Bold">
-                                            Rejet Image : ECRITURE ILLISIBLE
+                                            Rejet Image : MOTIF
                                         </TextBlock>
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal"

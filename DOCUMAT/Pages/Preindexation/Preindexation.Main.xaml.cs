@@ -97,12 +97,12 @@ namespace DOCUMAT.Pages.Preindexation
                                             if (ct.Traitement.Any(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper()
                                                      && t.TableID == registre.RegistreID && t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE && t.AgentID != Utilisateur.AgentID))
                                             {
-                                                DocumatContext.AddTraitement(DocumatContext.TbRegistre, registre.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE);
+                                                MessageBox.Show("Ce registre viens malheureusement d'être attribué à un autre Agent !!!", "Registre Attribué !!!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                                return;                                                
                                             }
                                             else
                                             {
-                                                MessageBox.Show("Ce registre viens malheureusement d'être attribué à un autre Agent !!!", "Registre Attribué !!!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                                                return;
+                                                DocumatContext.AddTraitement(DocumatContext.TbRegistre, registre.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, "DEBUT PREINDEXATION DU REGISTRE N°ID : " + registre.RegistreID);
                                             }
                                         }
                                     }
@@ -143,6 +143,11 @@ namespace DOCUMAT.Pages.Preindexation
                                     dgRegistre.Visibility = Visibility.Collapsed;
                                     PanelFeuillet.Visibility = Visibility.Visible;
                                     PanelRecherche.Visibility = Visibility.Collapsed;
+                                }
+                                else
+                                {
+                                    AfficherFeuillets.IsChecked = false;
+                                    MessageBox.Show("Ce registre n'a pas de Feuillets à Préindexer ni à Indexer !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
                                 }
                             }
                             else if(registreNonTermines.Count > 0) 

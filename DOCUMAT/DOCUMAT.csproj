@@ -181,6 +181,9 @@
     <Compile Include="Pages\Home\Admin.Home.xaml.cs">
       <DependentUpon>Admin.Home.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Image\FormManquantImage.xaml.cs">
+      <DependentUpon>FormManquantImage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Image\Image.Main.xaml.cs">
       <DependentUpon>Image.Main.xaml</DependentUpon>
     </Compile>
@@ -294,6 +297,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Home\Admin.Home.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\FormManquantImage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

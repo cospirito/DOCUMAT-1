@@ -284,6 +284,8 @@ namespace DOCUMAT.ViewModels
                                         check.IsChecked = true;
                                         sequenceView.ListReferenceFausse += reference + ",";
                                         sequenceView.References_Is_Check = true;
+                                        sequenceView.RefsList.Add(reference);
+                                        sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = true });
                                     }
                                 }
                             }
@@ -353,6 +355,8 @@ namespace DOCUMAT.ViewModels
                                             check.IsChecked = true;
                                             sequenceView.ListReferenceFausse += reference + ",";
                                             sequenceView.References_Is_Check = true;
+                                            sequenceView.RefsList.Add(reference);
+                                            sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = true });
                                         }
                                     }
                                 }

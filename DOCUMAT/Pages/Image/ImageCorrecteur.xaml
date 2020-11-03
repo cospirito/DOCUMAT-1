@@ -338,20 +338,28 @@
                                 <DataTemplate>
                                     <DockPanel Margin="5 10 20 10"
                                                x:Name="DockPanel">
-                                        <CheckBox x:Name="cbxNumOrdre"
-                                                  Content="{Binding strOrdre}"
+                                        <CheckBox Content="{Binding strOrdre}"
                                                   Margin="10"
                                                   Background="Red"
-                                                  IsChecked="{Binding OrdreFaux}"
-                                                  Click="cbxReadOnly_Click"                                                  />
-                                        <CheckBox x:Name="cbxDate"
-                                                  Content="{Binding strDate}"
-                                                  Margin="10"
-                                                  IsChecked="{Binding DateFausse}"
-                                                  Background="Red"
+                                                  IsChecked="{Binding Ordre_Is_Check}"
                                                   Click="cbxReadOnly_Click"/>
-                                        <StackPanel x:Name="ListeReferences" 
-                                                    Margin="10">
+                                        <CheckBox Content="{Binding strDate}"
+                                                  Margin="10"
+                                                  Background="Red"
+                                                  IsChecked="{Binding Date_Is_Check}"
+                                                  Click="cbxReadOnly_Click"/>
+                                        <StackPanel x:Name="ListeReferences"
+                                                    Margin="5">
+                                            <ListBox ItemsSource="{Binding TheList}">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox Name="CheckBoxZone" Content="{Binding TheText}"
+                                                                  IsChecked="{Binding TheValue}"
+                                                                  Background="Red"
+                                                                  Click="cbxReadOnly_Click"/>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
                                         </StackPanel>
                                     </DockPanel>
                                 </DataTemplate>

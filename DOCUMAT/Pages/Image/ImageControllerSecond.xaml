@@ -312,6 +312,7 @@
                                         <DataTemplate>
                                             <CheckBox x:Name="SuppSequence" 
                                                       Background="Red"
+                                                      IsEnabled="{Binding ASupprimer}"
                                                       Click="SuppSequence_Click"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -325,12 +326,12 @@
                                         <CheckBox Content="{Binding strOrdre}"
                                                   Margin="10"
                                                   Background="Red"
-                                                  IsChecked="{Binding Ordre_Is_Check}"
+                                                  IsEnabled="{Binding OrdreFaux}"
                                                   Click="cbxNumOrdre_Click"/>
                                         <CheckBox Content="{Binding strDate}"
                                                   Margin="10"
                                                   Background="Red"
-                                                  IsChecked="{Binding Date_Is_Check}"
+                                                  IsEnabled="{Binding DateFausse}"
                                                   Click="cbxDate_Click"/>
                                         <StackPanel x:Name="ListeReferences"
                                                     Margin="5">

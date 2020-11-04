@@ -49,7 +49,6 @@ namespace DOCUMAT.Pages.Image
 		#endregion
 
 		#region FONCTIONS			
-
 		/// <summary>
 		/// Fonction chargée d'afficher l'image à Indexer
 		/// </summary>
@@ -474,55 +473,55 @@ namespace DOCUMAT.Pages.Image
 
 		private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
 		{
-			try
-			{
-				//SequenceView sequenceView = (SequenceView)e.Row.Item;
-				//StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
-				//CheckBox cbxNumOrdre = (CheckBox)e.DetailsElement.FindName("cbxNumOrdre");
-				//CheckBox cbxDate = (CheckBox)e.DetailsElement.FindName("cbxDate");
+			//try
+			//{
+   //             SequenceView sequenceView = (SequenceView)e.Row.Item;
+   //             StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
+   //             CheckBox cbxNumOrdre = (CheckBox)e.DetailsElement.FindName("cbxNumOrdre");
+   //             CheckBox cbxDate = (CheckBox)e.DetailsElement.FindName("cbxDate");
 
-				//if (sequenceView.Is_ImageManquant == true)
-				//{
-				//	//cbxDate.Foreground = Brushes.White;
-				//	cbxDate.IsEnabled = true;
-				//	cbxNumOrdre.Foreground = Brushes.White;
-				//	cbxNumOrdre.IsEnabled = true;
-				//}
-				//else
-				//{
-				//	if (sequenceView.DateFausse)
-				//	{
-				//		cbxDate.Foreground = Brushes.GreenYellow;
-				//		cbxDate.IsEnabled = true;
-				//	}
-				//	else
-				//	{
-				//		cbxDate.Foreground = Brushes.White;
-				//		cbxDate.IsEnabled = false;
-				//	}
+   //             if (sequenceView.Is_ImageManquant == true)
+   //             {
+   //                 //cbxDate.Foreground = Brushes.White;
+   //                 cbxDate.IsEnabled = true;
+   //                 cbxNumOrdre.Foreground = Brushes.White;
+   //                 cbxNumOrdre.IsEnabled = true;
+   //             }
+   //             else
+   //             {
+   //                 if (sequenceView.DateFausse)
+   //                 {
+   //                     cbxDate.Foreground = Brushes.GreenYellow;
+   //                     cbxDate.IsEnabled = true;
+   //                 }
+   //                 else
+   //                 {
+   //                     cbxDate.Foreground = Brushes.White;
+   //                     cbxDate.IsEnabled = false;
+   //                 }
 
-				//	if (sequenceView.OrdreFaux)
-				//	{
-				//		cbxNumOrdre.Foreground = Brushes.GreenYellow;
-				//		cbxNumOrdre.IsEnabled = true;
-				//	}
-				//	else
-				//	{
-				//		cbxNumOrdre.Foreground = Brushes.White;
-				//		cbxNumOrdre.IsEnabled = false;
-				//	}
-				//}
+   //                 if (sequenceView.OrdreFaux)
+   //                 {
+   //                     cbxNumOrdre.Foreground = Brushes.GreenYellow;
+   //                     cbxNumOrdre.IsEnabled = true;
+   //                 }
+   //                 else
+   //                 {
+   //                     cbxNumOrdre.Foreground = Brushes.White;
+   //                     cbxNumOrdre.IsEnabled = false;
+   //                 }
+   //             }
 
-				//foreach (var element in sequenceView.ListeRefecrences)
-				//{
-				//	element.Value.Click += CheckBoxReferences_Click;
-				//	panel.Children.Add(element.Value);
-				//}
-			}
-			catch (Exception ex)
-			{
-				ex.ExceptionCatcher();
-			}
+   //             //foreach (var element in sequenceView.ListeRefecrences)
+   //             //{
+   //             //    element.Value.Click += CheckBoxReferences_Click;
+   //             //    panel.Children.Add(element.Value);
+   //             //}
+   //         }
+			//catch (Exception ex)
+			//{
+			//	ex.ExceptionCatcher();
+			//}
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

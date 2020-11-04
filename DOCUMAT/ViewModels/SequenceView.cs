@@ -1,8 +1,6 @@
 ﻿using DOCUMAT.Models;
 using System;
 using System.Collections.Generic;
-using System.Windows.Media;
-using System.Windows.Controls;
 using System.Linq;
 using System.Collections.ObjectModel;
 
@@ -20,8 +18,7 @@ namespace DOCUMAT.ViewModels
         public string strReferences { get; set; }
         public int NbRefIndex { get; set; }
         public bool isNbRefs_equal {get; set;}
-        public string NbRefColor;
-        public Dictionary<String, CheckBox> ListeRefecrences = new Dictionary<String, CheckBox>();
+        //public Dictionary<String, CheckBox> ListeRefecrences = new Dictionary<String, CheckBox>();
 
         // Propriété pour la récupération des données lors du check, concernant le contrôle
         public bool Ordre_Is_Check { get; set; }
@@ -167,22 +164,23 @@ namespace DOCUMAT.ViewModels
                 sequenceView.strDate = sequence.DateSequence.ToShortDateString();
                 sequenceView.strReferences = sequence.References;
                 if(sequence.References.ToLower().Contains("defaut"))
+                {
                     sequenceView.NbRefIndex = 0;
+                }
                 else
-                sequenceView.NbRefIndex = sequence.References.Split(',').Length;
+                {
+                    sequenceView.NbRefIndex = sequence.References.Split(',').Length;
+                }
+
                 // Définition de la couleur du Nombre de Référence indexer Pour SuperIndexeur
                 if (sequence.NombreDeReferences != sequenceView.NbRefIndex)
                 {
                     sequenceView.isNbRefs_equal = false;
-                    sequenceView.NbRefColor = "White";
                 }
                 else
                 {
                     sequenceView.isNbRefs_equal = true;
-                    sequenceView.NbRefColor = "Red";
                 }
-
-
 
                 if (sequence.isSpeciale.Contains("doublon"))
                 {
@@ -211,13 +209,13 @@ namespace DOCUMAT.ViewModels
                 {
                     if (!string.IsNullOrWhiteSpace(reference))
                     {
-                        sequenceView.ListeRefecrences.Add(reference, new CheckBox()
-                        {
-                            Name = "ref" + i++,
-                            Content = reference,
-                            Foreground = Brushes.White,
-                            Background = Brushes.Red
-                        });
+                        //sequenceView.ListeRefecrences.Add(reference, new CheckBox()
+                        //{
+                        //    Name = "ref" + i++,
+                        //    Content = reference,
+                        //    Foreground = Brushes.White,
+                        //    Background = Brushes.Red
+                        //});
                         sequenceView.RefsList.Add(reference);
                         sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = false });
                     }
@@ -273,15 +271,16 @@ namespace DOCUMAT.ViewModels
                             }
 
                             if(correction.RefSequence_idx == 1)
-                            {                                                                
+                            {
+                                sequenceView.TheList.Clear();
                                 foreach (var reference in ListReferences)
                                 {
                                     if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
                                     {
-                                        CheckBox check = new CheckBox();
-                                        sequenceView.ListeRefecrences.TryGetValue(reference, out check);
-                                        check.Background = Brushes.Red;
-                                        check.IsChecked = true;
+                                        //CheckBox check = new CheckBox();
+                                        //sequenceView.ListeRefecrences.TryGetValue(reference, out check);
+                                        //check.Background = Brushes.Red;
+                                        //check.IsChecked = true;
                                         sequenceView.ListReferenceFausse += reference + ",";
                                         sequenceView.References_Is_Check = true;
                                         sequenceView.RefsList.Add(reference);
@@ -293,6 +292,62 @@ namespace DOCUMAT.ViewModels
                             }
                         }
                     }                
+                }
+                #endregion
+
+                #region CAS D'UN CONTROLE PHASE 2
+                if(sequence.PhaseActuelle == 2)
+                {
+                    //sequenceView.En_Correction = false;
+                    using (var ct = new DocumatContext())
+                    {
+                        correction = ct.Correction.FirstOrDefault(c => c.StatutCorrection == 0 && c.PhaseCorrection == 1
+                                                            && c.SequenceID == sequence.SequenceID);
+                        if (correction != null)
+                        {
+                            #region SEQUENCE CORRIGEE A CONTROLER
+                            //sequenceView.Demande_Correction = correction;
+                            //sequenceView.En_Correction = true;
+                            sequenceView.ASupprimer = true;
+
+                            if (correction.OrdreSequence_idx == 1)
+                            {
+                                sequenceView.OrdreFaux = true;
+                            }
+                            else
+                            {
+                                sequenceView.OrdreFaux = false;
+                            }
+                            if (correction.DateSequence_idx == 1)
+                            {
+                                sequenceView.DateFausse = true;                                
+                            }
+                            else
+                            {
+                                sequenceView.DateFausse = false;
+                            }
+
+                            //if(correction.RefSequence_idx == 1)
+                            //{
+                            //    sequenceView.TheList.Clear();
+                            //    foreach (var reference in ListReferences)
+                            //    {
+                            //        if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
+                            //        {
+                            //            //CheckBox check = new CheckBox();
+                            //            //sequenceView.ListeRefecrences.TryGetValue(reference, out check);
+                            //            //check.Background = Brushes.Red;
+                            //            //check.IsChecked = true;
+                            //            sequenceView.ListReferenceFausse += reference + ",";
+                            //            sequenceView.References_Is_Check = true;
+                            //            sequenceView.RefsList.Add(reference);
+                            //            sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = true });
+                            //        }
+                            //    }
+                            //}
+                            #endregion                            
+                        }
+                    }       
                 }
                 #endregion
 
@@ -345,14 +400,15 @@ namespace DOCUMAT.ViewModels
 
                                 if (correction.RefSequence_idx == 1)
                                 {
+                                    sequenceView.TheList.Clear();
                                     foreach (var reference in ListReferences)
                                     {
                                         if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
                                         {
-                                            CheckBox check = new CheckBox();
-                                            sequenceView.ListeRefecrences.TryGetValue(reference, out check);
-                                            check.Background = Brushes.Red;
-                                            check.IsChecked = true;
+                                            //CheckBox check = new CheckBox();
+                                            //sequenceView.ListeRefecrences.TryGetValue(reference, out check);
+                                            //check.Background = Brushes.Red;
+                                            //check.IsChecked = true;
                                             sequenceView.ListReferenceFausse += reference + ",";
                                             sequenceView.References_Is_Check = true;
                                             sequenceView.RefsList.Add(reference);

@@ -922,27 +922,27 @@ namespace DOCUMAT.Pages.Image
 
 		private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
 		{
-            try
-            {
-                SequenceView sequenceView = (SequenceView)e.Row.Item;
-				//if(sequenceView.Sequence.isSpeciale == "saut" || sequenceView.ASupprimer)
-				//{
-				//	((DockPanel)e.DetailsElement.FindName("DockPanel")).Visibility = Visibility.Collapsed;
-				//}
-				//else
-				//{
-					StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
-					foreach (var element in sequenceView.ListeRefecrences)
-					{
-						panel.Children.Add(element.Value);
-						element.Value.Click += cbxReadOnly_Click;
-					}
-				//}
-			}
-			catch (Exception ex)
-			{
-				ex.ExceptionCatcher();
-			}
+   //         try
+   //         {
+   //             SequenceView sequenceView = (SequenceView)e.Row.Item;
+			//	//if(sequenceView.Sequence.isSpeciale == "saut" || sequenceView.ASupprimer)
+			//	//{
+			//	//	((DockPanel)e.DetailsElement.FindName("DockPanel")).Visibility = Visibility.Collapsed;
+			//	//}
+			//	//else
+			//	//{
+			//		StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
+			//		foreach (var element in sequenceView.ListeRefecrences)
+			//		{
+			//			panel.Children.Add(element.Value);
+			//			element.Value.Click += cbxReadOnly_Click;
+			//		}
+			//	//}
+			//}
+			//catch (Exception ex)
+			//{
+			//	ex.ExceptionCatcher();
+			//}
 		}
 
 		private void btnNext_Click(object sender, RoutedEventArgs e)

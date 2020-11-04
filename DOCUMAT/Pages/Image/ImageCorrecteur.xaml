@@ -341,12 +341,12 @@
                                         <CheckBox Content="{Binding strOrdre}"
                                                   Margin="10"
                                                   Background="Red"
-                                                  IsChecked="{Binding Ordre_Is_Check}"
+                                                  IsChecked="{Binding OrdreFaux}"
                                                   Click="cbxReadOnly_Click"/>
                                         <CheckBox Content="{Binding strDate}"
                                                   Margin="10"
                                                   Background="Red"
-                                                  IsChecked="{Binding Date_Is_Check}"
+                                                  IsChecked="{Binding DateFausse}"
                                                   Click="cbxReadOnly_Click"/>
                                         <StackPanel x:Name="ListeReferences"
                                                     Margin="5">

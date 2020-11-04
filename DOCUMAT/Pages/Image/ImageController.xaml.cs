@@ -571,20 +571,20 @@ namespace DOCUMAT.Pages.Image
 
         private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
-            try
-            {
-                SequenceView sequenceView = (SequenceView)e.Row.Item;
-                StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
-                if (panel.Children.Count == 0)
-                {
-                    foreach (var element in sequenceView.ListeRefecrences)
-                    {
-                        element.Value.Click += CheckBoxReferences_Click;
-                        panel.Children.Add(element.Value);
-                    }
-                }
-            }
-            catch (Exception ex) { ex.ExceptionCatcher(); }
+            //try
+            //{
+            //    SequenceView sequenceView = (SequenceView)e.Row.Item;
+            //    StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
+            //    if (panel.Children.Count == 0)
+            //    {
+            //        foreach (var element in sequenceView.ListeRefecrences)
+            //        {
+            //            element.Value.Click += CheckBoxReferences_Click;
+            //            panel.Children.Add(element.Value);
+            //        }
+            //    }
+            //}
+            //catch (Exception ex) { ex.ExceptionCatcher(); }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

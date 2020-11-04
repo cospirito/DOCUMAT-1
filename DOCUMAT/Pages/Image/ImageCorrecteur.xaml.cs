@@ -144,10 +144,10 @@ namespace DOCUMAT.Pages.Image
 			string EnCorrection = (Math.Round(((float)imagesEnCorrection.Count() / (float)imageViews.Count()) * 100, 1)).ToString() + " %"; 
 			string Valide = (Math.Round(((float)imagesValide.Count() / (float)imageViews.Count()) * 100, 1)).ToString() + " %"; ;
 
-			tbxImageTerminer.Text = "Terminé : " + Math.Round(perTerminer, 1) + " %";
-			tbxImageRejete.Text   = "En Correction : " + EnCorrection /*+ imagesEnCorrection.Count()*/;
-			tbxImageValide.Text   = "Validé : " + Valide /*+ imagesValide.Count()*/;
-			tbxImageEnCours.Text  = "Non Traité : " + EnCorrection;
+			tbxImageTerminer.Text = "Terminé : " + imagesValide.Count() + " ~ " + Math.Round(perTerminer, 1) + " %";
+			tbxImageRejete.Text   = "En Correction : " + imagesEnCorrection.Count() + " ~ " + EnCorrection /*+ imagesEnCorrection.Count()*/;
+			tbxImageValide.Text   = "Validé : " + imagesValide.Count() + " ~ " + Valide /*+ imagesValide.Count()*/;
+			tbxImageEnCours.Text  = "Non Traité : " + imagesEnCorrection.Count() + " ~ " + EnCorrection;
 			ArcIndicator.EndAngle = (perTerminer * 360) / 100;
 			TextIndicator.Text    = Math.Round(perTerminer, 1) + "%";
 		}
@@ -2247,71 +2247,81 @@ namespace DOCUMAT.Pages.Image
 		{
 			if (MessageBox.Show("Voulez vous Supprimer Cette Image et Passer à la Suivante?", "SUPPRIMER/TERMINER IMAGE", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
 			{
-				#region SUPPRESSION DE L'IMAGE ET DES INDEX DE SEQUENCES
-				using (var ct = new DocumatContext())
-				{
-					//Récupération de la demande de correction 
-					Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.ImageID == CurrentImageView.Image.ImageID && c.SequenceID == null
-										 && c.PhaseCorrection == 1 && c.StatutCorrection == 1 && c.ASupprimer == 1);
-					if (CorrectionOld != null)
+                try
+                {
+                    #region SUPPRESSION DE L'IMAGE ET DES INDEX DE SEQUENCES
+                    using (var ct = new DocumatContext())
                     {
-						//Suppression Image in BD
-						ct.Image.Remove(ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID && i.RegistreID == RegistreViewParent.Registre.RegistreID));
+                        //Récupération de la demande de correction 
+                        Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.ImageID == CurrentImageView.Image.ImageID && c.SequenceID == null
+                                             && c.PhaseCorrection == 1 && c.StatutCorrection == 1 && c.ASupprimer == 1);
+                        if (CorrectionOld != null)
+                        {
+                            //Suppression Image in BD
+                            ct.Image.Remove(ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID && i.RegistreID == RegistreViewParent.Registre.RegistreID));
 
-						// Suppression Image on Folder
-						if(File.Exists(Path.Combine(DossierRacine, CurrentImageView.Image.CheminImage)))
-						{
-							File.Delete(Path.Combine(DossierRacine, CurrentImageView.Image.CheminImage));
-						}
+                            // Suppression Image on Folder
+                            if (File.Exists(Path.Combine(DossierRacine, CurrentImageView.Image.CheminImage)))
+                            {
+                                File.Delete(Path.Combine(DossierRacine, CurrentImageView.Image.CheminImage));
+                            }
 
-						// Création d'une correction pour de l'image 
-						Models.Correction correction = new Models.Correction()
-						{
-							RegistreId = RegistreViewParent.Registre.RegistreID,
-							ImageID = CurrentImageView.Image.ImageID,
-							SequenceID = null,
+                            // Création d'une correction pour de l'image 
+                            Models.Correction correction = new Models.Correction()
+                            {
+                                RegistreId = RegistreViewParent.Registre.RegistreID,
+                                ImageID = CurrentImageView.Image.ImageID,
+                                SequenceID = null,
 
-							//Indexes Image mis à null
-							RejetImage_idx = CorrectionOld.RejetImage_idx,
-							MotifRejetImage_idx = CorrectionOld.MotifRejetImage_idx,
-							ASupprimer = CorrectionOld.ASupprimer,
+                                //Indexes Image mis à null
+                                RejetImage_idx = CorrectionOld.RejetImage_idx,
+                                MotifRejetImage_idx = CorrectionOld.MotifRejetImage_idx,
+                                ASupprimer = CorrectionOld.ASupprimer,
 
-							//Indexes de la séquence de l'image
-							OrdreSequence_idx = null,
-							DateSequence_idx = null,
-							RefSequence_idx = null,
-							RefRejetees_idx = null,
+                                //Indexes de la séquence de l'image
+                                OrdreSequence_idx = null,
+                                DateSequence_idx = null,
+                                RefSequence_idx = null,
+                                RefRejetees_idx = null,
 
-							DateCorrection = DateTime.Now,
-							DateCreation = DateTime.Now,
-							DateModif = DateTime.Now,
-							PhaseCorrection = 1,
-							StatutCorrection = 0,
-						};
-						ct.Correction.Add(correction);
-						ct.SaveChanges();
+                                DateCorrection = DateTime.Now,
+                                DateCreation = DateTime.Now,
+                                DateModif = DateTime.Now,
+                                PhaseCorrection = 1,
+                                StatutCorrection = 0,
+                            };
+                            ct.Correction.Add(correction);
+                            ct.SaveChanges();
 
-						//Enregistrement de l'action Agent
-						DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION, "CORRECTION PH1 : SUPPRESSION IMAGE N° : " + CurrentImageView.Image.NumeroPage + " DU REGISTRE ID : " + CurrentImageView.Image.RegistreID);
+                            //Enregistrement de l'action Agent
+                            DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION, "CORRECTION PH1 : SUPPRESSION IMAGE N° : " + CurrentImageView.Image.NumeroPage + " DU REGISTRE ID : " + CurrentImageView.Image.RegistreID);
 
-						this.BtnImageSuivante_Click(sender, e);
-						ActualiserArborescence();
-					}
-				}
-				#endregion
+                            this.BtnImageSuivante_Click(sender, e);
+                            ActualiserArborescence();
+                        }
+                    }
+                    #endregion
 
-				using (var ct = new DocumatContext())
-				{
-					if (ct.Image.All(i => i.RegistreID == RegistreViewParent.Registre.RegistreID
-										&& i.StatutActuel == (int)Enumeration.Image.PHASE2))
-					{
-						btnValideCorrection.Visibility = Visibility.Visible;
-					}
-					else
-					{
-						btnValideCorrection.Visibility = Visibility.Collapsed;
-					}
-				}
+                    using (var ct = new DocumatContext())
+                    {
+                        if (ct.Image.All(i => i.RegistreID == RegistreViewParent.Registre.RegistreID
+                                            && i.StatutActuel == (int)Enumeration.Image.PHASE2))
+                        {
+                            btnValideCorrection.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            btnValideCorrection.Visibility = Visibility.Collapsed;
+                        }
+                    }
+
+					// Rechargement de l'Aborescence
+					LoadAborescence();
+                }
+                catch (Exception ex)
+                {
+					ex.ExceptionCatcher();
+                }
 			}
 		}
 

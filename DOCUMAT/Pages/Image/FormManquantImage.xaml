@@ -1,0 +1,151 @@
+﻿<Window x:Class="DOCUMAT.Pages.Image.FormManquantImage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:DOCUMAT.Pages.Image"
+        mc:Ignorable="d"
+        Title="Manquant Image" 
+        Height="320" 
+        Topmost="True"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow"
+        Background="SteelBlue"
+        Width="290">
+    <StackPanel>
+        <StackPanel HorizontalAlignment="Center"
+                    Background="SteelBlue"
+                    VerticalAlignment="Center"
+                    Margin="15">
+            <StackPanel Orientation="Horizontal" 
+                        VerticalAlignment="Center"
+                        Margin="0 10">
+                <TextBlock 
+                    Foreground="White"
+                    FontWeight="Bold"
+                    FontFamily="Agency Fb"
+                    FontSize="17"
+                    VerticalAlignment="Center">
+                    Page N° :
+                </TextBlock>
+                <TextBox x:Name="tbNumeroImageManquant"                           
+                        Foreground="White"
+                        Width="50"
+                        FontSize="17"                         
+                        FontFamily="Agency Fb"
+                        Margin="10 0 0 0"
+                        VerticalAlignment="Center"
+                        TextChanged="tbNumeroImageManquant_TextChanged"/>
+                <materialDesign:PackIcon
+                    Kind="EditOutline"
+                    Width="20"
+                    Height="30"
+                    Foreground="White"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" 
+                        VerticalAlignment="Center"
+                        Margin="0 10">
+                <TextBlock 
+                    Foreground="White"
+                    FontFamily="Agency Fb"
+                    FontWeight="Bold"
+                    FontSize="17"                         
+                    VerticalAlignment="Center">
+                    Debut Sequence N° :
+                </TextBlock>
+                <TextBox x:Name="tbDebutSequenceManquant"                           
+                        Foreground="White"
+                        Width="50"
+                        FontSize="17"                                                  
+                        FontFamily="Agency Fb"                         
+                        Margin="10 0 0 0"
+                        VerticalAlignment="Center"
+                        TextChanged="tbDebutSequenceManquant_TextChanged"/>
+                <materialDesign:PackIcon
+                    Kind="EditOutline"
+                    Width="20"
+                    Height="30"
+                    Foreground="White"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" 
+                        VerticalAlignment="Center"
+                        Margin="0 10">
+                <TextBlock 
+                    Foreground="White"
+                    FontFamily="Agency Fb"
+                    FontWeight="Bold"
+                    FontSize="17"                                             
+                    VerticalAlignment="Center">
+                    Fin Sequence N° :
+                </TextBlock>
+                <TextBox x:Name="tbFinSequenceManquant"                           
+                        Foreground="White"
+                        Width="50"
+                        FontSize="17"                                                  
+                        FontFamily="Agency Fb"                         
+                        Margin="10 0 0 0"
+                        VerticalAlignment="Center"
+                        TextChanged="tbFinSequenceManquant_TextChanged"/>
+                <materialDesign:PackIcon
+                    Kind="EditOutline"
+                    Width="20"
+                    Height="30"
+                    Foreground="White"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" 
+                        VerticalAlignment="Center"
+                        Margin="0 10">
+                <TextBlock 
+                    Foreground="White"
+                    FontFamily="Agency Fb"
+                    FontWeight="Bold"
+                    FontSize="17"                                             
+                    VerticalAlignment="Center">
+                    Date Debut Seq. :
+                </TextBlock>
+                <DatePicker x:Name="dtDateSequenceManquant"
+                             Foreground="White"
+                             Width="100"
+                             FontFamily="Agency Fb"
+                             FontSize="17"                                                     
+                             Margin="10 0 0 0"/>
+                <materialDesign:PackIcon
+                    Kind="EditOutline"
+                    Width="20"
+                    Height="30"
+                    Foreground="White"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0 20 0 10 ">
+                <Button x:Name="btnAnnulerManquant" 
+                                Background="{x:Null}"                   
+                                BorderBrush="White"
+                                Height="25"
+                                BorderThickness="0 1"
+                                Margin="0 0 5 0"
+                                Click="btnAnnulerManquant_Click"
+                                >
+                    <materialDesign:PackIcon Kind="RemoveCircle"
+                                                     />
+                </Button>
+                <Button x:Name="btnValiderManquant" 
+                                Background="{x:Null}"                   
+                                BorderBrush="White"
+                                BorderThickness="0 1"
+                                Height="25"
+                                Margin="0 0 5 0"
+                                Click="btnValiderManquant_Click"
+                                >
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="0 0 10 0">Valider </TextBlock>
+                        <materialDesign:PackIcon Kind="CheckAll"
+                                                         />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</Window>

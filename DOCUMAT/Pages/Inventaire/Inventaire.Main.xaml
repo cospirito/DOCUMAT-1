@@ -34,9 +34,6 @@
                       Name="EditVersement"
                       Icon="{materialDesign:PackIcon Kind=Edit}" 
                       Click="EditVersement_Click"/>
-            <!--<MenuItem Header="Afficher les Registres"                      
-                      Icon="{materialDesign:PackIcon Kind=Details}" 
-                      Click="AfficherRegistre_Click"/>-->
             <MenuItem Header="Supprimer" 
                       Name="DelVersement"
                       Icon="{materialDesign:PackIcon Kind=Remove}"  
@@ -51,14 +48,10 @@
                       Name="EditRegistre"
                       Icon="{materialDesign:PackIcon Kind=Edit}"
                       Click="EditRegistre_Click" />
-            <MenuItem Header="Imprimer le QrCode"   
+            <!--<MenuItem Header="Imprimer le QrCode"   
                       Name="ImprimerQrCode"
                       Icon="{materialDesign:PackIcon Kind=Printer}"
-                      Click="ImprimerQrCode_Click"/>
-            <!--<MenuItem Header="Modifier les images du registre"   
-                      Name="ModifImages"
-                      Icon="{materialDesign:PackIcon Kind=ImageEdit}"
-                      Click="ModifImages_Click"/>-->
+                      Click="ImprimerQrCode_Click"/>-->
             <MenuItem Header="Supprimer"
                       Name="DelRegistre"
                       Icon="{materialDesign:PackIcon Kind=Remove}"
@@ -104,6 +97,7 @@
             <CheckBox x:Name="AfficherRegistre"
                       Content="Afficher les Registres"
                       Foreground="White"
+                      Background="White"
                       Click="AfficherRegistre_Click"/>
         </StackPanel>
 
@@ -218,7 +212,7 @@
                                        x:Name="QrCode"
                                        Source="{Binding QrCode}" 
                                        Height="70"
-                                       Width="70"
+                                       Width="70"                                       
                                        Stretch="UniformToFill"
                                        Margin="10" />
                                 <StackPanel Orientation="Vertical" Margin="10,10,10,10">

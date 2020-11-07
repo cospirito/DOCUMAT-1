@@ -310,7 +310,7 @@
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
                             CanUserSortColumns="False"                              
-                            MaxHeight="200"                            
+                            MaxHeight="400"                            
                             SelectionMode="Single"
                             IsReadOnly="True"
                             RowDetailsVisibilityMode="VisibleWhenSelected"                                                 
@@ -341,12 +341,12 @@
                                         <CheckBox Content="{Binding strOrdre}"
                                                   Margin="10"
                                                   Background="Red"
-                                                  IsChecked="{Binding Ordre_Is_Check}"
+                                                  IsChecked="{Binding OrdreFaux}"
                                                   Click="cbxReadOnly_Click"/>
                                         <CheckBox Content="{Binding strDate}"
                                                   Margin="10"
                                                   Background="Red"
-                                                  IsChecked="{Binding Date_Is_Check}"
+                                                  IsChecked="{Binding DateFausse}"
                                                   Click="cbxReadOnly_Click"/>
                                         <StackPanel x:Name="ListeReferences"
                                                     Margin="5">
@@ -365,76 +365,89 @@
                                 </DataTemplate>
                             </DataGrid.RowDetailsTemplate>
                         </DataGrid>
-                        <StackPanel>
+                        <Border BorderThickness="1"
+                                    BorderBrush="White"
+                                    Margin="0 0 0 10">
                             <StackPanel>
-                                <TextBox x:Name="tbListeReferences"
-                                     Visibility="Collapsed"                                     
-                                     FontSize="8"   
+                                <StackPanel Margin="5 0">
+                                    <TextBox x:Name="tbListeReferences"
+                                     Visibility="Collapsed" 
+                                     IsReadOnly="True"
+                                     FontSize="11"   
+                                     MinWidth="200"
+                                     MaxWidth="350"
                                      materialDesign:HintAssist.HelperText="LISTE DES REFERENCES"
                                      Foreground="White"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal"
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center">
-                                <TextBox x:Name="tbNumeroOrdreSequence" 
-                                Foreground="White"
-                                CharacterCasing="Upper"
-                                InputScope="Number"
-                                Width="50"
-                                FontSize="13"
-                                Typography.NumeralAlignment="Proportional"
-                                materialDesign:HintAssist.Hint="ORDRE       "
-                                materialDesign:HintAssist.HelperText="ORDRE"
-                                Margin="10 20 0 10"/>
+                                    <materialDesign:PackIcon 
+                                            Kind="FileEdit"
+                                            Width="20"
+                                            Height="20"
+                                            Foreground="White"
+                                            Margin="10 20 -10 5"  
+                                            VerticalAlignment="Center"/>
+                                    <TextBox x:Name="tbNumeroOrdreSequence" 
+                                            Foreground="White"
+                                            CharacterCasing="Upper"
+                                            InputScope="Number"
+                                            Width="50"
+                                            FontSize="13"
+                                            Typography.NumeralAlignment="Proportional"
+                                            materialDesign:HintAssist.Hint="ORDRE       "
+                                            materialDesign:HintAssist.HelperText="ORDRE"
+                                            Margin="10 20 0 10"/>
 
-                                <TextBox x:Name="tbDateSequence" 
-                                Foreground="White"
-                                CharacterCasing="Upper"
-                                InputScope="Date"
-                                Width="80"                                  
-                                FontSize="13"
-                                Typography.NumeralAlignment="Proportional"
-                                materialDesign:HintAssist.Hint="DATE  "
-                                materialDesign:HintAssist.HelperText="DATE"
-                                TextChanged="tbDateSequence_TextChanged"
-                                KeyUp="tbDateSequence_KeyUp"
-                                LostFocus="tbDateSequence_LostFocus"
-                                GotFocus="tbDateSequence_GotFocus"
-                                Margin="40 20 0 10"/>
-                                <TextBox x:Name="tbReference" 
-                                Foreground="White"
-                                CharacterCasing="Upper"
-                                InputScope="Number" 
-                                Width="70"
-                                FontSize="13"
-                                Typography.NumeralAlignment="Proportional"
-                                materialDesign:HintAssist.Hint="REF  "
-                                materialDesign:HintAssist.HelperText="REF"
-                                TextChanged="tbReference_TextChanged"                                
-                                KeyUp="tbReference_KeyUp"
-                                LostFocus="tbReference_LostFocus"
-                                GotFocus="tbReference_GotFocus"
-                                Margin="40 20 0 10"/>
-                            </StackPanel>
-                            <StackPanel HorizontalAlignment="Center" 
+                                    <TextBox x:Name="tbDateSequence" 
+                                            Foreground="White"
+                                            CharacterCasing="Upper"
+                                            InputScope="Date"
+                                            Width="80"                                  
+                                            FontSize="13"
+                                            Typography.NumeralAlignment="Proportional"
+                                            materialDesign:HintAssist.Hint="DATE  "
+                                            materialDesign:HintAssist.HelperText="DATE"
+                                            TextChanged="tbDateSequence_TextChanged"
+                                            KeyUp="tbDateSequence_KeyUp"
+                                            LostFocus="tbDateSequence_LostFocus"
+                                            GotFocus="tbDateSequence_GotFocus"
+                                            Margin="40 20 0 10"/>
+                                    <TextBox x:Name="tbReference" 
+                                            Foreground="White"
+                                            CharacterCasing="Upper"
+                                            InputScope="Number" 
+                                            Width="70"
+                                            FontSize="13"
+                                            Typography.NumeralAlignment="Proportional"
+                                            materialDesign:HintAssist.Hint="REF  "
+                                            materialDesign:HintAssist.HelperText="REF"
+                                            TextChanged="tbReference_TextChanged"                                
+                                            KeyUp="tbReference_KeyUp"
+                                            LostFocus="tbReference_LostFocus"
+                                            GotFocus="tbReference_GotFocus"
+                                            Margin="40 20 0 10"/>
+                                </StackPanel>
+                                <StackPanel HorizontalAlignment="Center" 
                                     Orientation="Horizontal">
-                                <CheckBox x:Name="cbxDoublonOrdre"
+                                    <CheckBox x:Name="cbxDoublonOrdre"
                                       Content="Doublon"
                                       Foreground="White" 
                                       Margin="0 20 0 10"
                                       Checked="cbxDoublonOrdre_Checked"
                                       Unchecked="cbxDoublonOrdre_Unchecked"    />
-                                <CheckBox x:Name="cbxBisOrdre"
+                                    <CheckBox x:Name="cbxBisOrdre"
                                       Content="Bis"
                                       Foreground="White"
                                       Margin="30 20 0 10"
                                       Checked="cbxBisOrdre_Checked"
                                       Unchecked="cbxBisOrdre_Unchecked"/>
-                            </StackPanel>
-                            <StackPanel x:Name="PanelRejetImage"
+                                </StackPanel>
+                                <StackPanel x:Name="PanelRejetImage"
                                         HorizontalAlignment="Center"
                                         Orientation="Horizontal"
                                         Visibility="Collapsed">
-                                <Button x:Name="btnImporterImage"
+                                    <Button x:Name="btnImporterImage"
                                     Margin="0 20 0 20"
                                     BorderBrush="White"
                                     BorderThickness="0 0 0 1"
@@ -442,7 +455,7 @@
                                     Background="Transparent"                                    
                                     Content="IMPORTER L'IMAGE"
                                     Click="btnImporterImage_Click"/>
-                                <Button x:Name="btnValiderImageImporte"
+                                    <Button x:Name="btnValiderImageImporte"
                                     Margin="10 0 0 0"
                                     BorderBrush="White"
                                     BorderThickness="0 0 0 1"
@@ -450,57 +463,49 @@
                                     ToolTip="Valider l'image importer"
                                     Background="Transparent"
                                     Click="btnValiderImageImporte_Click">
-                                    <materialDesign:PackIcon Kind="Check" Width="25" Height="25" />
-                                </Button>
+                                        <materialDesign:PackIcon Kind="Check" Width="25" Height="25" />
+                                    </Button>
+                                </StackPanel>
+                                
+                                <Border BorderBrush="White" BorderThickness="15 1">
+                                    <StackPanel Orientation="Horizontal" 
+                                                Margin="0 0 0 0"
+                                                HorizontalAlignment="Center">
+                                        <Button Margin="5" Background="{x:Null}"
+                                                BorderBrush="white"
+                                                BorderThickness="5 0 5 0"
+                                                ToolTip="Modifier la Séquence"
+                                                x:Name="BtnModifierSequence"
+                                                Click="BtnModifierSequence_Click">
+                                            <materialDesign:PackIcon Kind="Edit"
+                                                Width="25"
+                                                Height="25"
+                                        Foreground="White"/>
+                                        </Button>
 
+                                        <Button Margin="5" 
+                                                Background="{x:Null}"
+                                                BorderBrush="white"
+                                                BorderThickness="5 0 5 0"
+                                                ToolTip="Supprimer une Séquence"
+                                                x:Name="BtnSupprimerSequence"
+                                                Click="SupprimeSequence_Click">
+                                            <materialDesign:PackIcon Kind="RemoveCircle"
+                                                Width="25"
+                                                Height="25"
+                                                Foreground="White"/>
+                                        </Button>
+                                        <Button x:Name="BtnTerminerImage"
+                                                Margin="5"
+                                                BorderBrush="White"
+                                                Background="Transparent"
+                                                IsEnabled="False"
+                                                Content="TERMINER"
+                                                Click="BtnTerminerImage_Click"/>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal" 
-                                    Margin="0 30 0 0"
-                                    HorizontalAlignment="Center">
-                                <!--<Button Margin="5" Background="{x:Null}"
-                                BorderBrush="white"
-                                BorderThickness="1 0 0 0"
-                                ToolTip="Ajouter la Séquence"
-                                x:Name="BtnAddSequence"
-                                Click="BtnAddSequence_Click">
-                                    <materialDesign:PackIcon Kind="Plus"
-                                        Width="25"
-                                        Height="25"
-                                        Foreground="White"/>
-                                </Button>-->
-                                <Button Margin="5" Background="{x:Null}"
-                                BorderBrush="white"
-                                BorderThickness="1 0 0 0"
-                                ToolTip="Modifier la Séquence"
-                                x:Name="BtnModifierSequence"
-                                Click="BtnModifierSequence_Click">
-                                    <materialDesign:PackIcon Kind="Edit"
-                                        Width="25"
-                                        Height="25"
-                                        Foreground="White"/>
-                                </Button>
-                                <Button Margin="5" 
-                                    Background="{x:Null}"
-                                    BorderBrush="white"
-                                    BorderThickness="1 0 0 0"
-                                    ToolTip="Supprimer une Séquence"
-                                    x:Name="BtnSupprimerSequence"
-                                    Click="SupprimeSequence_Click">
-
-                                    <materialDesign:PackIcon Kind="RemoveCircle"
-                                        Width="25"
-                                        Height="25"
-                                        Foreground="White"/>
-                                </Button>
-                                <Button x:Name="BtnTerminerImage"
-                                    Margin="5"
-                                    BorderBrush="White"
-                                    Background="Transparent"
-                                    IsEnabled="False"
-                                    Content="TERMINER"
-                                    Click="BtnTerminerImage_Click"/>
-                            </StackPanel>
-                        </StackPanel>
+                        </Border>
                     </StackPanel>
 
                     <StackPanel Margin="31,30"

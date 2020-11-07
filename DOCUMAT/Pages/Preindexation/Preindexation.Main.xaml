@@ -300,25 +300,27 @@
                 </StackPanel>
 
                 <!--Formulaire des feuillets-->
-              <Border BorderBrush="White" 
-                      BorderThickness="1 0 0 0"
-                      Grid.Column="1"
-                      Margin="30 0 0 0"
+                <StackPanel Orientation="Horizontal"
+                            Grid.Column="1"
+                            MaxHeight="477"
+                            VerticalAlignment="Top"
+                            Margin="30 0 0 0">
+                    <Border BorderBrush="White" 
+                      BorderThickness="1 0 1 1"
                       materialDesign:ScrollBarAssist.ButtonsVisibility="Visible"
                       >
-                <StackPanel Orientation="Horizontal">
-                   <StackPanel Width="300">
+                        <StackPanel Width="300">
                             <StackPanel Background="DarkSlateGray" VerticalAlignment="Center">
-                            <TextBlock x:Name="titreFormFeuillet" 
+                                <TextBlock x:Name="titreFormFeuillet" 
                                         Text="Feuilllet"
                                         Foreground="white"                           
                                         FontSize="20"
                                         Padding="10"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"/>
-                        </StackPanel>
+                            </StackPanel>
 
-                        <TextBox x:Name="tbNumeroFeuillet" 
+                            <TextBox x:Name="tbNumeroFeuillet" 
                         Foreground="White"
                         IsEnabled="False"
                         CharacterCasing="Upper"
@@ -329,7 +331,7 @@
                         Margin="10"
                         TextChanged="tbNumeroFeuillet_TextChanged"/>
 
-                        <TextBox x:Name="tbNumeroOrdreDebut" 
+                            <TextBox x:Name="tbNumeroOrdreDebut" 
                         Foreground="White"
                         CharacterCasing="Upper"
                         InputScope="Number"
@@ -339,7 +341,7 @@
                         Margin="10"
                         TextChanged="tbNumeroOrdreDebut_TextChanged"/>
 
-                        <TextBox x:Name="tbNumeroOrdreFin" 
+                            <TextBox x:Name="tbNumeroOrdreFin" 
                         Foreground="White"
                         CharacterCasing="Upper"
                         InputScope="Number"
@@ -371,24 +373,26 @@
                                         <materialDesign:PackIcon Width="20" Height="20" Kind="CheckAll" 
                                                      VerticalAlignment="Center"/>
                                         <TextBlock VerticalAlignment="Center"
-                                       Margin="10 0"> ENREGISTRER </TextBlock>
+                                       Margin="10 0"> ENREGISTRER</TextBlock>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
                         </StackPanel>
-                        <!--Formulaire de références-->
-                        <Border BorderBrush="White" BorderThickness="1 0 1 0">
+                    </Border>
 
-                            <StackPanel x:Name="FormulaireReferences"
-                                    Visibility="Visible" Width="350">
-                                <StackPanel Background="DarkSlateGray" VerticalAlignment="Center">
-                                    <TextBlock Text="Références des Séquences"
+                    <!--Formulaire de références-->
+                    <Border BorderBrush="White" BorderThickness="1 0 1 1">
+
+                        <StackPanel x:Name="FormulaireReferences"
+                                    Visibility="Visible" Width="300">
+                            <StackPanel Background="DarkSlateGray" VerticalAlignment="Center">
+                                <TextBlock Text="Références des Séquences"
                                             Padding="10"
                                             HorizontalAlignment="Center"
                                             FontSize="20"
                                             Foreground="White"/>
-                                </StackPanel>
-                                <DataGrid Name="dgSequence"                                  
+                            </StackPanel>
+                            <DataGrid Name="dgSequence"                                  
                                     Margin="0 20 0 0"
                                     Grid.Column="0"
                                     AutoGenerateColumns="False" 
@@ -404,19 +408,19 @@
                                     CanUserResizeColumns="False"
                                     SelectionMode="Single"
                                     Grid.ColumnSpan="2">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="N° Ordre " Binding="{Binding NUmeroOdre}" />
-                                        <DataGridTextColumn Header="Nb Refs" Binding="{Binding NombreDeReferences}" />
-                                        <DataGridTextColumn Header="Dou. / Bis" Binding="{Binding isSpeciale}" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="FileEdit"
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="N° Ordre " Binding="{Binding NUmeroOdre}" />
+                                    <DataGridTextColumn Header="Nb Refs" Binding="{Binding NombreDeReferences}" />
+                                    <DataGridTextColumn Header="Dou. / Bis" Binding="{Binding isSpeciale}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="FileEdit"
                                             Width="25"
                                             Height="25"
                                             Foreground="White"
                                             Margin="0 27 -20 0"/>
-                                    <TextBox x:Name="tbNumeroOrdreSequence" 
+                                <TextBox x:Name="tbNumeroOrdreSequence" 
                                         Foreground="White"
                                         CharacterCasing="Upper"
                                         InputScope="Number"
@@ -428,7 +432,7 @@
                                         TextChanged="tbNumeroOrdreSequence_TextChanged"
                                         KeyUp="tbNumeroOrdreSequence_KeyUp"/>
 
-                                    <TextBox x:Name="tbNombreReferences" 
+                                <TextBox x:Name="tbNombreReferences" 
                                         Foreground="White"
                                         CharacterCasing="Upper"
                                         InputScope="Number"
@@ -439,52 +443,51 @@
                                         Margin="20"
                                         TextChanged="tbNombreReferences_TextChanged"
                                         KeyUp="tbNombreReferences_KeyUp"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal"
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Center">
-                                    <CheckBox x:Name="cbxDoublonOrdre"
+                                <CheckBox x:Name="cbxDoublonOrdre"
                                             Content="Doub."
                                             Foreground="White" 
                                             Margin="10 10 0 10"
                                             Checked="cbxDoublonOrdre_Checked"
                                             Unchecked="cbxDoublonOrdre_Unchecked"/>
-                                    <CheckBox x:Name="cbxBisOrdre"
+                                <CheckBox x:Name="cbxBisOrdre"
                                             Content="Bis"
                                             Foreground="White"
                                             Margin="10 10 0 10"
                                             Checked="cbxBisOrdre_Checked"
                                             Unchecked="cbxBisOrdre_Unchecked"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" 
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" 
                                             HorizontalAlignment="Center">
-                                    <Button Margin="10" Background="{x:Null}"
+                                <Button Margin="10" Background="{x:Null}"
                                             BorderBrush="white"
-                                            BorderThickness="1 0 1 0"
+                                            BorderThickness="5 0 5 0"
                                             ToolTip="Ajouter une Séquence"
                                             x:Name="BtnAddSequence"
                                             Click="BtnAddSequence_Click">
 
-                                        <materialDesign:PackIcon Kind="Plus"
+                                    <materialDesign:PackIcon Kind="Plus"
                                             Width="25"
                                             Height="25"
                                             Foreground="White"/>
-                                    </Button>
-                                    <Button Margin="10" Background="{x:Null}"
+                                </Button>
+                                <Button Margin="10" Background="{x:Null}"
                                             BorderBrush="white"
-                                            BorderThickness="1 0 1 0"
+                                            BorderThickness="5 0 5 0"
                                             ToolTip="Supprimer la Séquence sélectionnée"
                                             x:Name="BtnSupprimerSequence"
                                             Click="BtnSupprimerSequence_Click">
-                                        <materialDesign:PackIcon Kind="Remove"
+                                    <materialDesign:PackIcon Kind="Remove"
                                             Width="25"
                                             Height="25"
                                             Foreground="White"/>
-                                    </Button>
-                                </StackPanel>
+                                </Button>
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
-               </Border>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </Grid>
         </StackPanel>
     </StackPanel>

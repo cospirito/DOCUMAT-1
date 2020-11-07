@@ -42,144 +42,151 @@ namespace DOCUMAT.Pages.Preindexation
         //Affichage de la liste des images du registre à préindexer
         //Pour la préindexation le registre doit être au statut Créer
         private void AfficherFeuillets_Click(object sender, RoutedEventArgs e)
-        {            
-            if(AfficherFeuillets.IsChecked == true && dgRegistre.SelectedItems.Count == 1)
+        {
+            try
             {
-                using (var ct = new DocumatContext())
+                if (AfficherFeuillets.IsChecked == true && dgRegistre.SelectedItems.Count == 1)
                 {
-                    registre = ((RegistreView)dgRegistre.SelectedItem).Registre;
-
-                    if (registre != null)
+                    using (var ct = new DocumatContext())
                     {
-                        Models.Traitement traitement = ct.Traitement.FirstOrDefault(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper()
-                                && t.TableID == registre.RegistreID && t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE && t.AgentID != Utilisateur.AgentID);
-                        if(traitement == null)
-                        {
-                            // Vérification qu'il n'existe pas des registre ouvert non terminée pour l'agent 
-                            // récupération des registres traité par l'agent
-                            List<Models.Traitement> traitementsAgent = ct.Traitement.Where(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper() && 
-                                                    t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE && t.AgentID == Utilisateur.AgentID).ToList();
-                            List<Models.Registre> registreNonTermines = new List<Models.Registre>();
-                            Models.Registre registreEnCours = null;
-                            // Vérification que ces registres sont terminées
-                            foreach(Traitement tr in traitementsAgent)
-                            {
-                                if (!ct.Traitement.Any(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper() && t.TableID == tr.TableID
-                                    && t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE_TERMINEE) )
-                                {
-                                    // Si le registre ouvert est le registre en cours 
-                                    if(tr.TableID == registre.RegistreID && tr.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper())
-                                    {
-                                        registreEnCours = ct.Registre.FirstOrDefault(r => r.RegistreID == tr.TableID );
-                                    }
-                                    else
-                                    {
-                                        registreNonTermines.Add(ct.Registre.FirstOrDefault(r => r.RegistreID == tr.TableID));  
-                                    }
-                                } 
-                            }
+                        registre = ((RegistreView)dgRegistre.SelectedItem).Registre;
 
-                            if(registreEnCours !=null || registreNonTermines.Count == 0)
+                        if (registre != null)
+                        {
+                            Models.Traitement traitement = ct.Traitement.FirstOrDefault(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper()
+                                    && t.TableID == registre.RegistreID && t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE && t.AgentID != Utilisateur.AgentID);
+                            if (traitement == null)
                             {
-                                // Vérification des images déclaré de ce registre 
-                                if(registre.NombrePage > 0)
+                                // Vérification qu'il n'existe pas des registre ouvert non terminée pour l'agent 
+                                // récupération des registres traité par l'agent
+                                List<Models.Traitement> traitementsAgent = ct.Traitement.Where(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper() &&
+                                                        t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE && t.AgentID == Utilisateur.AgentID).ToList();
+                                List<Models.Registre> registreNonTermines = new List<Models.Registre>();
+                                Models.Registre registreEnCours = null;
+                                // Vérification que ces registres sont terminées
+                                foreach (Traitement tr in traitementsAgent)
                                 {
-                                    // Cas où c'est un nouveau registre qui est ouvert 
-                                    if (registreEnCours == null)
+                                    if (!ct.Traitement.Any(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper() && t.TableID == tr.TableID
+                                        && t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE_TERMINEE))
                                     {
-                                        if (MessageBox.Show("Voulez vous commencer la préindexation de ce Registre, en acceptant, vous serez le seul à pouvoir y travailler ?", "COMMENCER LA PREINDEXATION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                                        // Si le registre ouvert est le registre en cours 
+                                        if (tr.TableID == registre.RegistreID && tr.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper())
                                         {
-                                            AfficherFeuillets.IsChecked = false;
-                                            return;
+                                            registreEnCours = ct.Registre.FirstOrDefault(r => r.RegistreID == tr.TableID);
                                         }
                                         else
                                         {
-                                            if (ct.Traitement.Any(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper()
-                                                     && t.TableID == registre.RegistreID && t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE && t.AgentID != Utilisateur.AgentID))
+                                            registreNonTermines.Add(ct.Registre.FirstOrDefault(r => r.RegistreID == tr.TableID));
+                                        }
+                                    }
+                                }
+
+                                if (registreEnCours != null || registreNonTermines.Count == 0)
+                                {
+                                    // Vérification des images déclaré de ce registre 
+                                    if (registre.NombrePage > 0)
+                                    {
+                                        // Cas où c'est un nouveau registre qui est ouvert 
+                                        if (registreEnCours == null)
+                                        {
+                                            if (MessageBox.Show("Voulez vous commencer la préindexation de ce Registre, en acceptant, vous serez le seul à pouvoir y travailler ?", "COMMENCER LA PREINDEXATION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                                             {
-                                                MessageBox.Show("Ce registre viens malheureusement d'être attribué à un autre Agent !!!", "Registre Attribué !!!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                                                return;                                                
+                                                AfficherFeuillets.IsChecked = false;
+                                                return;
                                             }
                                             else
                                             {
-                                                DocumatContext.AddTraitement(DocumatContext.TbRegistre, registre.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, "DEBUT PREINDEXATION DU REGISTRE N°ID : " + registre.RegistreID);
+                                                if (ct.Traitement.Any(t => t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper()
+                                                         && t.TableID == registre.RegistreID && t.TypeTraitement == (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE && t.AgentID != Utilisateur.AgentID))
+                                                {
+                                                    MessageBox.Show("Ce registre viens malheureusement d'être attribué à un autre Agent !!!", "Registre Attribué !!!", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                                    return;
+                                                }
+                                                else
+                                                {
+                                                    DocumatContext.AddTraitement(DocumatContext.TbRegistre, registre.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, "DEBUT PREINDEXATION DU REGISTRE N°ID : " + registre.RegistreID);
+                                                }
                                             }
                                         }
-                                    }
 
-                                    // Chargement de l'image du Qrcode de la ligne
-                                    Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
-                                    var image = qrcode.Draw(registre.QrCode, 40);
-                                    var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
-                                    QrCodeImage.Source = imageConvertie.Source;
+                                        // Chargement de l'image du Qrcode de la ligne
+                                        Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
+                                        var image = qrcode.Draw(registre.QrCode, 40);
+                                        var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
+                                        QrCodeImage.Source = imageConvertie.Source;
 
-                                    ImageView imageView = new ImageView();
-                                    List<ImageView> imageViews = imageView.GetSimpleViewsList(registre);
-                                    dgFeuillet.ItemsSource = imageViews;
-                                    if (imageViews.Count() > 0)
-                                    {
-                                        LastImage = imageViews.OrderByDescending(i => i.Image.ImageID).FirstOrDefault().Image;
-                                        tbNumeroFeuillet.Text = (LastImage.NumeroPage + 1) + "";
-                                        tbNumeroOrdreDebut.Text = (LastImage.FinSequence + 1).ToString();
-                                        if (registre.NombrePage == imageViews.Count)
+                                        ImageView imageView = new ImageView();
+                                        List<ImageView> imageViews = imageView.GetSimpleViewsList(registre);
+                                        dgFeuillet.ItemsSource = imageViews;
+                                        if (imageViews.Count() > 0)
                                         {
-                                            MarquerPreindexer.Visibility = Visibility.Visible;
-                                            btnSaveFeuillet.IsEnabled = false;
+                                            LastImage = imageViews.OrderByDescending(i => i.Image.ImageID).FirstOrDefault().Image;
+                                            tbNumeroFeuillet.Text = (LastImage.NumeroPage + 1) + "";
+                                            tbNumeroOrdreDebut.Text = (LastImage.FinSequence + 1).ToString();
+                                            if (registre.NombrePage == imageViews.Count)
+                                            {
+                                                MarquerPreindexer.Visibility = Visibility.Visible;
+                                                btnSaveFeuillet.IsEnabled = false;
+                                            }
+                                            else
+                                            {
+                                                MarquerPreindexer.Visibility = Visibility.Collapsed;
+                                                btnSaveFeuillet.IsEnabled = true;
+                                            }
                                         }
                                         else
                                         {
-                                            MarquerPreindexer.Visibility = Visibility.Collapsed;
+                                            tbNumeroFeuillet.Text = "1";
+                                            tbNumeroFeuillet.IsEnabled = false;
+                                            tbNumeroOrdreDebut.Text = "1";
                                             btnSaveFeuillet.IsEnabled = true;
                                         }
+                                        // Hide dgRegistre et Show du dgFeuillet
+                                        dgRegistre.Visibility = Visibility.Collapsed;
+                                        PanelFeuillet.Visibility = Visibility.Visible;
+                                        PanelRecherche.Visibility = Visibility.Collapsed;
                                     }
                                     else
                                     {
-                                        tbNumeroFeuillet.Text = "1";
-                                        tbNumeroFeuillet.IsEnabled = false;
-                                        tbNumeroOrdreDebut.Text = "1";
-                                        btnSaveFeuillet.IsEnabled = true;
+                                        AfficherFeuillets.IsChecked = false;
+                                        MessageBox.Show("Ce registre n'a pas de Feuillets à Préindexer ni à Indexer !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
                                     }
-                                    // Hide dgRegistre et Show du dgFeuillet
-                                    dgRegistre.Visibility = Visibility.Collapsed;
-                                    PanelFeuillet.Visibility = Visibility.Visible;
-                                    PanelRecherche.Visibility = Visibility.Collapsed;
                                 }
-                                else
+                                else if (registreNonTermines.Count > 0)
                                 {
                                     AfficherFeuillets.IsChecked = false;
-                                    MessageBox.Show("Ce registre n'a pas de Feuillets à Préindexer ni à Indexer !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                    MessageBox.Show("Vous avez ouvert le registre : " + registreNonTermines[0].QrCode + ", vous devez le terminer avant d'entamer un autre registre !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
                                 }
                             }
-                            else if(registreNonTermines.Count > 0) 
+                            else
                             {
                                 AfficherFeuillets.IsChecked = false;
-                                MessageBox.Show("Vous avez ouvert le registre : " + registreNonTermines[0].QrCode + ", vous devez le terminer avant d'entamer un autre registre !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                Models.Agent agentFeuillet = ct.Agent.FirstOrDefault(a => a.AgentID == traitement.AgentID);
+                                MessageBox.Show("Ce registre est déja en cours de traitement par l'agent  : " + agentFeuillet.Noms, "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
                             }
                         }
                         else
                         {
-                            AfficherFeuillets.IsChecked = false;
-                            Models.Agent agentFeuillet = ct.Agent.FirstOrDefault(a => a.AgentID == traitement.AgentID);
-                            MessageBox.Show("Ce registre est déja en cours de traitement par l'agent  : " + agentFeuillet.Noms, "AVERTISSEMENT", MessageBoxButton.OK,MessageBoxImage.Warning);
+                            MarquerPreindexer.Visibility = Visibility.Collapsed;
+                            dgRegistre.Visibility = Visibility.Visible;
+                            PanelFeuillet.Visibility = Visibility.Collapsed;
+                            PanelRecherche.Visibility = Visibility.Visible;
+                            QrCodeImage.Source = null;
                         }
                     }
-                    else
-                    {
-                        MarquerPreindexer.Visibility = Visibility.Collapsed;
-                        dgRegistre.Visibility = Visibility.Visible;
-                        PanelFeuillet.Visibility = Visibility.Collapsed;
-                        PanelRecherche.Visibility = Visibility.Visible;
-                        QrCodeImage.Source = null;
-                    }
+                }
+                else
+                {
+                    MarquerPreindexer.Visibility = Visibility.Collapsed;
+                    dgRegistre.Visibility = Visibility.Visible;
+                    PanelFeuillet.Visibility = Visibility.Collapsed;
+                    PanelRecherche.Visibility = Visibility.Visible;
+                    QrCodeImage.Source = null;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MarquerPreindexer.Visibility = Visibility.Collapsed;
-                dgRegistre.Visibility = Visibility.Visible;
-                PanelFeuillet.Visibility = Visibility.Collapsed;
-                PanelRecherche.Visibility = Visibility.Visible;
-                QrCodeImage.Source = null;
+                ex.ExceptionCatcher();
             }
         }
 
@@ -518,43 +525,44 @@ namespace DOCUMAT.Pages.Preindexation
                 if (MessageBox.Show("Attention vous ne pourrez plus faire de modification sur ce registre, Voulez vous terminer la préindexation",
                                     "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    using (var ct = new DocumatContext())
-                    {
-                        Models.Registre reg = ct.Registre.FirstOrDefault(r => r.RegistreID == registre.RegistreID);
-                        // Récupération du statut actuelle
-                        Models.StatutRegistre AncienStatut = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == registre.RegistreID
-                                                             && s.Code == registre.StatutActuel);
-                        AncienStatut.DateFin = AncienStatut.DateModif = DateTime.Now;
 
-                        // Création et attribution du nouveau statut
-                        Models.StatutRegistre NewStatut = new StatutRegistre();
-                        NewStatut.RegistreID = reg.RegistreID;
-                        NewStatut.DateModif = NewStatut.DateDebut = NewStatut.DateCreation = DateTime.Now;
-                        NewStatut.Code = (int)Enumeration.Registre.PREINDEXE;
-                        ct.StatutRegistre.Add(NewStatut);
+                    // Affichage de l'impression du code barre
+                    Impression.QrCode PageImp = new Impression.QrCode(registre);
+                    PageImp.Show();
+
+                    //using (var ct = new DocumatContext())
+                    //{
+                    //    Models.Registre reg = ct.Registre.FirstOrDefault(r => r.RegistreID == registre.RegistreID);
+                    //    // Récupération du statut actuelle
+                    //    Models.StatutRegistre AncienStatut = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == registre.RegistreID
+                    //                                         && s.Code == registre.StatutActuel);
+                    //    AncienStatut.DateFin = AncienStatut.DateModif = DateTime.Now;
+
+                    //    // Création et attribution du nouveau statut
+                    //    Models.StatutRegistre NewStatut = new StatutRegistre();
+                    //    NewStatut.RegistreID = reg.RegistreID;
+                    //    NewStatut.DateModif = NewStatut.DateDebut = NewStatut.DateCreation = DateTime.Now;
+                    //    NewStatut.Code = (int)Enumeration.Registre.PREINDEXE;
+                    //    ct.StatutRegistre.Add(NewStatut);
                         
-                        // On change le statut Actuel duu registre
-                        reg.StatutActuel = (int)Enumeration.Registre.PREINDEXE;
-                        ct.SaveChanges();
+                    //    // On change le statut Actuel duu registre
+                    //    reg.StatutActuel = (int)Enumeration.Registre.PREINDEXE;
+                    //    ct.SaveChanges();
 
-                        //Enregistrement du traitement effectué
-                        DocumatContext.AddTraitement(DocumatContext.TbRegistre, reg.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE_TERMINEE);
-                    }
+                    //    //Enregistrement du traitement effectué
+                    //    DocumatContext.AddTraitement(DocumatContext.TbRegistre, reg.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE_TERMINEE);
+                    //}                   
 
                     dgFeuillet.Visibility = Visibility.Collapsed;
-                    // Rechargement du registre
-                    //RegistreView registreView = new RegistreView();
-                    //List<RegistreView> registreViews = registreView.GetViewsList();
-
-                    //dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE);
                     TbRechercher_TextChanged(null,null);
-                    //
                     PanelFeuillet.Visibility = Visibility.Collapsed;
                     dgRegistre.Visibility = Visibility.Visible;
                     QrCodeImage.Source = null;
                     AfficherFeuillets.IsChecked = false;
                     MarquerPreindexer.IsChecked = false;
                     MarquerPreindexer.Visibility = Visibility.Collapsed;
+
+
                 }
                 else
                 {
@@ -578,13 +586,20 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
-            // Chargement de l'image du Qrcode de la ligne
-            Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
-            var element = e.DetailsElement.FindName("QrCode");
-            RegistreView registre = (RegistreView)e.Row.Item;
-            var image = qrcode.Draw(registre.Registre.QrCode, 40);
-            var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
-            ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            try
+            {
+                // Chargement de l'image du Qrcode de la ligne
+                Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
+                var element = e.DetailsElement.FindName("QrCode");
+                RegistreView registre = (RegistreView)e.Row.Item;
+                var image = qrcode.Draw(registre.Registre.QrCode, 40);
+                var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
+                ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)

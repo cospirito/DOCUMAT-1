@@ -3,24 +3,64 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DOCUMAT.Impression"
+        xmlns:local="clr-namespace:DOCUMAT.Impression" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="QrCode" Height="400" 
-        ResizeMode="NoResize"
+        Title="IMPRESSION CODE BARRE"
+        WindowStyle="SingleBorderWindow"
         WindowStartupLocation="CenterScreen"
-        Topmost="True"
-        Width="400">
-    <StackPanel HorizontalAlignment="Center" Name="parentImage">
-        <Image Source="/Images/loader.gif" 
-               x:Name="QrCodeImage"
-               Width="130" 
-               Height="130"
-               Margin="20"
-               />
+        Loaded="Window_Loaded"
+        Width="770"
+        Height="570">
+    <StackPanel HorizontalAlignment="Center" Name="parentImage"
+                Margin="20">
+        <StackPanel Margin="0 10">
+            <TextBlock  FontWeight="Bold" 
+                        FontSize="25"
+                        TextWrapping="Wrap"
+                        x:Name="tbxTitreImpression" 
+                        TextDecorations="underline">
+                CODE ET CHEMIN DU REGISTRE N° VOLUME :  000000
+            </TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal"
+                    Margin="0 50">
+            <TextBlock VerticalAlignment="Center" 
+                       FontSize="20"
+                       FontWeight="Bold"> Code : </TextBlock>
+            <StackPanel HorizontalAlignment="Center">
+                <Image Source="/Images/loader.gif" 
+                        HorizontalAlignment="Center"
+                        x:Name="BarCodeRegistre"
+                        Margin="10 0"/>
+                <TextBlock Name="tbxCodeRegistre" 
+                           HorizontalAlignment="Center"
+                           Text="" ></TextBlock>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal"
+                    Margin="0 20">
+            <TextBlock VerticalAlignment="Center" 
+                       FontSize="20"
+                       Margin="10"
+                       FontWeight="Bold"> Chemin  :</TextBlock>
+            <StackPanel>
+                <Image Source="/Images/loader.gif" 
+                       VerticalAlignment="Center"
+                       x:Name="BarCodeChemin"
+                       Margin="10 0"/>
+                <TextBlock Name="tbxCheminRegistre" 
+                           HorizontalAlignment="Center"
+                           Text="" ></TextBlock>
+            </StackPanel>
+        </StackPanel>
         <Button x:Name="btnImprimer"
-                Content="IMPRIMER LE QRCODE"
                 Click="btnImprimer_Click"
-                Margin="10"
-                 />
+                Margin="100"
+                Height="50">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="10 0">IMPRIMER LA PAGE</TextBlock>
+                <materialDesign:PackIcon Kind="PrinterSettings" Width="25" Height="25"/>
+            </StackPanel>
+        </Button>
     </StackPanel>
 </Window>

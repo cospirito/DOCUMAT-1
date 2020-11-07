@@ -1922,7 +1922,7 @@ namespace DOCUMAT.Pages.Image
 					}
 					#endregion
 				}
-
+				 
 				using (var ct = new DocumatContext())
 				{
 					if (ct.Image.All(i => i.RegistreID == RegistreViewParent.Registre.RegistreID

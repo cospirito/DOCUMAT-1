@@ -64,12 +64,12 @@ namespace DOCUMAT.Pages.Controle
 
         private void ImprimerQrCode_Click(object sender, RoutedEventArgs e)
         {
-            if (dgRegistre.SelectedItems.Count == 1)
-            {
-                string qrCode = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
-                Impression.QrCode PageImp = new Impression.QrCode(qrCode);
-                PageImp.Show();
-            }
+            //if (dgRegistre.SelectedItems.Count == 1)
+            //{
+            //    string qrCode = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
+            //    Impression.QrCode PageImp = new Impression.QrCode(qrCode);
+            //    PageImp.Show();
+            //}
         }
 
         private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)

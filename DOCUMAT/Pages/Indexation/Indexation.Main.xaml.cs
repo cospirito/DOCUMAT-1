@@ -60,12 +60,12 @@ namespace DOCUMAT.Pages.Indexation
 
         private void ImprimerQrCode_Click(object sender, RoutedEventArgs e)
         {
-            if (dgRegistre.SelectedItems.Count == 1)
-            {
-                string qrCode = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
-                Impression.QrCode PageImp = new Impression.QrCode(qrCode);
-                PageImp.Show();
-            }
+            //if (dgRegistre.SelectedItems.Count == 1)
+            //{
+            //    string qrCode = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
+            //    Impression.QrCode PageImp = new Impression.QrCode(qrCode);
+            //    PageImp.Show();
+            //}
         }
 
         private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
@@ -81,13 +81,20 @@ namespace DOCUMAT.Pages.Indexation
 
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
-            // Chargement de l'image du Qrcode de la ligne
-            Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
-            var element = e.DetailsElement.FindName("QrCode");
-            RegistreView registre = (RegistreView)e.Row.Item;
-            var image = qrcode.Draw(registre.Registre.QrCode, 40);
-            var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
-            ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            try
+            {
+                // Chargement de l'image du Qrcode de la ligne
+                Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
+                var element = e.DetailsElement.FindName("QrCode");
+                RegistreView registre = (RegistreView)e.Row.Item;
+                var image = qrcode.Draw(registre.Registre.QrCode, 40);
+                var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
+                ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)

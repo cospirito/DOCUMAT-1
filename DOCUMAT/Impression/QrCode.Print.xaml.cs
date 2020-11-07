@@ -19,18 +19,29 @@ namespace DOCUMAT.Impression
     /// </summary>
     public partial class QrCode : Window
     {
-        string QrCodePrint ="";
         public QrCode()
         {
             InitializeComponent();
         }
 
-        public QrCode(string QrCode)
+        public QrCode(Models.Registre registre):this()
         {
-            InitializeComponent();
-            Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
-            QrCodeImage.Source = ConvertDrawingImageToWPFImage(qrcode.Draw(QrCode, 40)).Source;
-            this.QrCodePrint = QrCode;
+            try
+            {
+                // Chargement du formulaire du code barre
+                string[] cheminServices = registre.CheminDossier.Split(new char[2] { '/', '\\' });
+                string CheminService = cheminServices[1] + "/" + cheminServices[2];
+                Zen.Barcode.Code128BarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.Code128WithChecksum;
+                BarCodeRegistre.Source = ConvertDrawingImageToWPFImage(qrcode.Draw(registre.QrCode,50)).Source;
+                tbxCodeRegistre.Text = registre.QrCode;
+                BarCodeChemin.Source = ConvertDrawingImageToWPFImage(qrcode.Draw(CheminService, 50)).Source;
+                tbxCheminRegistre.Text = CheminService;
+                tbxTitreImpression.Text = "CODE ET CHEMIN DU REGISTRE N° VOLUME : " + registre.Numero;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
         /// <summary>
         ///  Convertir une image de type System.Drawing.Image en System.Controls.Image
@@ -51,15 +62,14 @@ namespace DOCUMAT.Impression
             return img;
         }
 
-        private void btnImprimer_Click(object sender, RoutedEventArgs e)
+        public void btnImprimer_Click(object sender, RoutedEventArgs e)
         {
             //Résolution 1024 * 768
 
             var printDlg = new PrintDialog();
-            this.Visibility = Visibility.Hidden;
+            //this.Visibility = Visibility.Hidden;
             if (printDlg.ShowDialog() == true)
-            {           
-                //btnImprimer.Visibility = Visibility.Hidden;
+            {
                 //this.Height = 1024;
                 //this.Width = 768;
                 //QrCodeImage.Margin = new Thickness(20);
@@ -67,8 +77,15 @@ namespace DOCUMAT.Impression
                 //this.WindowState = WindowState.Maximized;
                 //this.Visibility = Visibility.Visible;
                 // Impression du contenu de l'écran.
-                printDlg.PrintVisual(QrCodeImage, "IMPRESSION DU QRCODE");
+                btnImprimer.Visibility = Visibility.Hidden;
+                printDlg.PrintVisual(this, "IMPRESSION DU QRCODE");
+                this.Close();
             }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 

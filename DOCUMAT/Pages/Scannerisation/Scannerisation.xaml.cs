@@ -76,13 +76,20 @@ namespace DOCUMAT.Pages.Scannerisation
 
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
-            // Chargement de l'image du Qrcode de la ligne
-            Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
-            var element = e.DetailsElement.FindName("QrCode");
-            RegistreView registre = (RegistreView)e.Row.Item;
-            var image = qrcode.Draw(registre.Registre.QrCode, 40);
-            var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
-            ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            try
+            {
+                // Chargement de l'image du Qrcode de la ligne
+                Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
+                var element = e.DetailsElement.FindName("QrCode");
+                RegistreView registre = (RegistreView)e.Row.Item;
+                var image = qrcode.Draw(registre.Registre.QrCode, 40);
+                var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
+                ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -186,7 +193,7 @@ namespace DOCUMAT.Pages.Scannerisation
             // En plus il faut que EnableRowVirtualization="False"
             //RegistreView view = (RegistreView)e.Row.Item;
             //view.NumeroOrdre = e.Row.GetIndex() + 1;
-            //e.Row.Item = view;
+            //e.Row.Item = view;  <wx w5
 
             ((RegistreView)e.Row.Item).NumeroOrdre = e.Row.GetIndex() + 1;
         }
@@ -195,6 +202,15 @@ namespace DOCUMAT.Pages.Scannerisation
         {
             ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cm;
+            MenuItem menuItemImprimer = (MenuItem)cm.Items.GetItemAt(3);
+            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+            {
+                menuItemImprimer.IsEnabled = true;
+            }
+            else
+            {
+                menuItemImprimer.IsEnabled = false;
+            }
             RefreshRegistre();
         }
 
@@ -411,6 +427,19 @@ namespace DOCUMAT.Pages.Scannerisation
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "ERREUR", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ImprimerQrCode_Click(object sender, RoutedEventArgs e)
+        {
+            if(dgRegistre.SelectedItems.Count == 1)
+            {
+                if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                {
+                    // Affichage de l'impression du code barre
+                    Impression.QrCode PageImp = new Impression.QrCode(((RegistreView)dgRegistre.SelectedItem).Registre);
+                    PageImp.Show();
                 }
             }
         }

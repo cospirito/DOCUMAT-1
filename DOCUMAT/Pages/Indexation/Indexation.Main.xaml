@@ -139,7 +139,6 @@
                     <DataGrid.RowDetailsTemplate>
                         <DataTemplate>
                             <DockPanel>
-
                                 <Image DockPanel.Dock="Left" 
                                        x:Name="QrCode"
                                        Source="{Binding QrCode}" 

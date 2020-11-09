@@ -37,6 +37,10 @@
                       Name="ImporterImages"
                       Icon="{materialDesign:PackIcon Kind=FileImport}"
                       Click="ImporterImages_Click"/>
+            <MenuItem Header="Imprimer le QrCode"   
+                      Name="ImprimerQrCode"
+                      Icon="{materialDesign:PackIcon Kind=Printer}"
+                      Click="ImprimerQrCode_Click"/>
         </ContextMenu>
     </Page.Resources>
 

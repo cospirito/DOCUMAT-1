@@ -525,33 +525,32 @@ namespace DOCUMAT.Pages.Preindexation
                 if (MessageBox.Show("Attention vous ne pourrez plus faire de modification sur ce registre, Voulez vous terminer la préindexation",
                                     "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
+                    using (var ct = new DocumatContext())
+                    {
+                        Models.Registre reg = ct.Registre.FirstOrDefault(r => r.RegistreID == registre.RegistreID);
+                        // Récupération du statut actuelle
+                        Models.StatutRegistre AncienStatut = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == registre.RegistreID
+                                                             && s.Code == registre.StatutActuel);
+                        AncienStatut.DateFin = AncienStatut.DateModif = DateTime.Now;
+
+                        // Création et attribution du nouveau statut
+                        Models.StatutRegistre NewStatut = new StatutRegistre();
+                        NewStatut.RegistreID = reg.RegistreID;
+                        NewStatut.DateModif = NewStatut.DateDebut = NewStatut.DateCreation = DateTime.Now;
+                        NewStatut.Code = (int)Enumeration.Registre.PREINDEXE;
+                        ct.StatutRegistre.Add(NewStatut);
+
+                        // On change le statut Actuel duu registre
+                        reg.StatutActuel = (int)Enumeration.Registre.PREINDEXE;
+                        ct.SaveChanges();
+
+                        //Enregistrement du traitement effectué
+                        DocumatContext.AddTraitement(DocumatContext.TbRegistre, reg.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE_TERMINEE);
+                    }
 
                     // Affichage de l'impression du code barre
                     Impression.QrCode PageImp = new Impression.QrCode(registre);
                     PageImp.Show();
-
-                    //using (var ct = new DocumatContext())
-                    //{
-                    //    Models.Registre reg = ct.Registre.FirstOrDefault(r => r.RegistreID == registre.RegistreID);
-                    //    // Récupération du statut actuelle
-                    //    Models.StatutRegistre AncienStatut = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == registre.RegistreID
-                    //                                         && s.Code == registre.StatutActuel);
-                    //    AncienStatut.DateFin = AncienStatut.DateModif = DateTime.Now;
-
-                    //    // Création et attribution du nouveau statut
-                    //    Models.StatutRegistre NewStatut = new StatutRegistre();
-                    //    NewStatut.RegistreID = reg.RegistreID;
-                    //    NewStatut.DateModif = NewStatut.DateDebut = NewStatut.DateCreation = DateTime.Now;
-                    //    NewStatut.Code = (int)Enumeration.Registre.PREINDEXE;
-                    //    ct.StatutRegistre.Add(NewStatut);
-                        
-                    //    // On change le statut Actuel duu registre
-                    //    reg.StatutActuel = (int)Enumeration.Registre.PREINDEXE;
-                    //    ct.SaveChanges();
-
-                    //    //Enregistrement du traitement effectué
-                    //    DocumatContext.AddTraitement(DocumatContext.TbRegistre, reg.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE_TERMINEE);
-                    //}                   
 
                     dgFeuillet.Visibility = Visibility.Collapsed;
                     TbRechercher_TextChanged(null,null);

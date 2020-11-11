@@ -1,10 +1,15 @@
-﻿using DOCUMAT.Models;
+﻿using DOCUMAT.Migrations;
+using DOCUMAT.Models;
 using DOCUMAT.Pages.Registre;
 using DOCUMAT.ViewModels;
 using iTextSharp.xmp.impl;
 using Microsoft.VisualBasic.CompilerServices;
+using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +22,8 @@ namespace DOCUMAT.Pages.Inventaire
     public partial class Inventaire : Page
     {
         public Models.Agent Utilisateur = null;
+
+        public string DossierRacine = ConfigurationManager.AppSettings["Nom_Log_Scan"];
 
         // Refresh dgRegistre
         public void RefreshVersement()
@@ -324,6 +331,36 @@ namespace DOCUMAT.Pages.Inventaire
             {
                 AddVersement_Click(null, null);
             }
+        }
+
+        private void OpenDossier_Click(object sender, RoutedEventArgs e)
+        {
+            //if (dgVersement.SelectedItems.Count == 1)
+            //{
+
+            //    VersementView versementView = (VersementView)dgVersement.SelectedItem;
+            //    DirectoryInfo RegistreDossier = new DirectoryInfo(Path.Combine(DossierRacine, versementView.ServiceVersant.CheminDossier));
+            //    OpenFileDialog openFileDialog = new OpenFileDialog();
+            //    var dlg = new CommonOpenFileDialog();
+            //    dlg.Title = "Dossier du Service : " + versementView.ServiceVersant.Nom;
+            //    dlg.IsFolderPicker = false;
+            //    //dlg.InitialDirectory = currentDirectory;
+            //    dlg.AddToMostRecentlyUsedList = false;
+            //    dlg.AllowNonFileSystemItems = false;
+            //    //dlg.DefaultDirectory = currentDirectory;
+            //    //dlg.FileOk += Dlg_FileOk;
+            //    dlg.EnsureFileExists = true;
+            //    dlg.EnsurePathExists = true;
+            //    dlg.EnsureReadOnly = false;
+            //    dlg.EnsureValidNames = true;
+            //    dlg.Multiselect = true;
+            //    dlg.ShowPlacesList = true;
+            //    dlg.InitialDirectory = RegistreDossier.FullName;
+
+            //    if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
+            //    {
+            //    }
+            //}
         }
     }
 }

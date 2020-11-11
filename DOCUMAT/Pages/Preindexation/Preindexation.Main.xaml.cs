@@ -548,10 +548,6 @@ namespace DOCUMAT.Pages.Preindexation
                         DocumatContext.AddTraitement(DocumatContext.TbRegistre, reg.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE_TERMINEE);
                     }
 
-                    // Affichage de l'impression du code barre
-                    Impression.QrCode PageImp = new Impression.QrCode(registre);
-                    PageImp.Show();
-
                     dgFeuillet.Visibility = Visibility.Collapsed;
                     TbRechercher_TextChanged(null,null);
                     PanelFeuillet.Visibility = Visibility.Collapsed;
@@ -561,7 +557,9 @@ namespace DOCUMAT.Pages.Preindexation
                     MarquerPreindexer.IsChecked = false;
                     MarquerPreindexer.Visibility = Visibility.Collapsed;
 
-
+                    // Affichage de l'impression du code barre
+                    Impression.QrCode PageImp = new Impression.QrCode(registre);
+                    PageImp.Show();
                 }
                 else
                 {
@@ -764,6 +762,10 @@ namespace DOCUMAT.Pages.Preindexation
                                             where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
                                             select r;
                             dgRegistre.ItemsSource = jointure2;
+                            break;
+                        case 3:
+                            // Récupération des registre par code registre                            
+                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper()));
                             break;
                         default:
                             RefreshRegistre();

@@ -216,7 +216,7 @@
                         BorderThickness="15 1"
                         Height="70"                        
                         Click="btnValideCorrection_Click"
-                        ToolTip="Valider l'indexation du registre"                                                    >
+                        ToolTip="Valider la Correction du registre"                                                    >
                         <materialDesign:PackIcon Kind="CheckAll"
                                         Width="40"
                                         Height="40"

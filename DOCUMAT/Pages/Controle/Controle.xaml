@@ -112,6 +112,7 @@
                             <ComboBoxItem Content="CODE REGISTRE"/>
                             <ComboBoxItem Content="SERVICE" IsSelected="True" />
                             <ComboBoxItem Content="REGION" />
+                            <ComboBoxItem Content="NUMERO VOLUME" />
                         </ComboBox>
                     </StackPanel>
 

@@ -747,13 +747,15 @@ namespace DOCUMAT.Pages.Image
 								}
 								else
 								{
-									Models.Controle controleRejetImage = ct.Controle.FirstOrDefault(c => c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
-																	&& c.PhaseControle == 1 && c.StatutControle == 1
-																	&& c.RejetImage_idx == 1);
-									if (controleRejetImage != null)
+									List<Models.Correction> correctionRejetImage = ct.Correction.Where(c => c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
+																	&& c.PhaseCorrection == 1 && c.RejetImage_idx == 1).ToList();
+									if (correctionRejetImage.Count > 0)
 									{
-										PanelRejetImage.Visibility = Visibility.Visible;
-										tbxRejetImage.Text = "Rejet Image : " + controleRejetImage.MotifRejetImage_idx.ToUpper();
+										if (!correctionRejetImage.Any(c => c.StatutCorrection == 0))
+										{
+											PanelRejetImage.Visibility = Visibility.Visible;
+											tbxRejetImage.Text = "Rejet Image : " + correctionRejetImage[0].MotifRejetImage_idx.ToUpper();
+										}
 									}
 									else
 									{
@@ -2355,9 +2357,13 @@ namespace DOCUMAT.Pages.Image
                         File.Copy(btnImporterImage.Tag.ToString(), Path.Combine(DossierRacine, ImageOld));
                         PanelRejetImage.Visibility = Visibility.Collapsed;
 
-                        //Ajout d'une correction image
-                        // Création d'un controle d'image avec un statut validé
-                        Models.Correction correction = new Models.Correction()
+						// Récupératiion du contrpôle
+						Models.Controle controleRejetImage = ct.Controle.FirstOrDefault(c => c.ImageID == CurrentImageView.Image.ImageID && c.SequenceID == null
+														&& c.StatutControle == 1 && c.PhaseControle == 1 && c.RejetImage_idx == 1);
+
+						//Ajout d'une correction image
+						// Création d'un controle d'image avec un statut validé
+						Models.Correction correction = new Models.Correction()
                         {
                             RegistreId = RegistreViewParent.Registre.RegistreID,
                             ImageID = CurrentImageView.Image.ImageID,
@@ -2365,13 +2371,13 @@ namespace DOCUMAT.Pages.Image
 
                             //Indexes Image mis à null
                             RejetImage_idx = 1,
-                            MotifRejetImage_idx = "Qualité Visuelle",
+                            MotifRejetImage_idx = controleRejetImage.MotifRejetImage_idx,
                             ASupprimer = 0,
 
                             //Indexes de la séquence de l'image
                             OrdreSequence_idx = null,
-                            DateSequence_idx = null,
                             RefSequence_idx = null,
+                            DateSequence_idx = null,
                             RefRejetees_idx = null,
 
                             DateCorrection = DateTime.Now,

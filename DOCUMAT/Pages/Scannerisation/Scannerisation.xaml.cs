@@ -66,49 +66,6 @@ namespace DOCUMAT.Pages.Scannerisation
 
         private void BtnRechercher_Click(object sender, RoutedEventArgs e)
         {
-
-        }
-
-        private void BtnRechercher_PreviewKeyUp(object sender, KeyEventArgs e)
-        {
-
-        }
-
-        private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
-        {
-            try
-            {
-                // Chargement de l'image du Qrcode de la ligne
-                Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
-                var element = e.DetailsElement.FindName("QrCode");
-                RegistreView registre = (RegistreView)e.Row.Item;
-                var image = qrcode.Draw(registre.Registre.QrCode, 40);
-                var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
-                ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
-            }
-            catch (Exception ex)
-            {
-                ex.ExceptionCatcher();
-            }
-        }
-
-        private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
-        private void IndexerImage_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void SuperviserIndexation_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
-        {
             try
             {
                 if (TbRechercher.Text != "")
@@ -171,6 +128,10 @@ namespace DOCUMAT.Pages.Scannerisation
                                             select r;
                             dgRegistre.ItemsSource = jointure2;
                             break;
+                        case 3:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            break;
                         default:
                             RefreshRegistre();
                             break;
@@ -187,13 +148,50 @@ namespace DOCUMAT.Pages.Scannerisation
             }
         }
 
+        private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
+        {
+            try
+            {
+                // Chargement de l'image du Qrcode de la ligne
+                Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
+                var element = e.DetailsElement.FindName("QrCode");
+                RegistreView registre = (RegistreView)e.Row.Item;
+                var image = qrcode.Draw(registre.Registre.QrCode, 40);
+                var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
+                ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
+        private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void IndexerImage_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SuperviserIndexation_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
+        {            
+        }
+
         private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             //Définition de la colonne des numéros d'odre
             // En plus il faut que EnableRowVirtualization="False"
             //RegistreView view = (RegistreView)e.Row.Item;
             //view.NumeroOrdre = e.Row.GetIndex() + 1;
-            //e.Row.Item = view;  <wx w5
+            //e.Row.Item = view;  
 
             ((RegistreView)e.Row.Item).NumeroOrdre = e.Row.GetIndex() + 1;
         }
@@ -328,7 +326,6 @@ namespace DOCUMAT.Pages.Scannerisation
                                 }
 
                                 #endregion
-
                             }
                             else
                             {

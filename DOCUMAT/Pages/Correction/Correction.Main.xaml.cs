@@ -208,6 +208,9 @@ namespace DOCUMAT.Pages.Correction
                                                     select r;
                                     dgRegistre.ItemsSource = jointure2;
                                     break;
+                                case 3:
+                                    dgRegistre.ItemsSource = jointure.Where(r => r.Registre.QrCode.Contains(TbRechercher.Text.ToUpper())).ToList();
+                                    break;
                                 default:
                                     RefreshRegistrePhase1();
                                     break;
@@ -282,6 +285,9 @@ namespace DOCUMAT.Pages.Correction
                                                     where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
                                                     select r;
                                     dgRegistre.ItemsSource = jointure2;
+                                    break;
+                                case 3:
+                                    dgRegistre.ItemsSource = jointure.Where(r => r.Registre.Numero.Contains(TbRechercher.Text.ToUpper())).ToList();
                                     break;
                                 default:
                                     RefreshRegistrePhase1();

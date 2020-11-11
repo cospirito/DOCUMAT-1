@@ -168,6 +168,10 @@ namespace DOCUMAT.Pages.Controle
                                                     select r;
                                     dgRegistre.ItemsSource = jointure2;
                                     break;
+                                case 3:
+                                    dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.Numero.Contains(TbRechercher.Text.ToUpper())
+                                                                && r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
+                                    break;
                                 default:
                                     RefreshRegistrePhase1();
                                     break;
@@ -224,6 +228,10 @@ namespace DOCUMAT.Pages.Controle
                                                     where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
                                                     select r;
                                     dgRegistre.ItemsSource = jointure2;
+                                    break;
+                                case 3:
+                                    dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.Numero.Contains(TbRechercher.Text.ToUpper())
+                                                               && r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2).ToList();
                                     break;
                                 default:
                                     RefreshRegistrePhase2();

@@ -207,18 +207,18 @@
                     </TreeView.Resources>
                 </TreeView>
 
-                <Button x:Name="btnValideCorrection"    
-                        Margin="10" 
+                <Button x:Name="btnValideCorrection"   
+                        Margin="10"
                         Visibility="Collapsed"
                         Background="{x:Null}"
                         BorderBrush="GreenYellow"
-                        BorderThickness="1"
-                        Height="100"
-                        ToolTip="Valider l'indexation du registre"                        
+                        BorderThickness="15 1"
+                        Height="70"                        
+                        ToolTip="Valider la Correction du registre"                      
                         Click="btnValideCorrection_Click">
                     <materialDesign:PackIcon Kind="CheckAll"
-                                        Width="50"
-                                        Height="50"
+                                        Width="40"
+                                        Height="40"
                                         Foreground="GreenYellow"/>
                 </Button>
             </StackPanel>
@@ -443,30 +443,49 @@
                                       Checked="cbxBisOrdre_Checked"
                                       Unchecked="cbxBisOrdre_Unchecked"/>
                                 </StackPanel>
-                                <StackPanel x:Name="PanelRejetImage"
-                                        HorizontalAlignment="Center"
-                                        Orientation="Horizontal"
-                                        Visibility="Collapsed">
-                                    <Button x:Name="btnImporterImage"
-                                    Margin="0 20 0 20"
-                                    BorderBrush="White"
-                                    BorderThickness="0 0 0 1"
-                                    Foreground="White"
-                                    Background="Transparent"                                    
-                                    Content="IMPORTER L'IMAGE"
-                                    Click="btnImporterImage_Click"/>
-                                    <Button x:Name="btnValiderImageImporte"
-                                    Margin="10 0 0 0"
-                                    BorderBrush="White"
-                                    BorderThickness="0 0 0 1"
-                                    Foreground="White"
-                                    ToolTip="Valider l'image importer"
-                                    Background="Transparent"
-                                    Click="btnValiderImageImporte_Click">
-                                        <materialDesign:PackIcon Kind="Check" Width="25" Height="25" />
-                                    </Button>
-                                </StackPanel>
                                 
+                                <Border x:Name="PanelRejetImage"
+                                        BorderThickness="2"
+                                        Visibility="Visible"
+                                        Margin="0 0 0 10"
+                                        BorderBrush="White">
+                                    <StackPanel 
+                                            Orientation="Vertical"
+                                            Margin="0 ">
+                                        <StackPanel Background="White">
+                                            <TextBlock 
+                                            x:Name="tbxRejetImage"
+                                            Foreground="SteelBlue"
+                                            Padding="5"
+                                            HorizontalAlignment="Center"
+                                            FontWeight="Bold">
+                                            Rejet Image : MOTIF
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal"
+                                                HorizontalAlignment="Center">
+                                            <Button x:Name="btnImporterImage"
+                                            Margin="0 20 0 20"
+                                            BorderBrush="White"
+                                            BorderThickness="0 0 0 1"
+                                            Foreground="White"
+                                            Background="Transparent"                                    
+                                            Content="IMPORTER L'IMAGE"
+                                            Click="btnImporterImage_Click"/>
+                                            <Button x:Name="btnValiderImageImporte"
+                                            Margin="10 0 0 0"
+                                            BorderBrush="White"
+                                            BorderThickness="0 0 0 1"
+                                            Foreground="White"
+                                            ToolTip="Valider l'image importer"
+                                            Background="Transparent"
+                                            Click="btnValiderImageImporte_Click">
+                                                <materialDesign:PackIcon Kind="Check" Width="25" Height="25" />
+                                            </Button>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
                                 <Border BorderBrush="White" BorderThickness="15 1">
                                     <StackPanel Orientation="Horizontal" 
                                                 Margin="0 0 0 0"
@@ -495,6 +514,14 @@
                                                 Height="25"
                                                 Foreground="White"/>
                                         </Button>
+                                        <Button x:Name="BtnSupprimerImage"
+                                                Margin="5"
+                                                BorderBrush="White"
+                                                Background="Transparent"
+                                                IsEnabled="True"
+                                                Visibility="Collapsed"
+                                                Content="SUPPRIMER"
+                                                Click="btnSupprimerImage_Click"/>
                                         <Button x:Name="BtnTerminerImage"
                                                 Margin="5"
                                                 BorderBrush="White"

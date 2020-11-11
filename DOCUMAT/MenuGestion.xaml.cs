@@ -310,21 +310,27 @@ namespace DOCUMAT
                 }
                 else
                 {
-                    // Enregistrement de la fin de la session de travail
-                    using (var ct = new DocumatContext())
+                    try
                     {
-                        SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
-                        sessionTravail.DateFin = sessionTravail.DateModif = DateTime.Now;
-                        if(ct.SaveChanges() > 0)
+                        // Enregistrement de la fin de la session de travail
+                        using (var ct = new DocumatContext())
                         {
-                            Timer.Stop();
-                            Application.Current.Shutdown();
-                        }
-                        else
-                        {
-                            MessageBox.Show("La session n'a pas pu être arrêter !!!", "ERREUR ARRET SESSION", MessageBoxButton.OK, MessageBoxImage.Error);
+                            SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
+                            sessionTravail.DateFin = sessionTravail.DateModif = DateTime.Now;
+                            if (ct.SaveChanges() > 0)
+                            {
+                                Timer.Stop();
+                                Application.Current.Shutdown();
+                            }
+                            else
+                            {
+                                MessageBox.Show("La session a été stopper !!!", "ERREUR ARRET SESSION", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Application.Current.Shutdown();
+
+                            }
                         }
                     }
+                    catch (Exception){ Application.Current.Shutdown(); }
                 }
             }
         }

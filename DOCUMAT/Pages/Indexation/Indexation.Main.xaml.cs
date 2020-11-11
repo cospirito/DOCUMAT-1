@@ -207,6 +207,10 @@ namespace DOCUMAT.Pages.Indexation
                                             select r;
                             dgRegistre.ItemsSource = jointure2;
                             break;
+                        case 3:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            break;
                         default:
                             RefreshRegistre();
                             break;

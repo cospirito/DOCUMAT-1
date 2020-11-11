@@ -77,7 +77,6 @@
                     ToolTip="Rechercher"
                     x:Name="BtnRechercher"
                     Click="BtnRechercher_Click"
-                    Keyboard.PreviewKeyUp="BtnRechercher_PreviewKeyUp"
                     KeyboardNavigation.AcceptsReturn="False"
                     KeyboardNavigation.TabNavigation="None"
                     KeyboardNavigation.ControlTabNavigation="None"
@@ -97,12 +96,8 @@
                 <ComboBoxItem Content="CODE REGISTRE"/>
                 <ComboBoxItem Content="SERVICE" IsSelected="True" />
                 <ComboBoxItem Content="REGION" />
-                <!--<ComboBoxItem Content="SERVICE"/>-->
+                <ComboBoxItem Content="NUMERO VOLUME" />
             </ComboBox>
-            <!--<CheckBox x:Name="AfficherImage"
-                      Content="Afficher les Images"
-                      Foreground="White"
-                      Click="AfficherRegistre_Click"/>-->
         </StackPanel>
 
         <!--Zone de donnée-->

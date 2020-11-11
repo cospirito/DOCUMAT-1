@@ -1525,7 +1525,7 @@ namespace DOCUMAT.Pages.Image
 
 		private void tbDateSequence_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
 		{
-			if (e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.OemPlus)
+			if (e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.Add)
 			{
 				DateTime date;
 				if (DateTime.TryParse(tbDateSequence.Text, out date))
@@ -1533,7 +1533,7 @@ namespace DOCUMAT.Pages.Image
 					tbDateSequence.Text = date.AddDays(1).ToShortDateString();
 				}
 			}
-			else if (e.Key == System.Windows.Input.Key.Down || e.Key == System.Windows.Input.Key.OemMinus)
+			else if (e.Key == System.Windows.Input.Key.Down || e.Key == System.Windows.Input.Key.Subtract)
 			{				
 				DateTime date;
 				if (DateTime.TryParse(tbDateSequence.Text, out date))

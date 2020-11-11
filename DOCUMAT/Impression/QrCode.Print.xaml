@@ -9,6 +9,7 @@
         WindowStyle="SingleBorderWindow"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded"
+        ResizeMode="NoResize"
         Width="770"
         Height="570">
     <StackPanel HorizontalAlignment="Center" Name="parentImage"

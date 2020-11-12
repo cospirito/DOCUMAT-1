@@ -32,15 +32,13 @@
                       Click="ControleImage_Click"/>
         </ContextMenu>
     </Page.Resources>
-
-    <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
-        <Grid Margin="20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="5*"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Margin="0 0 10 0">
-                <Button
+    <Grid VerticalAlignment="Top" Margin="0 20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="5*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Margin="20 0 10 0">
+            <Button
                         x:Name="BtnPhase1"
                         Height="100"
                         Background="White"
@@ -50,9 +48,9 @@
                         Margin="0 0 0 10"
                         Foreground="SteelBlue"
                         Click="BtnPhase1_Click">
-                    PHASE 1
-                </Button>
-                <Button
+                PHASE 1
+            </Button>
+            <Button
                         x:Name="BtnPhase2"
                         Height="100"
                         Background="{x:Null}"
@@ -61,28 +59,33 @@
                         Foreground="White"
                         ToolTip="Supprimer une Séquence"
                         Click="BtnPhase2_Click">
-                    PHASE 2
-                </Button>
-            </StackPanel>
+                PHASE 2
+            </Button>
+        </StackPanel>
 
-            <Border Grid.Column="1" BorderBrush="White" 
+        <Border Grid.Column="1" BorderBrush="White" 
                     BorderThickness="1 0 0 0">
-                <StackPanel  x:Name="PanelMainPhase">
-                    <!--Bouton d'interaction-->
-                    <StackPanel x:Name="panelInteracBtn"
+            <Grid  x:Name="PanelMainPhase">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="150"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <!--Bouton d'interaction-->
+                <StackPanel x:Name="panelInteracBtn"
+                        Grid.Row="0"
                         Orientation="Horizontal" Margin="20"
                         VerticalAlignment="Center">
-                        <Button Margin="10" Background="{x:Null}"
+                    <Button Margin="10" Background="{x:Null}"
                         BorderBrush="CornflowerBlue"
                         ToolTip="Actualiser"
                         Name="btnRefresh" 
                         Click="btnRefresh_Click" >
-                            <materialDesign:PackIcon Kind="Refresh"
+                        <materialDesign:PackIcon Kind="Refresh"
                                             Width="25"
                                             Height="25"
                                             Foreground="White"/>
-                        </Button>
-                        <TextBox x:Name="TbRechercher" 
+                    </Button>
+                    <TextBox x:Name="TbRechercher" 
                          materialDesign:HintAssist.Hint="RECHERCHER" 
                          Foreground="White" 
                          HorizontalAlignment="Center"
@@ -90,134 +93,132 @@
                          Margin="20 20 20 20"
                          TextChanged="TbRechercher_TextChanged"
                          MinWidth="200"/>
-                        <Button Margin="10" Background="{x:Null}"
+                    <Button Margin="10" Background="{x:Null}"
                         BorderBrush="CornflowerBlue"
                         ToolTip="Rechercher"
                         x:Name="BtnRechercher"
                         Click="BtnRechercher_Click"
                         >
-                            <materialDesign:PackIcon Kind="Search"
+                        <materialDesign:PackIcon Kind="Search"
                                             Width="25"
                                             Height="25"
                                             Foreground="White"/>
-                        </Button>
+                    </Button>
 
-                        <ComboBox x:Name="cbChoixRecherche" 
+                    <ComboBox x:Name="cbChoixRecherche" 
                                 Foreground="White"
                                 materialDesign:HintAssist.Hint="RECHERCHER PAR"
                                 materialDesign:HintAssist.HelperText="RECHERCHER PAR"                                                                                                      
                                 SelectedIndex="0"
                                 SelectionChanged="cbChoixRecherche_SelectionChanged"
                                 Margin="20">
-                            <ComboBoxItem Content="CODE REGISTRE"/>
-                            <ComboBoxItem Content="SERVICE" IsSelected="True" />
-                            <ComboBoxItem Content="REGION" />
-                            <ComboBoxItem Content="NUMERO VOLUME" />
-                        </ComboBox>
-                    </StackPanel>
+                        <ComboBoxItem Content="CODE REGISTRE"/>
+                        <ComboBoxItem Content="SERVICE" IsSelected="True" />
+                        <ComboBoxItem Content="REGION" />
+                        <ComboBoxItem Content="NUMERO VOLUME" />
+                    </ComboBox>
+                </StackPanel>
 
-                    <!--Zone de donnée-->
-                    <StackPanel>
-                        <TextBlock x:Name="titreGrid" Text="LISTE DES REGISTRES"
+                <!--Zone de donnée-->
+                <StackPanel Grid.Row="1">
+                    <TextBlock x:Name="titreGrid" Text="LISTE DES REGISTRES"
                                Foreground="White"                           
                                FontSize="24"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"/>
-                        <!--Grid View des Registres -->
-                        <Grid Margin="20" x:Name="gridViewPanelRegistre">
-                            <StackPanel Grid.Column="1">
-                                <DataGrid Name="dgRegistre" 
+                    <!--Grid View des Registres -->
+                    <Grid Margin="20" x:Name="gridViewPanelRegistre">
+                        <StackPanel Grid.Column="1">
+                            <DataGrid Name="dgRegistre" 
                             AutoGenerateColumns="False" 
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
                             IsReadOnly="True"
-                            MaxHeight="350" 
                             RowDetailsVisibilityMode="VisibleWhenSelected" 
                             Margin="0,-2,0,2"
                             LoadingRow="dgRegistre_LoadingRow"
                             SelectionChanged="dgRegistre_SelectionChanged"
                             AreRowDetailsFrozen="False"
                             LoadingRowDetails="dgRegistre_LoadingRowDetails" Grid.ColumnSpan="2">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
-                                        <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />
-                                        <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Registre.Numero}" />
-                                        <DataGridTextColumn Header="Service versant" Binding="{Binding  ServiceVersant.Nom}" />
-                                        <DataGridTextColumn Header="Region" Binding="{Binding  ServiceVersant.Region.Nom}" />
-                                        <DataGridTextColumn Header="pages attendues " Binding="{Binding Registre.NombrePage}" />
-                                        <DataGridTextColumn Header="pages scannées " Binding="{Binding NombreImageScan}" />
-                                        <DataGridTextColumn Header="pages enregistrées" Binding="{Binding NombreImageCompte}" />
-                                        <DataGridTextColumn Header="Agent Traitant" Binding="{Binding AgentTraitant.Noms}" />
-                                        <DataGridTextColumn Header="Type de registre" Binding="{Binding Registre.Type}" />
-                                        <DataGridTextColumn Header="Date Création" Binding="{Binding Registre.DateCreation, Converter={StaticResource DateConverter}}" />
-                                    </DataGrid.Columns>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
+                                    <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />
+                                    <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Registre.Numero}" />
+                                    <DataGridTextColumn Header="Service versant" Binding="{Binding  ServiceVersant.Nom}" />
+                                    <DataGridTextColumn Header="Region" Binding="{Binding  ServiceVersant.Region.Nom}" />
+                                    <DataGridTextColumn Header="pages attendues " Binding="{Binding Registre.NombrePage}" />
+                                    <DataGridTextColumn Header="pages scannées " Binding="{Binding NombreImageScan}" />
+                                    <DataGridTextColumn Header="pages enregistrées" Binding="{Binding NombreImageCompte}" />
+                                    <DataGridTextColumn Header="Agent Traitant" Binding="{Binding AgentTraitant.Noms}" />
+                                    <DataGridTextColumn Header="Type de registre" Binding="{Binding Registre.Type}" />
+                                    <DataGridTextColumn Header="Date Création" Binding="{Binding Registre.DateCreation, Converter={StaticResource DateConverter}}" />
+                                </DataGrid.Columns>
 
-                                    <!--Details sur le versement-->
-                                    <DataGrid.RowDetailsTemplate>
-                                        <DataTemplate>
-                                            <DockPanel>
-                                                <Image DockPanel.Dock="Left" 
+                                <!--Details sur le versement-->
+                                <DataGrid.RowDetailsTemplate>
+                                    <DataTemplate>
+                                        <DockPanel>
+                                            <Image DockPanel.Dock="Left" 
                                                    x:Name="QrCode"
                                                    Source="{Binding QrCode}" 
                                                    Height="70"
                                                    Width="70"
                                                    Stretch="UniformToFill"
                                                    Margin="10" />
-                                                <StackPanel Orientation="Vertical" Margin="10,10,10,10">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Numéro de Versement : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding Versement.NumeroVers}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Date de Versement : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Numéro dépôt du début : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding Registre.NumeroDepotDebut}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Date de dépôt du début : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding Registre.DateDepotDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
+                                            <StackPanel Orientation="Vertical" Margin="10,10,10,10">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Numéro de Versement : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding Versement.NumeroVers}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
-                                                <StackPanel Orientation="Vertical" Margin="10,10,10,10">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Numéro de dépot de fin : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding Registre.NumeroDepotFin}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Date de dépôt de fin : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding Registre.DateDepotFin,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Date de changement du statut : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding StatutActuel.DateDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Date de Versement : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
-                                                <StackPanel Orientation="Vertical" Margin="10,10,10,10">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Statut du registre : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding StatutName}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Date de Création : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="Dernière modification : " FontWeight="Bold" Grid.Row="2" />
-                                                        <TextBlock Text="{Binding Registre.DateModif,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                                    </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Numéro dépôt du début : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding Registre.NumeroDepotDebut}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
-                                            </DockPanel>
-                                        </DataTemplate>
-                                    </DataGrid.RowDetailsTemplate>
-                                </DataGrid>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Date de dépôt du début : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding Registre.DateDepotDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Vertical" Margin="10,10,10,10">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Numéro de dépot de fin : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding Registre.NumeroDepotFin}" Grid.Column="1" Grid.Row="2" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Date de dépôt de fin : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding Registre.DateDepotFin,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Date de changement du statut : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding StatutActuel.DateDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Vertical" Margin="10,10,10,10">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Statut du registre : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding StatutName}" Grid.Column="1" Grid.Row="2" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Date de Création : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Dernière modification : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding Registre.DateModif,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </DataGrid.RowDetailsTemplate>
+                            </DataGrid>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
-            </Border>
-        </Grid>
-    </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
 </Page>

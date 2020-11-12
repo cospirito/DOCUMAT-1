@@ -56,78 +56,6 @@ namespace DOCUMAT.Pages.Dispatching
 
         private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
         {
-            try
-            {
-                if (TbRechercher.Text != "")
-                {                    
-                    RegistreView RegistreView = new RegistreView();
-                    List<RegistreView> registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION,true).ToList();
-                    
-                    if(cbChoixStatut.SelectedIndex == 0)
-                        registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true).ToList();
-                    else if(cbChoixStatut.SelectedIndex == 1)
-                        registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, false).ToList();
-                    else
-                        registreViews = RegistreView.GetViewsList().ToList();
-
-                    switch (cbChoixRecherche.SelectedIndex)
-                    {
-
-                        case 0:
-                            // Récupération des registre par code registre
-                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE && r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
-                            break;
-                        case 1:
-                            // Récupération des registre par service
-                            List<Models.Service> Services1 = RegistreView.context.Service.ToList();
-                            List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
-                            List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
-                            List<RegistreView> registreViews1 = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
-
-                            var jointure1 = from r in registreViews1
-                                            join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
-                                            from v in table1.ToList()
-                                            join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
-                                            from l in table2.ToList()
-                                            join s in Services1 on l.ServiceID equals s.ServiceID
-                                            where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                            select r;
-                            dgRegistre.ItemsSource = jointure1;
-                            break;
-                        case 2:
-                            // Récupération des registre par service
-                            List<Models.Region> Region2 = RegistreView.context.Region.ToList();
-                            List<Models.Service> Services2 = RegistreView.context.Service.ToList();
-                            List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
-                            List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
-                            List<RegistreView> registreViews2 = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
-
-                            var jointure2 = from r in registreViews2
-                                            join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
-                                            from v in table1.ToList()
-                                            join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
-                                            from l in table2.ToList()
-                                            join s in Services2 on l.ServiceID equals s.ServiceID into table3
-                                            from s in table3.ToList()
-                                            join rg in Region2 on s.RegionID equals rg.RegionID
-                                            where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                            select r;
-                            dgRegistre.ItemsSource = jointure2;
-                            break;
-                        default:
-                            RefreshRegistre();
-                            break;
-                    }
-                }
-                else
-                {
-                    RefreshRegistre();
-                }
-            }
-            catch (Exception ex)
-            {
-                ex.ExceptionCatcher();
-            }
         }
 
         
@@ -306,6 +234,87 @@ namespace DOCUMAT.Pages.Dispatching
             if(AllComponentisLoad)
             {
                 RefreshRegistre();
+            }
+        }
+
+        private void BtnRechercher_Click(object sender, RoutedEventArgs e)
+        {
+
+            try
+            {
+                if (TbRechercher.Text != "")
+                {
+                    RegistreView RegistreView = new RegistreView();
+                    List<RegistreView> registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true).ToList();
+
+                    if (cbChoixStatut.SelectedIndex == 0)
+                        registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true).ToList();
+                    else if (cbChoixStatut.SelectedIndex == 1)
+                        registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, false).ToList();
+                    else
+                        registreViews = RegistreView.GetViewsList().ToList();
+
+                    switch (cbChoixRecherche.SelectedIndex)
+                    {
+
+                        case 0:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE && r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            break;
+                        case 1:
+                            // Récupération des registre par service
+                            List<Models.Service> Services1 = RegistreView.context.Service.ToList();
+                            List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
+                            List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
+                            List<RegistreView> registreViews1 = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
+
+                            var jointure1 = from r in registreViews1
+                                            join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
+                                            from v in table1.ToList()
+                                            join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
+                                            from l in table2.ToList()
+                                            join s in Services1 on l.ServiceID equals s.ServiceID
+                                            where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
+                                            select r;
+                            dgRegistre.ItemsSource = jointure1;
+                            break;
+                        case 2:
+                            // Récupération des registre par service
+                            List<Models.Region> Region2 = RegistreView.context.Region.ToList();
+                            List<Models.Service> Services2 = RegistreView.context.Service.ToList();
+                            List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
+                            List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
+                            List<RegistreView> registreViews2 = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
+
+                            var jointure2 = from r in registreViews2
+                                            join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
+                                            from v in table1.ToList()
+                                            join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
+                                            from l in table2.ToList()
+                                            join s in Services2 on l.ServiceID equals s.ServiceID into table3
+                                            from s in table3.ToList()
+                                            join rg in Region2 on s.RegionID equals rg.RegionID
+                                            where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
+                                            select r;
+                            dgRegistre.ItemsSource = jointure2;
+                            break;
+                        case 3:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE && r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            break;
+                        default:
+                            RefreshRegistre();
+                            break;
+                    }
+                }
+                else
+                {
+                    RefreshRegistre();
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
             }
         }
     }

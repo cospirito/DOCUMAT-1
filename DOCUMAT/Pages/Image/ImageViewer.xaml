@@ -40,9 +40,14 @@
                       Click="SupprimeSequence_Click" />
         </ContextMenu>-->
     </Window.Resources>
-    <StackPanel>
-        <Grid  VerticalAlignment="Center"
-               Height="125"
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="125"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid  Grid.Row="0"
+               VerticalAlignment="Top"
+               Margin="0"
                Background="White">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" 
@@ -57,7 +62,7 @@
             <Border BorderBrush="SteelBlue" 
                     Grid.Column="0"
                     VerticalAlignment="Center"  
-                    BorderThickness="1"
+                    BorderThickness="2"
                     Focusable="True">
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="AgentImage"
@@ -133,7 +138,7 @@
             </Border>
             <Border BorderBrush="SteelBlue"
                     Grid.Column="2" 
-                    BorderThickness="1" >
+                    BorderThickness="2" >
                 <StackPanel Orientation="Horizontal" 
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center">
@@ -189,7 +194,8 @@
                 </StackPanel>
             </Border>
         </Grid>
-        <Grid>
+        
+        <Grid Grid.Row="1" Margin="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="7*" MinWidth="600"/>
@@ -197,36 +203,40 @@
             </Grid.ColumnDefinitions>
 
             <!--Partie dédier à l'aborescence-->
-            <Border BorderBrush="White" BorderThickness="2">
-                <StackPanel Grid.Column="0" 
-                            Margin="0">
+            <Border Grid.Column="0" BorderBrush="White" BorderThickness="2">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="150"></RowDefinition>
+                    </Grid.RowDefinitions>
                     <TreeView x:Name="FolderView"
                               Foreground="White"
-                              MaxHeight="600">
-                        <TreeView.Resources>
+                              Grid.Row="0">
+                            <TreeView.Resources>
 
-                            <Style TargetType="{x:Type TreeViewItem}">
-                                <Setter Property="HeaderTemplate">
-                                    <Setter.Value>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Image Height="30"
+                                <Style TargetType="{x:Type TreeViewItem}">
+                                    <Setter Property="HeaderTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Height="30"
                                                        Width="30"
                                                        Margin="3"
                                                        Stretch="Fill"
                                                  Source="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TreeViewItem}},
                                                 Path=Tag,
                                                 Converter={x:Static local:HeaderToImageConverter.Instance}}" />
-                                                <TextBlock VerticalAlignment="Center" Text="{Binding}" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </TreeView.Resources>
-                    </TreeView>
+                                                    <TextBlock VerticalAlignment="Center" Text="{Binding}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </TreeView.Resources>
+                        </TreeView>
 
-                    <Button x:Name="btnValideIndexation"    
+                        <Button x:Name="btnValideIndexation" 
+                            Grid.Row="1"
                             Margin="10" 
                             Visibility="Collapsed"
                             Background="{x:Null}"
@@ -235,12 +245,12 @@
                             Height="100"
                             ToolTip="Valider l'indexation du registre"                        
                                 Click="btnValideIndexation_Click">
-                        <materialDesign:PackIcon Kind="CheckAll"
+                            <materialDesign:PackIcon Kind="CheckAll"
                                             Width="50"
                                             Height="50"
                                             Foreground="GreenYellow"/>
-                    </Button>
-                </StackPanel>
+                        </Button>
+                </Grid>
             </Border>
 
             <!--Partie d'dier à la visionneuse d'image-->
@@ -249,30 +259,28 @@
                     BorderBrush="white" 
                     Margin="0"
                     x:Name="borderDocument">
-                <!--<Border.Style>
-                    <Style TargetType="Border">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter  Property="Opacity" Value="1.0"/>
-                                <Setter Property="Cursor" Value="SizeWE"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>-->
-                <StackPanel Margin="0">
-                    <DocumentViewer Name="DocumentViewer"                                     
-                                    MinHeight="700"
-                                    />
-                    <!--<Image x:Name="ImageBitmapSource" />-->
-                </StackPanel>
+                <DocumentViewer Name="DocumentViewer"                                  
+                                    Background="SteelBlue"
+                                    BorderThickness="0" Margin="0" 
+                                    >
+                </DocumentViewer>
             </Border>
 
             <!--Partie dédiée a Séquence d'Image-->
             <Border Grid.Column="2"
                     BorderBrush="White"
                     BorderThickness="2">
-                <StackPanel>
-                    <StackPanel Background="White">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35"></RowDefinition>
+                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="30"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="400"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" 
+                                Background="White"
+                                VerticalAlignment="Top">
                         <TextBlock Text="Formulaire d'indexation"
                                     Foreground="SteelBlue"
                                     FontSize="15"
@@ -281,34 +289,43 @@
                                     Margin="5"
                                     />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" 
+                    <StackPanel Grid.Row="1" 
+                                Orientation="Horizontal" 
+                                VerticalAlignment="Top"
+                                HorizontalAlignment="Center"
                                 Margin="0">
                         <TextBlock x:Name="tbxNomPage" 
-                        Foreground="White"
-                        FontSize="10"     
+                        Foreground="White"                                   
+                        FontSize="12"     
                         Text="PAGE :"
-                        InputScope="Number"                        
+                        InputScope="Number" 
+                        VerticalAlignment="Center"                       
                         Margin="10"/>
                         <TextBlock x:Name="tbxNumeroPage" 
                         Foreground="White"
                         Text="N°"
-                        FontSize="10"          
-                        InputScope="Number"                        
+                        FontSize="12"          
+                        InputScope="Number"      
+                        VerticalAlignment="Center"                                         
                         Margin="10"/>
                         <TextBlock x:Name="tbxDebSeq" 
                         Foreground="White"
                         Text="N° Debut : "
-                        FontSize="10"          
-                        InputScope="Number"                        
-                        Margin="10"/>
+                        FontSize="12"          
+                        InputScope="Number"  
+                        VerticalAlignment="Center"                                             
+                        Margin="12"/>
                         <TextBlock x:Name="tbxFinSeq" 
                         Foreground="White"
                         Text="N° Fin : "
-                        FontSize="10"          
+                        FontSize="12"          
+                        VerticalAlignment="Center"                       
                         InputScope="Number"                        
                         Margin="10"/>
                     </StackPanel>
-                    <StackPanel Background="White">
+                    <StackPanel Grid.Row="2" 
+                                Background="White"
+                                VerticalAlignment="Top">
                         <TextBlock Text="Séquences de l'image" 
                                    HorizontalAlignment="Center"
                                    Padding="5" 
@@ -316,12 +333,14 @@
                                    FontWeight="Bold"
                                    Foreground="SteelBlue"/>
                     </StackPanel>
-                    <DataGrid Name="dgSequence" 
+                    <DataGrid Grid.Row="3" 
+                        Name="dgSequence" 
+                        VerticalAlignment="Top"
                         AutoGenerateColumns="False" 
+                        Height="Auto"
                         VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Auto"
-                        IsReadOnly="True"                        
-                        Height="250" 
+                        IsReadOnly="True"  
                         RowDetailsVisibilityMode="VisibleWhenSelected"                         
                         LoadingRow="dgSequence_LoadingRow"
                         SelectionChanged="dgSequence_SelectionChanged"
@@ -333,8 +352,16 @@
                             <DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
+                    <StackPanel Grid.Row="4" VerticalAlignment="Top">
+                        <StackPanel Background="White">
+                            <TextBlock Foreground="SteelBlue"
+                                       FontWeight="Bold"
+                                       Padding="7"
+                                       HorizontalAlignment="Center"
+                                       FontSize="12"> Champs D'Indexation</TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="10 0">
                             <Border Margin="10 20 0 5"  
                                     VerticalAlignment="Center"
                                     BorderBrush="White"
@@ -351,10 +378,9 @@
                                      IsReadOnly="True"
                                      FontSize="11"   
                                      MinWidth="200"
-                                     MaxWidth="350"
                                      materialDesign:HintAssist.HelperText="LISTE DES REFERENCES"
                                      Foreground="White"
-                                     Margin="10 20 0 5 "/>
+                                     Margin="10 20 20 20 "/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center">
@@ -426,20 +452,20 @@
                                       Content="Saut"
                                       Foreground="White" 
                                       Margin="30 10 0 10"
-                                      Background="LightGreen"
+                                      Background="White"
                                       Checked="cbxSautOrdre_Checked"
                                       Unchecked="cbxSautOrdre_Unchecked"/>
                             <CheckBox x:Name="cbxDoublonOrdre"
                                       Content="Doublon"
                                       Foreground="White" 
-                                      Background="LightGreen"
+                                      Background="White"
                                       Margin="30 10 0 10"
                                       Checked="cbxDoublonOrdre_Checked"
                                       Unchecked="cbxDoublonOrdre_Unchecked"/>
                             <CheckBox x:Name="cbxBisOrdre"
                                       Content="Bis"
                                       Foreground="White"
-                                      Background="LightGreen"
+                                      Background="White"
                                       Margin="30 10 0 10"
                                       Checked="cbxBisOrdre_Checked"
                                       Unchecked="cbxBisOrdre_Unchecked"/>
@@ -550,8 +576,8 @@
 
                         </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
         </Grid>
-    </StackPanel>
+    </Grid>
 </Window>

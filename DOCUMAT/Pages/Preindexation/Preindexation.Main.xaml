@@ -32,16 +32,21 @@
         </ContextMenu>
     </Page.Resources>
 
-    <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
+    <Grid x:Name="Service_Space">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="150"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
         <!--Bouton d'interaction-->
         <StackPanel x:Name="panelInteracBtn"
+                    Grid.Row="0"
                     Orientation="Horizontal"
                     VerticalAlignment="Center"
-                    Margin="20 20 20 0">
+                    Margin="20 0 20 0">
             <Image Height="80" Width="80" 
                    x:Name="QrCodeImage"
                    Stretch="UniformToFill"/>
-            <Grid >
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="10*" />
                     <ColumnDefinition Width="*" />
@@ -136,16 +141,18 @@
         </StackPanel>
 
         <!--Grid View des Registres -->
-        <Grid Margin="20" x:Name="gridViewPanelRegistre"
+        <StackPanel Margin="0 0 0 20" 
+              x:Name="gridViewPanelRegistre"
+              Grid.Row="1"
+              VerticalAlignment="Top"
               Visibility="Visible">
             <DataGrid Name="dgRegistre" 
+                          Margin="20"
                           AutoGenerateColumns="False" 
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
                           IsReadOnly="True"
-                          MaxHeight="350"
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
-                          Margin="0,-2,0,2"
                           LoadingRow="dgRegistre_LoadingRow"
                           SelectionChanged="dgRegistre_SelectionChanged"
                           AreRowDetailsFrozen="False"
@@ -242,11 +249,12 @@
                     </DataTemplate>
                 </DataGrid.RowDetailsTemplate>
             </DataGrid>
-        </Grid>
+        </StackPanel>
         
         <!--Zone de  Préindexation du registre sélectionné-->
         <StackPanel x:Name="PanelFeuillet" 
-                    Visibility="Collapsed">
+                    Visibility="Collapsed"
+                    Grid.Row="1">
             <!--Grid View des Registres -->
             <Grid Margin="20 10 20 0" x:Name="gridViewPanelFeuillet"                  >
                 <Grid.ColumnDefinitions>
@@ -261,7 +269,6 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
                           IsReadOnly="True"
-                          MaxHeight="450" 
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgFeuillet_LoadingRow"
@@ -490,5 +497,5 @@
                 </StackPanel>
             </Grid>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Page>

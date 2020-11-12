@@ -238,7 +238,7 @@ namespace DOCUMAT.Pages.Image
 					else
 					{
 						tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
-						tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + RegistreViewParent.Registre.NombrePage;
+						tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + " / " + RegistreViewParent.Registre.NombrePage;
 						tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
 						tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
 					}

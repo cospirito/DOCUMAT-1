@@ -63,10 +63,15 @@
         </ContextMenu>
     </Page.Resources>
 
-    <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
+    <Grid x:Name="Service_Space">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="150"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
         <!--Bouton d'interaction-->
         <StackPanel x:Name="panelInteracBtn"
-                    Orientation="Horizontal" Margin="20"
+                    Grid.Row="0"
+                    Orientation="Horizontal" Margin="20 0 20 0"
                     VerticalAlignment="Center">
             <ComboBox x:Name="cbRegion" 
                 Foreground="White"
@@ -106,7 +111,7 @@
         </StackPanel>
 
         <!--Zone de donnée-->
-        <StackPanel>
+        <StackPanel Grid.Row="1" Margin="0 0 0 20">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <TextBlock x:Name="titreGrid" Text="LISTE DES VERSEMENTS"
                                Foreground="White"                           
@@ -138,8 +143,7 @@
                           AutoGenerateColumns="False" 
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
-                          IsReadOnly="True"
-                          MaxHeight="350"                           
+                          IsReadOnly="True"                    
                           Margin="0,-2,0,2"                          
                           LoadingRowDetails="dgView_LoadingRowDetails"
                           AreRowDetailsFrozen="False"
@@ -267,5 +271,5 @@
                 </DataGrid>
             </Grid>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Page>

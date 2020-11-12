@@ -37,17 +37,22 @@
                       Name="ImporterImages"
                       Icon="{materialDesign:PackIcon Kind=FileImport}"
                       Click="ImporterImages_Click"/>
-            <MenuItem Header="Imprimer le QrCode"   
+            <MenuItem Header="Imprimer le Code Barre"   
                       Name="ImprimerQrCode"
                       Icon="{materialDesign:PackIcon Kind=Printer}"
                       Click="ImprimerQrCode_Click"/>
         </ContextMenu>
     </Page.Resources>
 
-    <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
+    <Grid x:Name="Service_Space">
+        <Grid.RowDefinitions>
+            <RowDefinition MaxHeight="150"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
         <!--Bouton d'interaction-->
         <StackPanel x:Name="panelInteracBtn"
-                    Orientation="Horizontal" Margin="20"
+                    Grid.Row="0"
+                    Orientation="Horizontal" Margin="20 0 20 0"
                     VerticalAlignment="Center">
             <Button Margin="10" Background="{x:Null}"
                         BorderBrush="CornflowerBlue"
@@ -101,12 +106,28 @@
         </StackPanel>
 
         <!--Zone de donnée-->
-        <StackPanel>
-            <TextBlock x:Name="titreGrid" Text="LISTE DES REGISTRES"
-                           Foreground="White"                           
-                           FontSize="24"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+        <StackPanel Grid.Row="1" Margin="0 0 0 20">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock x:Name="titreGrid" Text="LISTE DES REGISTRES"
+                               Foreground="White"                           
+                               FontSize="24"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                <Button Margin="25 10 10 10" Background="{x:Null}"
+                                BorderBrush="LightGreen"
+                                BorderThickness="5 0 5 0"
+                                ToolTip="Valider le scan de tous registres"
+                                Name="btnValiderAllScan"                   
+                                Click="btnValiderAllScan_Click" >
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Valider Tout" Margin="0 5 5 0"/>
+                        <materialDesign:PackIcon Kind="CheckAll"
+                                    Width="25"
+                                    Height="25"
+                                    Foreground="LightGreen"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
             <!--Grid View des Registres -->
             <Grid Margin="20" x:Name="gridViewPanelRegistre">
                 <Grid.ColumnDefinitions>
@@ -118,7 +139,6 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
                           IsReadOnly="True"
-                          MaxHeight="350" 
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgRegistre_LoadingRow"
@@ -206,5 +226,5 @@
                 </DataGrid>
             </Grid>
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Page>

@@ -60,7 +60,8 @@
                         KeyboardNavigation.TabNavigation="None"
                         KeyboardNavigation.ControlTabNavigation="None"
                         KeyboardNavigation.DirectionalNavigation="None"
-                        KeyboardNavigation.IsTabStop="True"                    
+                        KeyboardNavigation.IsTabStop="True"
+                        Click="BtnRechercher_Click"
                         >
                         <materialDesign:PackIcon Kind="Search"
                                             Width="25"
@@ -71,7 +72,6 @@
                      materialDesign:HintAssist.Hint="RECHERCHER" 
                      Foreground="White" 
                      HorizontalAlignment="Center"
-                     CharacterCasing="Upper"
                      VerticalAlignment="Center"
                      Margin="20 20 20 20"
                      TextChanged="TbRechercher_TextChanged"
@@ -85,6 +85,7 @@
                         <ComboBoxItem Content="CODE REGISTRE"/>
                         <ComboBoxItem Content="SERVICE" IsSelected="True" />
                         <ComboBoxItem Content="REGION" />
+                        <ComboBoxItem Content="NUMERO VOLUME"/>
                         <!--<ComboBoxItem Content="SERVICE"/>-->
                     </ComboBox>
                     <ComboBox x:Name="cbChoixStatut" 

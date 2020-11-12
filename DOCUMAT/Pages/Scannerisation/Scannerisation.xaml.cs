@@ -258,16 +258,7 @@ namespace DOCUMAT.Pages.Scannerisation
                                 xmlDocument.Load(logFile.FullName);
 
                                 //Récupération de l'agent de scan
-                                XmlNodeList xmlAgents = xmlDocument.GetElementsByTagName("mets:agent");
-                                string LoginAgent = "";
-
-                                foreach (XmlNode xmlAgent in xmlAgents)
-                                {
-                                    if (xmlAgent.Attributes["TYPE"].Value.ToUpper() == "INDIVIDUAL")
-                                    {
-                                        LoginAgent = xmlAgent.FirstChild.InnerText;
-                                    }
-                                }
+                                string LoginAgent = xmlDocument.GetElementsByTagName("dc:creator").Item(0).InnerText;
 
                                 // Récupération des meta données des pages scanné
                                 XmlNodeList xmlfilesList = xmlDocument.GetElementsByTagName("mets:file");
@@ -324,7 +315,6 @@ namespace DOCUMAT.Pages.Scannerisation
                                                     "\n Nombre Image Log (+PGO) : " + xmlfilesList.Count +
                                                     "\n Nombre Image Registre (+PGO) : " + (registreView.Registre.NombrePage + 2), "Nombre Page Incorrect", MessageBoxButton.OK, MessageBoxImage.Warning);
                                 }
-
                                 #endregion
                             }
                             else
@@ -439,6 +429,11 @@ namespace DOCUMAT.Pages.Scannerisation
                     PageImp.Show();
                 }
             }
+        }
+
+        private void btnValiderAllScan_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

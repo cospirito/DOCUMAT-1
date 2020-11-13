@@ -69,17 +69,6 @@
                                             Height="25"
                                             Foreground="White"/>
                     </Button>
-                    <!--<TextBox x:Name="TbQrCode" 
-                     materialDesign:HintAssist.Hint="QRCODE DU REGISTRE" 
-                     materialDesign:HintAssist.HelperText="QRCODE DU REGISTRE"
-                     Foreground="White" 
-                     IsEnabled="False" 
-                     HorizontalAlignment="Center"
-                     CharacterCasing="Upper"
-                     VerticalAlignment="Center"
-                     Margin="20 20 20 20"                     
-                     MinWidth="200"/>-->
-
                     <CheckBox x:Name="AfficherFeuillets"
                       Content="Préindexer les Feuillets"
                       Foreground="White"

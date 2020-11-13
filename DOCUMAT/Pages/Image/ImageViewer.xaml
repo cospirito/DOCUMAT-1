@@ -198,12 +198,14 @@
         <Grid Grid.Row="1" Margin="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="7*" MinWidth="600"/>
+                <ColumnDefinition Width="7*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
             <!--Partie dédier à l'aborescence-->
-            <Border Grid.Column="0" BorderBrush="White" BorderThickness="2">
+            <Border Grid.Column="0" 
+                    BorderBrush="White" 
+                    BorderThickness="2">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
@@ -292,7 +294,6 @@
                     <StackPanel Grid.Row="1" 
                                 Orientation="Horizontal" 
                                 VerticalAlignment="Top"
-                                HorizontalAlignment="Center"
                                 Margin="0">
                         <TextBlock x:Name="tbxNomPage" 
                         Foreground="White"                                   
@@ -341,6 +342,7 @@
                         VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Auto"
                         IsReadOnly="True"  
+                        CanUserSortColumns="False"
                         RowDetailsVisibilityMode="VisibleWhenSelected"                         
                         LoadingRow="dgSequence_LoadingRow"
                         SelectionChanged="dgSequence_SelectionChanged"
@@ -352,7 +354,9 @@
                             <DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />
                         </DataGrid.Columns>
                     </DataGrid>
-                    <StackPanel Grid.Row="4" VerticalAlignment="Top">
+                    
+                    <StackPanel Grid.Row="4" 
+                                VerticalAlignment="Top">
                         <StackPanel Background="White">
                             <TextBlock Foreground="SteelBlue"
                                        FontWeight="Bold"

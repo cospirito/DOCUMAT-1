@@ -46,13 +46,14 @@
 
     <Grid x:Name="Service_Space">
         <Grid.RowDefinitions>
-            <RowDefinition MaxHeight="150"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="150"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <!--Bouton d'interaction-->
         <StackPanel x:Name="panelInteracBtn"
                     Grid.Row="0"
-                    Orientation="Horizontal" Margin="20 0 20 0"
+                    Orientation="Horizontal" 
+                    Margin="20 0 20 0"
                     VerticalAlignment="Center">
             <Button Margin="10" Background="{x:Null}"
                         BorderBrush="CornflowerBlue"
@@ -97,7 +98,7 @@
                         materialDesign:HintAssist.Hint="RECHERCHER PAR"
                         materialDesign:HintAssist.HelperText="RECHERCHER PAR"                                                                                                      
                         SelectedIndex="0"
-                        Margin="20">
+                        Margin="20 0">
                 <ComboBoxItem Content="CODE REGISTRE"/>
                 <ComboBoxItem Content="SERVICE" IsSelected="True" />
                 <ComboBoxItem Content="REGION" />

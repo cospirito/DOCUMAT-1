@@ -71,7 +71,8 @@
         <!--Bouton d'interaction-->
         <StackPanel x:Name="panelInteracBtn"
                     Grid.Row="0"
-                    Orientation="Horizontal" Margin="20 0 20 0"
+                    Orientation="Horizontal" 
+                    Margin="20 0 20 0"
                     VerticalAlignment="Center">
             <ComboBox x:Name="cbRegion" 
                 Foreground="White"
@@ -176,7 +177,6 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
                           IsReadOnly="True"
-                          MaxHeight="350" 
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgRegistre_LoadingRow"

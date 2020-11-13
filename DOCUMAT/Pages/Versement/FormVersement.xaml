@@ -14,7 +14,7 @@
         ResizeMode="NoResize"
         Background="SteelBlue">
 
-    <StackPanel x:Name="Versement_space">
+    <StackPanel x:Name="Versement_space" Margin="10">
 
         <!--Zone de donnée-->
         <StackPanel x:Name="FormParent">

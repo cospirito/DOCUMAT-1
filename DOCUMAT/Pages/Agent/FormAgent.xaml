@@ -15,7 +15,7 @@
         Closing="Window_Closing"
         Loaded="Window_Loaded"
         >
-    <Grid>
+    <Grid  Margin="10"> 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="444*"/>
             <ColumnDefinition Width="144*"/>

@@ -13,7 +13,7 @@
         WindowStyle="ToolWindow"
         Background="SteelBlue"
         Width="290">
-    <StackPanel>
+    <StackPanel  Margin="10">
         <StackPanel HorizontalAlignment="Center"
                     Background="SteelBlue"
                     VerticalAlignment="Center"

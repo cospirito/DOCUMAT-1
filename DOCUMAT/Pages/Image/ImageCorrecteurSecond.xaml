@@ -16,9 +16,14 @@
         <local:StringToImageSourceConverter x:Key="ImageConverter"/>
         <local:DateConverter x:Key="DateConverter"/>
     </Window.Resources>
-    <StackPanel>
-        <Grid  VerticalAlignment="Center"
-                    Height="125"
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="125"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid  Grid.Row="0"
+               VerticalAlignment="Center"
+               Height="125"
                Background="White">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" 
@@ -169,124 +174,140 @@
                 </StackPanel>
             </Border>
         </Grid>
-        <Grid>
+        
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="53*"/>
-                <ColumnDefinition Width="335*"/>
-                <ColumnDefinition Width="134*"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="7*"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
             <!--Partie dédier à l'aborescence-->
-            <StackPanel Grid.Column="0" 
-                        Margin="5" 
-                        Grid.ColumnSpan="2">
-                <TreeView x:Name="FolderView"
-                          Foreground="White"
-                          MaxHeight="600">
-                    <TreeView.Resources>
+            <Border Grid.Column="0"  
+                    BorderThickness="2" 
+                    BorderBrush="white">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="150"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TreeView x:Name="FolderView"
+                              Foreground="White"
+                              Grid.Row="0">
+                        <TreeView.Resources>
 
-                        <Style TargetType="{x:Type TreeViewItem}">
-                            <Setter Property="HeaderTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image Height="30"
+                            <Style TargetType="{x:Type TreeViewItem}">
+                                <Setter Property="HeaderTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Height="30"
                                                    Width="30"
                                                    Margin="3"
                                                    Stretch="Fill"
                                             Source="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type TreeViewItem}},
                                             Path=Tag,
                                             Converter={x:Static local:HeaderToImageConverter.Instance}}" />
-                                            <TextBlock VerticalAlignment="Center" Text="{Binding}" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </TreeView.Resources>
-                </TreeView>
+                                                <TextBlock VerticalAlignment="Center" Text="{Binding}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TreeView.Resources>
+                    </TreeView>
 
-                <Button x:Name="btnValideCorrection"   
-                        Margin="10"
-                        Visibility="Collapsed"
-                        Background="{x:Null}"
-                        BorderBrush="GreenYellow"
-                        BorderThickness="15 1"
-                        Height="70"                        
-                        ToolTip="Valider la Correction du registre"                      
-                        Click="btnValideCorrection_Click">
-                    <materialDesign:PackIcon Kind="CheckAll"
-                                        Width="40"
-                                        Height="40"
-                                        Foreground="GreenYellow"/>
-                </Button>
-            </StackPanel>
+                    <Button x:Name="btnValideCorrection"   
+                            Margin="10"
+                            Grid.Row="1"
+                            Visibility="Collapsed"
+                            Background="{x:Null}"
+                            BorderBrush="GreenYellow"
+                            BorderThickness="15 1"
+                            Height="70"                        
+                            ToolTip="Valider la Correction du registre"                      
+                            Click="btnValideCorrection_Click">
+                        <materialDesign:PackIcon Kind="CheckAll"
+                                            Width="40"
+                                            Height="40"
+                                            Foreground="GreenYellow"/>
+                    </Button>
+                </Grid>
+            </Border>
 
-            <!--Partie dédier à la visionneuse d'image-->
-            <Border Grid.Column="2"  
+            <!--Partie d'dier à la visionneuse d'image-->
+            <Border Grid.Column="1"  
                     BorderThickness="2" 
                     BorderBrush="white">
-                <StackPanel Grid.Column="0">
-                    <DocumentViewer Name="DocumentViewer" 
-                                    Height="700"/>
-                    <!--<Image x:Name="ImageBitmapSource" />-->
-                </StackPanel>
+                <DocumentViewer Name="DocumentViewer"                                  
+                                    Background="SteelBlue"
+                                    BorderThickness="0" Margin="0" 
+                                    >
+                </DocumentViewer>
             </Border>
 
             <!--Partie dédiée a Séquence d'Image-->
-            <Border Grid.Column="3" 
+            <Border Grid.Column="2" 
                     BorderBrush="White" 
                     BorderThickness="2" >
-                <StackPanel>
-                    <StackPanel Background="White">
+                    <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35"></RowDefinition>
+                        <RowDefinition Height="50"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0"
+                            Background="White">
                         <TextBlock Text="FORMULAIRE D'INDEXATION"
-                                    Foreground="SteelBlue"
-                                    FontSize="15"
-                                    FontWeight="Bold"
-                                    HorizontalAlignment="Center"
-                                    Margin="5"
-                                    />
+                                Foreground="SteelBlue"
+                                FontSize="15"
+                                FontWeight="Bold"
+                                HorizontalAlignment="Center"
+                                Margin="5"
+                                />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" 
+                    <StackPanel Grid.Row="1"
+                                Orientation="Horizontal" 
                                 Margin="0">
                         <TextBlock x:Name="tbxNomPage" 
-                        Foreground="White"
-                        FontSize="10"     
-                        Text="PAGE :"
-                        InputScope="Number"                        
-                        Margin="10"/>
+                                    Foreground="White"
+                                    FontSize="12"     
+                                    Text="PAGE :"
+                                    InputScope="Number"                        
+                                    Margin="10"/>
                         <TextBlock x:Name="tbxNumeroPage" 
-                        Foreground="White"
-                        Text="N°"
-                        FontSize="10"          
-                        InputScope="Number"                        
-                        Margin="10"/>
+                                    Foreground="White"
+                                    Text="N°"
+                                    FontSize="12"          
+                                    InputScope="Number"                        
+                                    Margin="10"/>
                         <TextBlock x:Name="tbxDebSeq" 
-                        Foreground="White"
-                        Text="N° Debut : "
-                        FontSize="10"          
-                        InputScope="Number"                        
-                        Margin="10"/>
+                                    Foreground="White"
+                                    Text="N° Debut : "
+                                    FontSize="12"          
+                                    InputScope="Number"                        
+                                    Margin="10"/>
                         <TextBlock x:Name="tbxFinSeq" 
-                        Foreground="White"
-                        Text="N° Fin : "
-                        FontSize="10"          
-                        InputScope="Number"                        
-                        Margin="10"/>
+                                    Foreground="White"
+                                    Text="N° Fin : "
+                                    FontSize="12"          
+                                    InputScope="Number"                        
+                                    Margin="10"/>
                     </StackPanel>
 
-                    <StackPanel Visibility="Visible"
+                    <StackPanel Grid.Row="2">
+                        <StackPanel 
+                                Visibility="Visible"
                                 x:Name="PanelCorrectionEnCours">
-                        <StackPanel Background="White">
-                            <TextBlock Text="Séquences de l'image" 
+                            <StackPanel Background="White">
+                                <TextBlock Text="Séquences de l'image" 
                                    HorizontalAlignment="Center"
                                    Padding="5" 
                                    FontSize="12" 
                                    FontWeight="Bold"
                                    Foreground="SteelBlue"/>
-                        </StackPanel>
-                        <DataGrid Name="dgSequenceIndex" 
+                            </StackPanel>
+                            <DataGrid Name="dgSequenceIndex" 
                             AutoGenerateColumns="False" 
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
@@ -298,19 +319,18 @@
                             SelectionChanged="dgSequence_SelectionChanged"
                             AreRowDetailsFrozen="False"
                             LoadingRowDetails="dgSequence_LoadingRowDetails">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="N° Ordre" Binding="{Binding strOrdre}" />
-                                <DataGridTextColumn Header="Date " Binding="{Binding strDate}" />
-                                <DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                        <DataGrid 
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="N° Ordre" Binding="{Binding strOrdre}" />
+                                    <DataGridTextColumn Header="Date " Binding="{Binding strDate}" />
+                                    <DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <DataGrid 
                             Name="dgSequence" 
                             AutoGenerateColumns="False" 
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
-                            CanUserSortColumns="False"                              
-                            MaxHeight="400"                            
+                            CanUserSortColumns="False"                            
                             SelectionMode="Single"
                             IsReadOnly="True"
                             RowDetailsVisibilityMode="VisibleWhenSelected"                                                 
@@ -318,59 +338,59 @@
                             AreRowDetailsFrozen="False"
                             LoadingRow="dgSequence_LoadingRow"
                             LoadingRowDetails="dgSequence_LoadingRowDetails">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn IsReadOnly="True" Header="N° Ordre" Binding="{Binding strOrdre}" />
-                                <DataGridTextColumn IsReadOnly="True" Header="Date " Binding="{Binding strDate}" />
-                                <DataGridTemplateColumn  Header="A Supprimer">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox x:Name="SuppSequence" 
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="True" Header="N° Ordre" Binding="{Binding strOrdre}" />
+                                    <DataGridTextColumn IsReadOnly="True" Header="Date " Binding="{Binding strDate}" />
+                                    <DataGridTemplateColumn  Header="A Supprimer">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox x:Name="SuppSequence" 
                                                       Background="Red"
                                                       IsChecked="{Binding ASupprimer}"                                                      
                                                       Click="cbxReadOnly_Click"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <!--<DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />-->
-                                <!--<DataGridCheckBoxColumn Header="A Supprimer" Binding= "{Binding CheckBoxBooleanValue}"/>-->
-                            </DataGrid.Columns>
-                            <DataGrid.RowDetailsTemplate>
-                                <DataTemplate>
-                                    <DockPanel Margin="5 10 20 10"
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <!--<DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />-->
+                                    <!--<DataGridCheckBoxColumn Header="A Supprimer" Binding= "{Binding CheckBoxBooleanValue}"/>-->
+                                </DataGrid.Columns>
+                                <DataGrid.RowDetailsTemplate>
+                                    <DataTemplate>
+                                        <DockPanel Margin="5 10 20 10"
                                                x:Name="DockPanel">
-                                        <CheckBox Content="{Binding strOrdre}"
+                                            <CheckBox Content="{Binding strOrdre}"
                                                   Margin="10"
                                                   Background="Red"
                                                   IsChecked="{Binding OrdreFaux}"
                                                   Click="cbxReadOnly_Click"/>
-                                        <CheckBox Content="{Binding strDate}"
+                                            <CheckBox Content="{Binding strDate}"
                                                   Margin="10"
                                                   Background="Red"
                                                   IsChecked="{Binding DateFausse}"
                                                   Click="cbxReadOnly_Click"/>
-                                        <StackPanel x:Name="ListeReferences"
+                                            <StackPanel x:Name="ListeReferences"
                                                     Margin="5">
-                                            <ListBox ItemsSource="{Binding TheList}">
-                                                <ListBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <CheckBox Name="CheckBoxZone" Content="{Binding TheText}"
+                                                <ListBox ItemsSource="{Binding TheList}">
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox Name="CheckBoxZone" Content="{Binding TheText}"
                                                                   IsChecked="{Binding TheValue}"
                                                                   Background="Red"
                                                                   Click="cbxReadOnly_Click"/>
-                                                    </DataTemplate>
-                                                </ListBox.ItemTemplate>
-                                            </ListBox>
-                                        </StackPanel>
-                                    </DockPanel>
-                                </DataTemplate>
-                            </DataGrid.RowDetailsTemplate>
-                        </DataGrid>
-                        <Border BorderThickness="1"
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </DataGrid.RowDetailsTemplate>
+                            </DataGrid>
+                            <Border BorderThickness="1"
                                     BorderBrush="White"
                                     Margin="0 0 0 10">
-                            <StackPanel>
-                                <StackPanel Margin="5 0">
-                                    <TextBox x:Name="tbListeReferences"
+                                <StackPanel>
+                                    <StackPanel Margin="5 0">
+                                        <TextBox x:Name="tbListeReferences"
                                      Visibility="Collapsed" 
                                      IsReadOnly="True"
                                      FontSize="11"   
@@ -378,17 +398,17 @@
                                      MaxWidth="350"
                                      materialDesign:HintAssist.HelperText="LISTE DES REFERENCES"
                                      Foreground="White"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal"
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center">
-                                    <materialDesign:PackIcon 
+                                        <materialDesign:PackIcon 
                                             Kind="FileEdit"
                                             Width="20"
                                             Height="20"
                                             Foreground="White"
                                             Margin="10 20 -10 5"  
                                             VerticalAlignment="Center"/>
-                                    <TextBox x:Name="tbNumeroOrdreSequence" 
+                                        <TextBox x:Name="tbNumeroOrdreSequence" 
                                             Foreground="White"
                                             CharacterCasing="Upper"
                                             InputScope="Number"
@@ -399,7 +419,7 @@
                                             materialDesign:HintAssist.HelperText="ORDRE"
                                             Margin="10 20 0 10"/>
 
-                                    <TextBox x:Name="tbDateSequence" 
+                                        <TextBox x:Name="tbDateSequence" 
                                             Foreground="White"
                                             CharacterCasing="Upper"
                                             InputScope="Date"
@@ -413,7 +433,7 @@
                                             LostFocus="tbDateSequence_LostFocus"
                                             GotFocus="tbDateSequence_GotFocus"
                                             Margin="40 20 0 10"/>
-                                    <TextBox x:Name="tbReference" 
+                                        <TextBox x:Name="tbReference" 
                                             Foreground="White"
                                             CharacterCasing="Upper"
                                             InputScope="Number" 
@@ -427,44 +447,44 @@
                                             LostFocus="tbReference_LostFocus"
                                             GotFocus="tbReference_GotFocus"
                                             Margin="40 20 0 10"/>
-                                </StackPanel>
-                                <StackPanel HorizontalAlignment="Center" 
+                                    </StackPanel>
+                                    <StackPanel HorizontalAlignment="Center" 
                                     Orientation="Horizontal">
-                                    <CheckBox x:Name="cbxDoublonOrdre"
+                                        <CheckBox x:Name="cbxDoublonOrdre"
                                       Content="Doublon"
                                       Foreground="White" 
                                       Margin="0 20 0 10"
                                       Checked="cbxDoublonOrdre_Checked"
                                       Unchecked="cbxDoublonOrdre_Unchecked"    />
-                                    <CheckBox x:Name="cbxBisOrdre"
+                                        <CheckBox x:Name="cbxBisOrdre"
                                       Content="Bis"
                                       Foreground="White"
                                       Margin="30 20 0 10"
                                       Checked="cbxBisOrdre_Checked"
                                       Unchecked="cbxBisOrdre_Unchecked"/>
-                                </StackPanel>
-                                
-                                <Border x:Name="PanelRejetImage"
+                                    </StackPanel>
+
+                                    <Border x:Name="PanelRejetImage"
                                         BorderThickness="2"
                                         Visibility="Visible"
                                         Margin="0 0 0 10"
                                         BorderBrush="White">
-                                    <StackPanel 
+                                        <StackPanel 
                                             Orientation="Vertical"
                                             Margin="0 ">
-                                        <StackPanel Background="White">
-                                            <TextBlock 
+                                            <StackPanel Background="White">
+                                                <TextBlock 
                                             x:Name="tbxRejetImage"
                                             Foreground="SteelBlue"
                                             Padding="5"
                                             HorizontalAlignment="Center"
                                             FontWeight="Bold">
                                             Rejet Image : MOTIF
-                                            </TextBlock>
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal"
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal"
                                                 HorizontalAlignment="Center">
-                                            <Button x:Name="btnImporterImage"
+                                                <Button x:Name="btnImporterImage"
                                             Margin="0 20 0 20"
                                             BorderBrush="White"
                                             BorderThickness="0 0 0 1"
@@ -472,7 +492,7 @@
                                             Background="Transparent"                                    
                                             Content="IMPORTER L'IMAGE"
                                             Click="btnImporterImage_Click"/>
-                                            <Button x:Name="btnValiderImageImporte"
+                                                <Button x:Name="btnValiderImageImporte"
                                             Margin="10 0 0 0"
                                             BorderBrush="White"
                                             BorderThickness="0 0 0 1"
@@ -480,41 +500,41 @@
                                             ToolTip="Valider l'image importer"
                                             Background="Transparent"
                                             Click="btnValiderImageImporte_Click">
-                                                <materialDesign:PackIcon Kind="Check" Width="25" Height="25" />
-                                            </Button>
+                                                    <materialDesign:PackIcon Kind="Check" Width="25" Height="25" />
+                                                </Button>
+                                            </StackPanel>
                                         </StackPanel>
-                                    </StackPanel>
-                                </Border>
+                                    </Border>
 
-                                <Border BorderBrush="White" BorderThickness="15 1">
-                                    <StackPanel Orientation="Horizontal" 
+                                    <Border BorderBrush="White" BorderThickness="15 1">
+                                        <StackPanel Orientation="Horizontal" 
                                                 Margin="0 0 0 0"
                                                 HorizontalAlignment="Center">
-                                        <Button Margin="5" Background="{x:Null}"
+                                            <Button Margin="5" Background="{x:Null}"
                                                 BorderBrush="white"
                                                 BorderThickness="5 0 5 0"
                                                 ToolTip="Modifier la Séquence"
                                                 x:Name="BtnModifierSequence"
                                                 Click="BtnModifierSequence_Click">
-                                            <materialDesign:PackIcon Kind="Edit"
+                                                <materialDesign:PackIcon Kind="Edit"
                                                 Width="25"
                                                 Height="25"
                                         Foreground="White"/>
-                                        </Button>
+                                            </Button>
 
-                                        <Button Margin="5" 
+                                            <Button Margin="5" 
                                                 Background="{x:Null}"
                                                 BorderBrush="white"
                                                 BorderThickness="5 0 5 0"
                                                 ToolTip="Supprimer une Séquence"
                                                 x:Name="BtnSupprimerSequence"
                                                 Click="SupprimeSequence_Click">
-                                            <materialDesign:PackIcon Kind="RemoveCircle"
+                                                <materialDesign:PackIcon Kind="RemoveCircle"
                                                 Width="25"
                                                 Height="25"
                                                 Foreground="White"/>
-                                        </Button>
-                                        <Button x:Name="BtnSupprimerImage"
+                                            </Button>
+                                            <Button x:Name="BtnSupprimerImage"
                                                 Margin="5"
                                                 BorderBrush="White"
                                                 Background="Transparent"
@@ -522,41 +542,41 @@
                                                 Visibility="Collapsed"
                                                 Content="SUPPRIMER"
                                                 Click="btnSupprimerImage_Click"/>
-                                        <Button x:Name="BtnTerminerImage"
+                                            <Button x:Name="BtnTerminerImage"
                                                 Margin="5"
                                                 BorderBrush="White"
                                                 Background="Transparent"
                                                 IsEnabled="False"
                                                 Content="TERMINER"
                                                 Click="BtnTerminerImage_Click"/>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
 
-                    <StackPanel Margin="31,30"
+                        <StackPanel Margin="31,30"
                                 Height="500"
                                 HorizontalAlignment="Center"
                                 Visibility="Collapsed"
                                 x:Name="PanelCorrectionEffectue">
-                        <Image x:Name="ImgCorrecte"
+                            <Image x:Name="ImgCorrecte"
                                Source="/Images/correct1.png"
                                Height="150"                                            
                                Margin="0 0 0 10"/>
-                        <Image x:Name="ImgEdit"
+                            <Image x:Name="ImgEdit"
                                Visibility="Collapsed"
                                Source="/Images/contract.png"
                                Height="150"                                            
                                Margin="25 0 0 10"/>
-                        <TextBlock x:Name="tbxControleStatut"
+                            <TextBlock x:Name="tbxControleStatut"
                                    Text="VALIDE"
                                    HorizontalAlignment="Center"
                                    Foreground="White"
                                    FontFamily="Agency Fb"
                                    FontWeight="Black"
                                    FontSize="17"/>
-                        <Button x:Name="btnSuivant" 
+                            <Button x:Name="btnSuivant" 
                                 Content="SUIVANT"
                                 HorizontalAlignment="Center"
                                 Margin="0 30 0 0"
@@ -566,10 +586,10 @@
                                 Click="BtnImageSuivante_Click"
                                 Background="{x:Null}"
                                 />
+                        </StackPanel>
                     </StackPanel>
-
-                </StackPanel>
+                </Grid>
             </Border>
         </Grid>
-    </StackPanel>
+    </Grid>
 </Window>

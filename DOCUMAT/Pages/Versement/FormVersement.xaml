@@ -6,27 +6,32 @@
         xmlns:local="clr-namespace:DOCUMAT.Pages.Versement"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Versement" 
-        Height="650" 
+        Title="Versement"  
+        MinHeight="700"
+        Height="700"
+        MaxHeight="800"
         WindowStartupLocation="CenterScreen"
         Closed="Window_Closed"
+        MinWidth="800"
         Width="800"
-        ResizeMode="NoResize"
+        MaxWidth="900"        
         Background="SteelBlue">
 
-    <StackPanel x:Name="Versement_space" Margin="10">
-
+    <StackPanel x:Name="Versement_space">
         <!--Zone de donnée-->
         <StackPanel x:Name="FormParent">
             <!--Formulaire d'ajout et de modification-->
             <StackPanel x:Name="formVersement" 
                         Margin="20">
-                
                 <TextBlock x:Name="txbFormHeader" 
-                    Text="FORMULAIRE DE VERSEMENT"
-                    Foreground="White"
-                    HorizontalAlignment="Center"
-                    FontSize="20"/>
+                        Text="FORMULAIRE DE VERSEMENT"
+                        Foreground="White"
+                        Padding="10"
+                        TextDecorations="underline"
+                        FontWeight="Bold"
+                        FontFamily="Agency Fb"
+                        HorizontalAlignment="Center"
+                        FontSize="20"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="7*" />
@@ -86,6 +91,8 @@
                 <TextBlock Text="Nombre de registres Versés :" 
                            HorizontalAlignment="Center" 
                            FontSize="20"
+                           FontWeight="Bold"
+                           FontFamily="Agency FB"
                            Foreground="White"/>
                 <StackPanel Orientation="Horizontal"  HorizontalAlignment="Center">
                     <TextBox x:Name="tbNombreR3" 
@@ -121,21 +128,6 @@
                                 materialDesign:HintAssist.Hint="SERVICE VERSANT"
                                 materialDesign:HintAssist.HelperText="SERVICE VERSANT"
                                 Margin="20"/>
-                <!--<StackPanel Orientation="Horizontal" x:Name="PanelBordereau">
-                    <Button Margin="10" 
-                            x:Name="BtnChoixBordereau"
-                            ToolTip="Ajouter"
-                            Click="BtnChoixBordereau_Click"
-                            >
-                        SELECTIONNER LE BORDEREAU
-                    </Button>
-                    <TextBox x:Name="tbBorderau" 
-                                Foreground="White"
-                                CharacterCasing="Upper"
-                                materialDesign:HintAssist.Hint="CHEMIN DU BORDEREAU"
-                                Margin="10" 
-                                 IsReadOnly="True"/>
-                </StackPanel>-->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="btnAnnuleVersement" Margin="5"
                         Content="ANNULER" Click="btnAnnuleVersement_Click"/>
@@ -151,6 +143,9 @@
                 <TextBlock x:Name="txbFormLivHeader" 
                     Text="FORMULAIRE DE LIVRAISON"
                     Foreground="White"
+                    FontFamily="Agency FB"
+                    FontWeight="Bold"
+                    TextDecorations="underline"
                     HorizontalAlignment="Center"                    
                     FontSize="20"/>
                             

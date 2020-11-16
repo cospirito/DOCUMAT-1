@@ -35,24 +35,26 @@
     <Grid x:Name="Service_Space">
         <Grid.RowDefinitions>
             <RowDefinition Height="150"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <!--Bouton d'interaction-->
         <StackPanel x:Name="panelInteracBtn"
                     Grid.Row="0"
                     Orientation="Horizontal"
-                    VerticalAlignment="Center"
-                    Margin="20 0 20 0">
+                    Margin="20 0 20 0"
+                    VerticalAlignment="Center">
             <Image Height="80" Width="80" 
                    x:Name="QrCodeImage"
                    Stretch="UniformToFill"/>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="10*" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0 0 100 0">
+                <StackPanel Grid.Column="0" 
+                            Orientation="Horizontal" 
+                            Margin="0 0 100 0">
                     <Button Margin="10" Background="{x:Null}"
                         BorderBrush="CornflowerBlue"
                         ToolTip="Actualisé"
@@ -105,7 +107,7 @@
                                             Width="25"
                                             Height="25"
                                             Foreground="White"/>
-                    </Button> 
+                    </Button>
                     <TextBox x:Name="TbRechercher" 
                      materialDesign:HintAssist.Hint="RECHERCHER" 
                      Foreground="White" 
@@ -130,10 +132,10 @@
         </StackPanel>
 
         <!--Grid View des Registres -->
-        <StackPanel Margin="0 0 0 20" 
-              x:Name="gridViewPanelRegistre"
-              Grid.Row="1"
-              VerticalAlignment="Top"
+        <StackPanel Grid.Row="1" 
+                    VerticalAlignment="Top">
+            <StackPanel Margin="0 0 0 20" 
+              x:Name="gridViewPanelRegistre"                            
               Visibility="Visible">
             <DataGrid Name="dgRegistre" 
                           Margin="20"
@@ -141,6 +143,7 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
                           IsReadOnly="True"
+                          Height="Auto"
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           LoadingRow="dgRegistre_LoadingRow"
                           SelectionChanged="dgRegistre_SelectionChanged"
@@ -239,13 +242,13 @@
                 </DataGrid.RowDetailsTemplate>
             </DataGrid>
         </StackPanel>
-        
+
         <!--Zone de  Préindexation du registre sélectionné-->
         <StackPanel x:Name="PanelFeuillet" 
-                    Visibility="Collapsed"
-                    Grid.Row="1">
+                    Visibility="Collapsed">
             <!--Grid View des Registres -->
-            <Grid Margin="20 10 20 0" x:Name="gridViewPanelFeuillet"                  >
+            <Grid Margin="20 10 20 0" 
+                  x:Name="gridViewPanelFeuillet"                  >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -290,7 +293,7 @@
                             <materialDesign:PackIcon Width="20" Height="20" Kind="RemoveCircle" 
                                                      VerticalAlignment="Center"/>
                             <TextBlock VerticalAlignment="Center"
-                                       Margin="10 0"> SUPPRIMER LE DERNIER FEUILLET </TextBlock>
+                                       Margin="10 0"> SUPPRIMER LE DERNIER FEUILLET</TextBlock>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -485,6 +488,7 @@
                     </Border>
                 </StackPanel>
             </Grid>
+        </StackPanel>
         </StackPanel>
     </Grid>
 </Page>

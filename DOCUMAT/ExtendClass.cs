@@ -42,7 +42,7 @@ namespace DOCUMAT
 			}
 			else 
 			{
-				MessageBox.Show(exception.Message, "ERREUR INATTENDUE", MessageBoxButton.OK, MessageBoxImage.Error);
+				MessageBox.Show(exception.Message, "ERREUR INATTENDUE", MessageBoxButton.OK, MessageBoxImage.Warning);
 			}
 
 		}

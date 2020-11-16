@@ -220,19 +220,12 @@
     <Compile Include="Pages\Registre\FormRegistre.xaml.cs">
       <DependentUpon>FormRegistre.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\Registre\Registre.Main.xaml.cs">
-      <DependentUpon>Registre.Main.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Pages\Scannerisation\Scannerisation.xaml.cs">
       <DependentUpon>Scannerisation.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Versement\FormVersement.xaml.cs">
       <DependentUpon>FormVersement.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\Versement\Versement.Main.xaml.cs">
-      <DependentUpon>Versement.Main.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="System\Windows\Forms.cs" />
     <Compile Include="TestWindows.xaml.cs">
       <DependentUpon>TestWindows.xaml</DependentUpon>
     </Compile>
@@ -352,10 +345,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\Registre\Registre.Main.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Pages\Scannerisation\Scannerisation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -365,10 +354,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Versement\FormVersement.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\Versement\Versement.Main.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

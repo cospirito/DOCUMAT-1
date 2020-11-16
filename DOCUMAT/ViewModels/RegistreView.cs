@@ -270,16 +270,7 @@ namespace DOCUMAT.ViewModels
                     xmlDocument.Load(logFile.FullName);
 
                     //Récupération de l'agent de scan
-                    XmlNodeList xmlAgents = xmlDocument.GetElementsByTagName("mets:agent");
-                    string LoginAgent = "";
-
-                    foreach (XmlNode xmlAgent in xmlAgents)
-                    {
-                        if (xmlAgent.Attributes["TYPE"].Value.ToUpper() == "INDIVIDUAL")
-                        {
-                            LoginAgent = xmlAgent.FirstChild.InnerText;
-                        }
-                    }
+                    string LoginAgent = xmlDocument.GetElementsByTagName("dc:creator").Item(0).InnerText;
 
                     Models.Agent agentScan = regV.context.Agent.FirstOrDefault(a => a.Login.ToLower() == LoginAgent && a.Affectation == (int)Enumeration.AffectationAgent.SCANNE);
                     if (agentScan != null)

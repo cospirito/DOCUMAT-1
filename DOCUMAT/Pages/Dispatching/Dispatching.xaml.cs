@@ -165,32 +165,37 @@ namespace DOCUMAT.Pages.Dispatching
         {
             if(IsSelectionAgent.IsChecked == true)
             {
-                RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
-                Models.Traitement traitement = registreView.context.Traitement.Where(t => t.TableSelect.ToUpper().Contains(DocumatContext.TbRegistre.ToUpper()) && t.TableID == registreView.Registre.RegistreID
-                       && t.TypeTraitement == (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION).FirstOrDefault();
-                ListViewItem listViewItem = (ListViewItem)sender;
-                int IdAgent = Int32.Parse(listViewItem.Tag.ToString());
-                Models.Agent agent = registreView.context.Agent.Where(a => a.AgentID == IdAgent).FirstOrDefault();
-
-                if (traitement == null)
+                if(dgRegistre.SelectedItems.Count > 0)
                 {
-                    if (MessageBox.Show("Voulez vous attribuer le registre : " + registreView.Registre.QrCode + ", à l'agent : " + agent.Noms + 
-                        " ?","ATTRIBUER A L'AGENT ?",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    if (MessageBox.Show("Voulez vous attribuer ces registres à Cet Agent ?", "ATTRIBUER A L'AGENT ?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
-                        // traitement de l'attribution 
-                        DocumatContext.AddTraitement(DocumatContext.TbRegistre, registreView.Registre.RegistreID, agent.AgentID, (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION);
+                        foreach (RegistreView registreView in dgRegistre.SelectedItems)
+                        {
+                            //RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
+                            Models.Traitement traitement = registreView.context.Traitement.Where(t => t.TableSelect.ToUpper().Contains(DocumatContext.TbRegistre.ToUpper()) && t.TableID == registreView.Registre.RegistreID
+                                   && t.TypeTraitement == (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION).FirstOrDefault();
+                            ListViewItem listViewItem = (ListViewItem)sender;
+                            int IdAgent = Int32.Parse(listViewItem.Tag.ToString());
+                            Models.Agent agent = registreView.context.Agent.Where(a => a.AgentID == IdAgent).FirstOrDefault();
 
-                        // remise en place de l'affichage
-                        dgRegistre.IsEnabled = true;
-                        panelRecherche.IsEnabled = true;
-                        panelSelection.Visibility = Visibility.Collapsed;
-                        IsSelectionAgent.IsChecked = false; 
-                        RefreshRegistre();
+                            if (traitement == null)
+                            {
+                                // traitement de l'attribution 
+                                DocumatContext.AddTraitement(DocumatContext.TbRegistre, registreView.Registre.RegistreID, agent.AgentID, (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION);
+
+                                // remise en place de l'affichage
+                                dgRegistre.IsEnabled = true;
+                                panelRecherche.IsEnabled = true;
+                                panelSelection.Visibility = Visibility.Collapsed;
+                                IsSelectionAgent.IsChecked = false;
+                                RefreshRegistre();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Impossible, ce registre est attribué à un autre agent !!!", "IMPOSSIBLE", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
                     }
-                }
-                else
-                {
-                    MessageBox.Show("Impossible, ce registre est attribué à un autre agent !!!","IMPOSSIBLE",MessageBoxButton.OK,MessageBoxImage.Error);
                 }
             }
         }

@@ -134,7 +134,7 @@
                                   HorizontalScrollBarVisibility="Auto"
                                   IsReadOnly="True"
                                   RowDetailsVisibilityMode="VisibleWhenSelected" 
-                                  MinHeight="500"      
+                                  MinHeight="500"                                    
                                   AreRowDetailsFrozen="False"
                                   LoadingRow="dgRegistre_LoadingRow"
                                   SelectionChanged="dgRegistre_SelectionChanged"
@@ -163,8 +163,7 @@
                             </Style.Triggers>
                         </Style>
                     </DataGrid.Resources>
-
-                    <!--Details sur le versement-->
+                    <!--Details sur le versement--><!--
                     <DataGrid.RowDetailsTemplate>
                         <DataTemplate>
                             <DockPanel>
@@ -176,10 +175,10 @@
                                                Stretch="UniformToFill"
                                                Margin="10" />
                                 <StackPanel Orientation="Vertical" Margin="10,10,10,10">
-                                    <!--<StackPanel Orientation="Horizontal">
+                                    --><!--<StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="Agent Versant : " FontWeight="Bold" Grid.Row="2" />
                                                 <TextBlock Text="{Binding AgentVersant.Noms}" Grid.Column="1" Grid.Row="2" />
-                                            </StackPanel>-->
+                                            </StackPanel>--><!--
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="Numéro dépôt du début : " FontWeight="Bold" Grid.Row="2" />
                                         <TextBlock Text="{Binding Registre.NumeroDepotDebut}" Grid.Column="1" Grid.Row="2" />
@@ -215,7 +214,7 @@
                                 </StackPanel>
                             </DockPanel>
                         </DataTemplate>
-                    </DataGrid.RowDetailsTemplate>
+                    </DataGrid.RowDetailsTemplate>-->
                 </DataGrid>
             </Border>
 

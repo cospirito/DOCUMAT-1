@@ -243,18 +243,36 @@ namespace DOCUMAT.Pages.Scannerisation
                             if (filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToUpper())
                                == null)
                             {
-                                MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Garde"] + ", Vérifier le Dossier de Scan et importer la" +
-                                    " PAGE DE GARDE si nécessaire !", "PAGE DE GARDE Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
-                                return;
+                                FileInfo pageInfo = filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == "-1".ToUpper());
+                                if (pageInfo != null)
+                                {
+                                    // Changement du nom -1 en nom de la Page de Garde                                   
+                                    File.Move(pageInfo.FullName, Path.Combine(pageInfo.DirectoryName, ConfigurationManager.AppSettings["Nom_Page_Garde"].ToUpper() + pageInfo.Extension));
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Garde"] + ", Vérifier le Dossier de Scan et importer la" +
+                                        " PAGE DE GARDE si nécessaire !", "PAGE DE GARDE Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
+                                    return;
+                                }
                             }
 
-                            // Vérification que la Page de Garde est Présente 
+                            // Vérification que la Page d'Ouverture est Présente 
                             if (filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToUpper())
                                == null)
                             {
-                                MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Ouverture"] + ", Vérifier le Dossier de Scan et importer la" +
+                                FileInfo pageInfo = filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == "0".ToUpper());
+                                if (pageInfo != null)
+                                {
+                                    // Changement du nom -1 en nom de la Page de Garde                                   
+                                    File.Move(pageInfo.FullName, Path.Combine(pageInfo.DirectoryName, ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToUpper() + pageInfo.Extension));
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Ouverture"] + ", Vérifier le Dossier de Scan et importer la " +
                                     " PAGE D'OUVERTURE si nécessaire !", "PAGE D'OUVERTURE Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
-                                return;
+                                    return;
+                                }
                             }
 
                             // Vérification du fichier log de scan 
@@ -457,18 +475,36 @@ namespace DOCUMAT.Pages.Scannerisation
                                 if (filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToUpper())
                                    == null)
                                 {
-                                    MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Garde"] + ", Vérifier le Dossier de Scan et importer la" +
-                                        " PAGE DE GARDE si nécessaire !", "PAGE DE GARDE Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
-                                    return;
+                                    FileInfo pageInfo = filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == "-1".ToUpper());
+                                    if (pageInfo != null)
+                                    {
+                                        // Changement du nom -1 en nom de la Page de Garde                                   
+                                        File.Move(pageInfo.FullName, Path.Combine(pageInfo.DirectoryName, ConfigurationManager.AppSettings["Nom_Page_Garde"].ToUpper() + pageInfo.Extension));
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Garde"] + ", Vérifier le Dossier de Scan et importer la" +
+                                            " PAGE DE GARDE si nécessaire !", "PAGE DE GARDE Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
+                                        return;
+                                    }
                                 }
 
-                                // Vérification que la Page de Garde est Présente 
+                                // Vérification que la Page d'Ouverture est Présente 
                                 if (filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToUpper())
                                    == null)
                                 {
-                                    MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Ouverture"] + ", Vérifier le Dossier de Scan et importer la" +
+                                    FileInfo pageInfo = filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == "0".ToUpper());
+                                    if (pageInfo != null)
+                                    {
+                                        // Changement du nom -1 en nom de la Page de Garde                                   
+                                        File.Move(pageInfo.FullName, Path.Combine(pageInfo.DirectoryName, ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToUpper() + pageInfo.Extension));
+                                    }
+                                    else
+                                    {
+                                        MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Ouverture"] + ", Vérifier le Dossier de Scan et importer la " +
                                         " PAGE D'OUVERTURE si nécessaire !", "PAGE D'OUVERTURE Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
-                                    return;
+                                        return;
+                                    }
                                 }
 
                                 // Vérification du fichier log de scan 

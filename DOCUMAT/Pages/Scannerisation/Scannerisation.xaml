@@ -76,7 +76,6 @@
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center"
                      Margin="20 20 20 20"
-                     TextChanged="TbRechercher_TextChanged"
                      MinWidth="200"/>
             <Button Margin="10" Background="{x:Null}"
                     BorderBrush="CornflowerBlue"
@@ -143,7 +142,6 @@
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgRegistre_LoadingRow"
-                          SelectionChanged="dgRegistre_SelectionChanged"
                           AreRowDetailsFrozen="False"
                           LoadingRowDetails="dgRegistre_LoadingRowDetails" 
                           Grid.ColumnSpan="2">

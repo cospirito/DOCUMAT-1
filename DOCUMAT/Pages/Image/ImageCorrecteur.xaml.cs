@@ -557,6 +557,9 @@ namespace DOCUMAT.Pages.Image
 					cbxDoublonOrdre.IsChecked = false;
 					cbxSautOrdre.IsChecked = false;
 					tbDateSequence.Focus();
+					tbListeReferences.Text = "";
+					tbListeReferences.Visibility = Visibility.Collapsed;
+					References.Clear();
 					dgSequenceIndex.ScrollIntoView(NewSequenceViews.Last());
 
 					// Pour savoir toutes séquences sont indexées 
@@ -578,8 +581,12 @@ namespace DOCUMAT.Pages.Image
 					tbNumeroOrdreSequence.Text = CurrentImageView.Image.DebutSequence.ToString();
 					tbDateSequence.Text = CurrentImageView.Image.DateDebutSequence.ToShortDateString();
 					tbListeReferences.Text = "";
+					tbListeReferences.Visibility = Visibility.Collapsed;
+					References.Clear();
+					BtnTerminerImage.IsEnabled = false;
+					BtnModifierSequence.IsEnabled = true;
+					BtnAddSequence.IsEnabled = true;
 				}
-
 			}
 			#endregion
 		}
@@ -635,7 +642,6 @@ namespace DOCUMAT.Pages.Image
 
 				if(imageView1 != null)
                 {
-
 					//On change l'image actuelle
 					CurrentImageView = imageView1;
 					this.currentImage = currentImage;
@@ -923,59 +929,65 @@ namespace DOCUMAT.Pages.Image
 		{
 			if(dgSequenceIndex.SelectedItems.Count == 1)
 			{
-				SequenceView sequenceView = (SequenceView)dgSequenceIndex.SelectedItem;
-				if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
-				{					
-					using (var ct = new DocumatContext())
-					{
-						ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
-						ct.SaveChanges();
-						ActualiseDataIndexer();
+				if(MessageBox.Show("Confirmez la suppression","Confirmation suppression",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+					SequenceView sequenceView = (SequenceView)dgSequenceIndex.SelectedItem;
+					if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
+					{					
+						using (var ct = new DocumatContext())
+						{
+							ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
+							ct.SaveChanges();
+							ActualiseDataIndexer();
+						}
 					}
-				}
+                }
 			}
 			else if(dgSequence.SelectedItems.Count == 1)
 			{
-				if(CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
+				if (MessageBox.Show("Confirmez la suppression", "Confirmation suppression", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
 				{
-					SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
-					if (sequenceView.ASupprimer)
+					if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
 					{
-						using (var ct = new DocumatContext())
+						SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
+						if (sequenceView.ASupprimer)
 						{
-							//Suppression de la séquence
-							ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
-
-							// Création de la correction
-							Models.Correction correction = new Models.Correction()
+							using (var ct = new DocumatContext())
 							{
-								RegistreId = RegistreViewParent.Registre.RegistreID,
-								ImageID = sequenceView.Sequence.ImageID,
-								SequenceID = sequenceView.Sequence.SequenceID,
+								//Suppression de la séquence
+								ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
 
-								//Indexes Image mis à null
-								RejetImage_idx = null,
-								MotifRejetImage_idx = null,
+								// Création de la correction
+								Models.Correction correction = new Models.Correction()
+								{
+									RegistreId = RegistreViewParent.Registre.RegistreID,
+									ImageID = sequenceView.Sequence.ImageID,
+									SequenceID = sequenceView.Sequence.SequenceID,
 
-								//Indexes de la séquence de l'image
-								OrdreSequence_idx = null,
-								DateSequence_idx = null,
-								RefSequence_idx = null,
-								RefRejetees_idx = null,
-								ASupprimer = 1,
+									//Indexes Image mis à null
+									RejetImage_idx = null,
+									MotifRejetImage_idx = null,
 
-								DateCorrection = DateTime.Now,
-								DateCreation = DateTime.Now,
-								DateModif = DateTime.Now,
-								PhaseCorrection = 1,
-								StatutCorrection = 0,
-							};
-							ct.Correction.Add(correction);
-							ct.SaveChanges();
+									//Indexes de la séquence de l'image
+									OrdreSequence_idx = null,
+									DateSequence_idx = null,
+									RefSequence_idx = null,
+									RefRejetees_idx = null,
+									ASupprimer = 1,
+
+									DateCorrection = DateTime.Now,
+									DateCreation = DateTime.Now,
+									DateModif = DateTime.Now,
+									PhaseCorrection = 1,
+									StatutCorrection = 0,
+								};
+								ct.Correction.Add(correction);
+								ct.SaveChanges();
+							}
 						}
-					}
 
-					ActualiseDataCorriger();
+						ActualiseDataCorriger();
+					}
 				}
 			}
 		}
@@ -990,27 +1002,12 @@ namespace DOCUMAT.Pages.Image
 			if(dgSequence.SelectedItems.Count > 0)
 			{				
 				SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
-
 				// On décoche les cases à cocher à chaque changement de séquence
 				cbxSautOrdre.IsChecked = false;
 				cbxBisOrdre.IsChecked = false;
 				cbxDoublonOrdre.IsChecked = false;
 
-				if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
-				{
-                    #region CAS DES NOUVELLE SEQUENCE D'IMAGE MANQUANTE
-                    tbNumeroOrdreSequence.IsEnabled = true;
-					tbDateSequence.IsEnabled = true;
-					tbReference.IsEnabled = true;
-					cbxSautOrdre.IsEnabled = false;
-					cbxBisOrdre.IsEnabled = true;
-					cbxDoublonOrdre.IsEnabled = true;
-					BtnAddSequence.IsEnabled = true;
-					BtnModifierSequence.IsEnabled = true;
-					BtnSupprimerSequence.IsEnabled = true;
-                    #endregion
-                }
-                else if(sequenceView.strReferences.Equals("manquant"))
+				if(sequenceView.strReferences.Equals("manquant"))
 				{
 					#region CAS DES SEQUENCES MANQUANTES
 					tbNumeroOrdreSequence.IsEnabled = true;
@@ -1104,28 +1101,7 @@ namespace DOCUMAT.Pages.Image
 		}
 
 		private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
-		{
-   //         try
-   //         {
-   //             SequenceView sequenceView = (SequenceView)e.Row.Item;
-			//	//if(sequenceView.Sequence.isSpeciale == "saut" || sequenceView.ASupprimer)
-			//	//{
-			//	//	((DockPanel)e.DetailsElement.FindName("DockPanel")).Visibility = Visibility.Collapsed;
-			//	//}
-			//	//else
-			//	//{
-			//	StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
-			//	foreach (var element in sequenceView.ListeRefecrences)
-			//	{					
-			//		panel.Children.Add(element.Value);					
-			//		element.Value.Click += cbxReadOnly_Click;
-			//	}
-			//	//}
-			//}
-			//catch (Exception ex)
-			//{
-			//	ex.ExceptionCatcher();
-			//}
+		{ 		
 		}
 
 		private void btnNext_Click(object sender, RoutedEventArgs e)
@@ -1425,61 +1401,63 @@ namespace DOCUMAT.Pages.Image
 							tbListeReferences.Visibility = Visibility.Collapsed;
                             #endregion
                         }
-                        else if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
+					}
+				}
+				else if(dgSequenceIndex.SelectedItems.Count == 1)
+				{
+					if(MessageBox.Show("Corriger la Séquence ?", "Confirmez Correction", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+					{
+						if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
 						{
+							SequenceView sequenceView = (SequenceView)dgSequenceIndex.SelectedItem;
 							using (var ct = new DocumatContext())
 							{
-								SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
-								if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
+								//Ajout de la séquence
+								int OrdreSequence = 0;
+								string DateSequence = tbDateSequence.Text, references = "", isSpecial = "";
+
+								foreach (var refin in References)
 								{
-									//Ajout de la séquence
-									int OrdreSequence = 0;
-									string DateSequence = tbDateSequence.Text, references = "", isSpecial = "";
-
-									foreach (var refin in References)
-									{
-										references += refin.Value + ",";
-									}
-									references = references.Remove(references.Length - 1);
-
-									if (!Int32.TryParse(tbNumeroOrdreSequence.Text, out OrdreSequence))
-									{
-										throw new Exception("Le numero d'ordre entré est incorrecte !!!");
-									}
-
-									if (cbxSautOrdre.IsChecked == true)
-									{
-										DateSequence = null;
-										references = null;
-										isSpecial = "saut";
-									}
-									else if (cbxDoublonOrdre.IsChecked == true)
-									{
-										isSpecial = "doublon";
-									}
-									else if (cbxBisOrdre.IsChecked == true)
-									{
-										isSpecial = "bis";
-									}
-
-									Models.Sequence UpSequence = ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID);
-									UpSequence.ImageID = CurrentImageView.Image.ImageID;
-									UpSequence.NUmeroOdre = OrdreSequence;
-									UpSequence.DateSequence = DateTime.Parse(DateSequence);
-									UpSequence.References = references;
-									UpSequence.isSpeciale = isSpecial;
-									UpSequence.NombreDeReferences = References.Count;
-									UpSequence.DateModif = DateTime.Now;
-									ct.SaveChanges();
-
-									// Enregistrement de L'action Agent
-									DocumatContext.AddTraitement(DocumatContext.TbSequence, UpSequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH1 : AJOUT NEW SEQUENCE ID : " + UpSequence.SequenceID + " A L'IMAGE ID : " + UpSequence.ImageID);
-
-									ActualiseDataIndexer();
+									references += refin.Value + ",";
 								}
+								references = references.Remove(references.Length - 1);
+
+								if (!Int32.TryParse(tbNumeroOrdreSequence.Text, out OrdreSequence))
+								{
+									throw new Exception("Le numero d'ordre entré est incorrecte !!!");
+								}
+
+								if (cbxSautOrdre.IsChecked == true)
+								{
+									DateSequence = null;
+									references = null;
+									isSpecial = "saut";
+								}
+								else if (cbxDoublonOrdre.IsChecked == true)
+								{
+									isSpecial = "doublon";
+								}
+								else if (cbxBisOrdre.IsChecked == true)
+								{
+									isSpecial = "bis";
+								}
+
+								Models.Sequence UpSequence = ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID);
+								UpSequence.ImageID = CurrentImageView.Image.ImageID;
+								UpSequence.NUmeroOdre = OrdreSequence;
+								UpSequence.DateSequence = DateTime.Parse(DateSequence);
+								UpSequence.References = references;
+								UpSequence.isSpeciale = isSpecial;
+								UpSequence.NombreDeReferences = References.Count;
+								UpSequence.DateModif = DateTime.Now;
+								ct.SaveChanges();
+
+								// Enregistrement de L'action Agent
+								DocumatContext.AddTraitement(DocumatContext.TbSequence, UpSequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH1 : AJOUT NEW SEQUENCE ID : " + UpSequence.SequenceID + " A L'IMAGE ID : " + UpSequence.ImageID);
+								ActualiseDataIndexer();
 							}
 						}
-					}
+                    }
 				}
             }
             catch (Exception ex)
@@ -1498,7 +1476,7 @@ namespace DOCUMAT.Pages.Image
 						&& References.Count != 0) || cbxSautOrdre.IsChecked == true)
 					{
 						SequenceView sequence = ((List<SequenceView>)dgSequenceIndex.ItemsSource).LastOrDefault();
-						int LastNumOrdre = (sequence != null) ? sequence.Sequence.NUmeroOdre : CurrentImageView.Image.FinSequence;
+						int LastNumOrdre = (sequence != null) ? sequence.Sequence.NUmeroOdre : CurrentImageView.Image.DebutSequence;
 						// Pour savoir toutes séquences sont indexées 
 						if (LastNumOrdre < CurrentImageView.Image.FinSequence)
 						{
@@ -2124,10 +2102,14 @@ namespace DOCUMAT.Pages.Image
 			}
 			else if (e.Key == System.Windows.Input.Key.Enter)
 			{
-				if (References.Count > 0 || cbxSautOrdre.IsChecked == true)
+				if ((References.Count > 0 || cbxSautOrdre.IsChecked == true) && dgSequenceIndex.SelectedItems.Count == 0)
 				{
 					this.BtnAddSequence_Click(null, new RoutedEventArgs());
 				}
+				else if(dgSequenceIndex.SelectedItems.Count > 0)
+                {
+					this.BtnModifierSequence_Click(null, new RoutedEventArgs());
+                }
 			}
 		}
 
@@ -2394,6 +2376,49 @@ namespace DOCUMAT.Pages.Image
                 {
 					ex.ExceptionCatcher();
                 }		
+			}
+		}
+
+        private void dgSequenceIndex_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+			if (dgSequenceIndex.SelectedItems.Count > 0)
+			{
+				SequenceView sequenceView = (SequenceView)dgSequenceIndex.SelectedItem;
+				// On décoche les cases à cocher à chaque changement de séquence
+				cbxSautOrdre.IsChecked = false;
+				cbxBisOrdre.IsChecked = false;
+				cbxDoublonOrdre.IsChecked = false;
+
+				if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.CREEE)
+				{
+					#region CAS DES NOUVELLE SEQUENCE D'IMAGE MANQUANTE
+					tbNumeroOrdreSequence.IsEnabled = true;
+					tbDateSequence.IsEnabled = true;
+					tbReference.IsEnabled = true;
+					cbxSautOrdre.IsEnabled = false;
+					cbxBisOrdre.IsEnabled = true;
+					cbxDoublonOrdre.IsEnabled = true;
+					BtnAddSequence.IsEnabled = false;
+					BtnModifierSequence.IsEnabled = true;
+					BtnSupprimerSequence.IsEnabled = true;
+					tbNumeroOrdreSequence.Text = sequenceView.Sequence.NUmeroOdre.ToString();
+					tbDateSequence.Text = sequenceView.strDate;
+					tbReference.Text = "";
+					References.Clear();
+					tbListeReferences.Text = "";
+					tbListeReferences.Visibility = Visibility.Visible;
+
+					// Chargement des references 
+					foreach (var ref1 in sequenceView.Sequence.References.Split(','))
+					{
+						if(!string.IsNullOrWhiteSpace(ref1))
+                        {
+							tbListeReferences.Text += ref1 + " ";
+							References.Add(ref1,ref1);
+                        }
+					}
+					#endregion
+				}
 			}
 		}
     }

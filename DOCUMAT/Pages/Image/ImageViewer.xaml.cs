@@ -216,6 +216,16 @@ namespace DOCUMAT.Pages.Image
 				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
 				if(imageView1 != null)
                 {
+					// Chargement de la visionneuse
+					if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
+					{
+						viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
+					}
+					else
+					{
+						MessageBox.Show("La page : \"" + imageView1.Image.NomPage + "\" est introuvable !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+						return;
+					}
 
 					//On change l'image actuelle
 					CurrentImageView = imageView1;
@@ -242,16 +252,6 @@ namespace DOCUMAT.Pages.Image
 						tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
 						tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
 					}
-
-					// Chargement de la visionneuse
-					if (File.Exists(Path.Combine(DossierRacine,imageView1.Image.CheminImage)))
-                    {
-						viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
-                    }
-					else
-                    {
-						MessageBox.Show("La page : \"" + imageView1.Image.NomPage + "\" est introuvable !!!","AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Warning);
-                    }
 					#endregion
 
 					#region RECUPERATION DES SEQUENCES DE L'IMAGE
@@ -427,47 +427,54 @@ namespace DOCUMAT.Pages.Image
 			// Récupération des images du registre
 			ImageView imageView1 = new ImageView();
 			List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
+			FileInfo fileInfo = new FileInfo(Path.Combine(DossierRacine, RegistreViewParent.CheminDossier,treeViewItem.Header.ToString()));
 
-			//Chargement de l'image 
+			// Chargement de l'image 
 			int numeroPage = 0;
-
-			//Cas d'une page normal (Page numérotée)
-			if (Int32.TryParse(treeViewItem.Header.ToString().Remove(treeViewItem.Header.ToString().Length - 4), out numeroPage))
+			if (fileInfo.Exists)
 			{
-				currentImage = numeroPage;
-				ChargerImage(currentImage);
-			}
-			else if (treeViewItem.Header.ToString().Remove(treeViewItem.Header.ToString().Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
-			{
-				//Affichage de la page de garde
-				currentImage = -1;
-				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == -1);
+				//Cas d'une page normal (Page numérotée)
+				if (Int32.TryParse(fileInfo.Name.Remove(fileInfo.Name.Length - fileInfo.Extension.Length), out numeroPage))
+				{
+					currentImage = numeroPage;
+					ChargerImage(currentImage);
+				}
+				else if (fileInfo.Name.Remove(fileInfo.Name.Length - fileInfo.Extension.Length).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower())
+				{
+					//Affichage de la page de garde
+					currentImage = -1;
+					imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == -1);
 
-				tbxNomPage.Text = "PAGE DE GARDE";
-				tbxNumeroPage.Text = "";
-				tbNumeroOrdreSequence.Text = "";
-				tbDateSequence.Text = "";
-				tbReference.Text = "";
-				dgSequence.ItemsSource = null;
-				// Chargement de l'image		
-				ChargerImage(currentImage);
+					tbxNomPage.Text = "PAGE DE GARDE";
+					tbxNumeroPage.Text = "";
+					tbNumeroOrdreSequence.Text = "";
+					tbDateSequence.Text = "";
+					tbReference.Text = "";
+					dgSequence.ItemsSource = null;
+					// Chargement de l'image		
+					ChargerImage(currentImage);
 
-			}
-			else if (treeViewItem.Header.ToString().Remove(treeViewItem.Header.ToString().Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
-			{
-				//Affichage de la page d'ouverture
-				currentImage = 0;
-				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == 0);				
+				}
+				else if (fileInfo.Name.Remove(fileInfo.Name.Length - fileInfo.Extension.Length).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
+				{
+					//Affichage de la page d'ouverture
+					currentImage = 0;
+					imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == 0);				
 
-				tbxNomPage.Text = "PAGE D'OUVERTURE";
-				tbxNumeroPage.Text = "";
-				tbNumeroOrdreSequence.Text = "";
-				tbDateSequence.Text = "";
-				tbReference.Text = "";
-				dgSequence.ItemsSource = null;
-				// Chargement de l'image		
-				ChargerImage(currentImage);
-			}
+					tbxNomPage.Text = "PAGE D'OUVERTURE";
+					tbxNumeroPage.Text = "";
+					tbNumeroOrdreSequence.Text = "";
+					tbDateSequence.Text = "";
+					tbReference.Text = "";
+					dgSequence.ItemsSource = null;
+					// Chargement de l'image		
+					ChargerImage(currentImage);
+				}
+            }
+			else
+            {
+				MessageBox.Show("L'image n'existe pas dans le dossier de scan !", "Image Introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
 		}
 
 		private void btnAnnule_Click(object sender, RoutedEventArgs e)
@@ -506,7 +513,6 @@ namespace DOCUMAT.Pages.Image
 									"\n Nombre pages attendues : " + (RegistreViewParent.Registre.NombrePage + 2),"AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Asterisk) ;
                 }
 
-
 				// Affichage et configuration de la TreeView
 				registreAbre.Header = RegistreViewParent.Registre.QrCode;
 				registreAbre.Tag = RegistreViewParent.Registre.QrCode;
@@ -515,12 +521,14 @@ namespace DOCUMAT.Pages.Image
 
 				// Définition de la lettre de référence pour ce registre
 				if (RegistreViewParent.Registre.Type == "R4")
+                {
 					RefInitiale = "T";
+                }
 
 				// On extrait en premier la page de garde 
 				foreach (var file in files)
 				{
-					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
+					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower())
 					{
 						var fileTree = new TreeViewItem();
 						fileTree.Header = GetFileFolderName(file);
@@ -536,7 +544,7 @@ namespace DOCUMAT.Pages.Image
 				// Puis la page d'ouverture				
 				foreach (var file in files)
 				{
-					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
+					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
 					{
 						var fileTree = new TreeViewItem();
 						fileTree.Header = GetFileFolderName(file);
@@ -674,7 +682,8 @@ namespace DOCUMAT.Pages.Image
 				{
 					if (imageView.Image.StatutActuel == (int)Enumeration.Image.SCANNEE)
 					{
-						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NumeroPage.ToString());
+						string nomFile = (imageView.Image.NumeroPage > 9) ? imageView.Image.NumeroPage.ToString() : $"0{imageView.Image.NumeroPage}";
+						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == nomFile);
 						if (file != null)
 						{
 							using (var ct = new DocumatContext())
@@ -687,7 +696,7 @@ namespace DOCUMAT.Pages.Image
 								image.DateModif = DateTime.Now;
 								image.DateCreation = DateTime.Now;
 								image.StatutActuel = (int)Enumeration.Image.CREEE;
-								image.NomPage = imageView.Image.NumeroPage.ToString();
+								image.NomPage = nomFile	;
 								ct.SaveChanges();
 
 								// Création du nouveau Statut 
@@ -704,14 +713,14 @@ namespace DOCUMAT.Pages.Image
 						}
 						else
 						{
-							ListPageIntrouvable = ListPageIntrouvable + imageView.Image.NumeroPage + ", ";
-							//throw new Exception("La Page N°" + imageView.Image.NumeroPage + " est introuvable ");
+							ListPageIntrouvable = ListPageIntrouvable + imageView.Image.NumeroPage + " ,";
 						}
 					}
 				}
 
 				if(ListPageIntrouvable != "")
                 {
+					//ListPageIntrouvable = ListPageIntrouvable.Remove()
 					MessageBox.Show("Impossible de retrouver La/les Page(s) de numéro : " + ListPageIntrouvable,"AVERTISSEMENT", MessageBoxButton.OK,MessageBoxImage.Warning);
                 }
 				#endregion
@@ -727,7 +736,6 @@ namespace DOCUMAT.Pages.Image
 
 				// Modification des information d'entête
 				HeaderInfosGetter();
-
 
 				#region VERIFICATION DE L'AGENT 				
 				using (var ct = new DocumatContext())
@@ -905,27 +913,6 @@ namespace DOCUMAT.Pages.Image
 												"\n Nombre Références Saisi : " + References.Count +
 												"\n Nombre Références Préindexé : " + sequenceSpecial.NombreDeReferences, "NOMBRE DE REFERENCE INCORRECTE", MessageBoxButton.OK, MessageBoxImage.Warning);
 											return;
-											//if (MessageBox.Show("Nombre de références attendu est différent de celui que vous avez entré, " +
-											//				   "Revérifier SVP toutes les références. appuyer #OUI, si Vous êtes sûr que les références que vous avez entrées sont correctes ",
-											//				   "NOMBRE REFERENCES INCORRECTE",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
-           //                                 {
-											//	// Un contrôle de référence/indexée doit être fait avant l'update
-											//	sequenceSpecial.DateSequence = DateTime.Parse(tbDateSequence.Text);
-											//	sequenceSpecial.DateCreation = DateTime.Now;
-											//	sequenceSpecial.DateModif = DateTime.Now;
-											//	sequenceSpecial.References = "";
-											//	foreach (var refer in References)
-											//	{
-											//		if (References.Last().Key != refer.Key)
-											//			sequenceSpecial.References = sequenceSpecial.References + refer.Value + ",";
-											//		else
-											//			sequenceSpecial.References = sequenceSpecial.References + refer.Value;
-											//	}
-											//}
-											//else
-           //                                 {
-											//	return;
-           //                                 }
 										}
                                     }
 									else
@@ -974,29 +961,7 @@ namespace DOCUMAT.Pages.Image
 											MessageBox.Show("Le Nombre de Références que Vous avez saisi est différent du Nombre de Référence Préindexé " +
 															"\n Nombre Références Saisi : " + References.Count +
 															"\n Nombre Références Préindexé : " + sequence.NombreDeReferences, "NOMBRE DE REFERENCE INCORRECTE", MessageBoxButton.OK, MessageBoxImage.Warning);
-																									return;
-											//if (MessageBox.Show("Nombre de références attendu est différent de celui que vous avez entré, " +
-											//				   "Revérifier SVP toutes les références. appuyer #OUI, si Vous êtes sûr que les références que vous avez entrées son correcte !",
-											//				   "NOMBRE REFERENCES INCORRECTE", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-											//{
-											//	// Un contrôle de référence/indexée doit être fait avant l'update
-											//	sequence.DateSequence = DateTime.Parse(tbDateSequence.Text);
-											//	sequence.DateCreation = DateTime.Now;
-											//	sequence.DateModif = DateTime.Now;
-											//	sequence.isSpeciale = isSpeciale;
-											//	sequence.References = "";
-											//	foreach (var refer in References)
-											//	{
-											//		if (References.Last().Key != refer.Key)
-											//			sequence.References = sequence.References + refer.Value + ",";
-											//		else
-											//			sequence.References = sequence.References + refer.Value;
-											//	}
-											//}
-											//else
-											//                                 {
-											//	return;
-											//                                 }
+											return;
 										}
 									}
 									else

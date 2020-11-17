@@ -104,42 +104,45 @@ namespace DOCUMAT.Pages.Image
 				#endregion
 
 				#region RECUPERATION DES SEQUENCES DE L'IMAGE
-					// On vide le Dictionary des séquences de l'image précédente
-					ListeSequences.Clear();
-					using (var ct = new DocumatContext())
+				// On vide le Dictionary des séquences de l'image précédente
+				ListeSequences.Clear();
+				using (var ct = new DocumatContext())
+				{
+					List<ManquantImage> manquantImages = ct.ManquantImage.ToList();
+					// Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
+					List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID
+					&& s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
+					if (!manquantImages.Any(m =>m.IdImage == imageView1.Image.ImageID))
 					{
-						List<ManquantImage> manquantImages = ct.ManquantImage.ToList();
-						// Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
-						List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID
-						&& s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
-						if (!manquantImages.Any(m =>m.IdImage == imageView1.Image.ImageID))
+						if (sequences.Count != 0)
 						{
-							if (sequences.Count != 0)
+							//Ajout des séquences dans le Dictionary	
+							List<SequenceView> sequenceViews = SequenceView.GetSequenceCorrecte1(sequences);
+							foreach (var seq in sequenceViews)
 							{
-								dgSequence.ItemsSource = SequenceView.GetSequenceCorrecte1(sequences);				
-								//Ajout des séquences dans le Dictionary					
-								foreach (var seq in SequenceView.GetSequenceCorrecte1(sequences))
-								{
-									ListeSequences.Add(seq.Sequence.SequenceID, seq);
-								}
+								ListeSequences.Add(seq.Sequence.SequenceID, seq);
 							}
-						}
-						else
-						{
-							if (sequences.Count != 0)
-							{
-								List<SequenceView> sequenceViews = SequenceView.GetViewsList(sequences);
-								//Ajout des séquences dans le Dictionary					
-								foreach (var seq in sequenceViews)
-								{
-									seq.Is_ImageManquant = true;
-									ListeSequences.Add(seq.Sequence.SequenceID, seq);
-								}
-								dgSequence.ItemsSource = sequenceViews;
-
-							}
+							dgSequence.ItemsSource = sequenceViews;				
 						}
 					}
+					else
+					{
+						if (sequences.Count != 0)
+						{
+							List<SequenceView> sequenceViews = SequenceView.GetViewsList(sequences);
+							//Ajout des séquences dans le Dictionary					
+							foreach (var seq in sequenceViews)
+							{
+								seq.Is_ImageManquant = true;
+								seq.DateFausse = true;
+								seq.OrdreFaux = true;
+								seq.ASupprimer = true;
+								ListeSequences.Add(seq.Sequence.SequenceID, seq);
+							}
+							dgSequence.ItemsSource = sequenceViews;
+						}
+					}
+				}
 				#endregion
 
 				#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE

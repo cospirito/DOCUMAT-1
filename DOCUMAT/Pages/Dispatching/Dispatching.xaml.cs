@@ -253,7 +253,6 @@ namespace DOCUMAT.Pages.Dispatching
 
         private void BtnRechercher_Click(object sender, RoutedEventArgs e)
         {
-
             try
             {
                 if (TbRechercher.Text != "")
@@ -270,7 +269,6 @@ namespace DOCUMAT.Pages.Dispatching
 
                     switch (cbChoixRecherche.SelectedIndex)
                     {
-
                         case 0:
                             // Récupération des registre par code registre
                             dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE && r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));

@@ -308,21 +308,21 @@
                                    Foreground="SteelBlue"/>
                             </StackPanel>
                             <DataGrid Name="dgSequenceIndex" 
-                        AutoGenerateColumns="False" 
-                        VerticalScrollBarVisibility="Auto"
-                        HorizontalScrollBarVisibility="Auto"
-                        IsReadOnly="True"        
-                        Visibility="Collapsed"
-                        RowDetailsVisibilityMode="VisibleWhenSelected"                         
-                        LoadingRow="dgSequence_LoadingRow"
-                        SelectionChanged="dgSequence_SelectionChanged"
-                        AreRowDetailsFrozen="False"
-                        LoadingRowDetails="dgSequence_LoadingRowDetails">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="N° Ordre" Binding="{Binding strOrdre}" />
-                                    <DataGridTextColumn Header="Date " Binding="{Binding strDate}" />
-                                    <DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />
-                                </DataGrid.Columns>
+                                    AutoGenerateColumns="False" 
+                                    VerticalScrollBarVisibility="Auto"
+                                    HorizontalScrollBarVisibility="Auto"
+                                    IsReadOnly="True"        
+                                    Visibility="Collapsed"
+                                    RowDetailsVisibilityMode="VisibleWhenSelected"                         
+                                    LoadingRow="dgSequence_LoadingRow"
+                                    SelectionChanged="dgSequenceIndex_SelectionChanged"
+                                    AreRowDetailsFrozen="False"
+                                    LoadingRowDetails="dgSequence_LoadingRowDetails">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="N° Ordre" Binding="{Binding strOrdre}" />
+                                            <DataGridTextColumn Header="Date " Binding="{Binding strDate}" />
+                                            <DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />
+                                        </DataGrid.Columns> 
                             </DataGrid>
                             <DataGrid 
                             Name="dgSequence" 

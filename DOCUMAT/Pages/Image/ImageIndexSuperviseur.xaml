@@ -269,7 +269,7 @@
                     BorderThickness="2">
                 <TreeView x:Name="FolderView"
                               Foreground="White"
-                              Margin="0 0 0 10">
+                              Margin="0 0 0 30">
                         <TreeView.Resources>
 
                             <Style TargetType="{x:Type TreeViewItem}">

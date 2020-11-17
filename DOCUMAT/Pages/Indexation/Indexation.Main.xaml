@@ -122,7 +122,6 @@
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgRegistre_LoadingRow"
-                          SelectionChanged="dgRegistre_SelectionChanged"
                           AreRowDetailsFrozen="False"
                           LoadingRowDetails="dgRegistre_LoadingRowDetails" Grid.ColumnSpan="2">
                     <DataGrid.Columns>

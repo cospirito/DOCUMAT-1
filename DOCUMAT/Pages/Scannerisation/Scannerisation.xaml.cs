@@ -51,7 +51,6 @@ namespace DOCUMAT.Pages.Scannerisation
 
         private bool ValiderScan(RegistreView registreView)
         {
-
             // Décompte des fichiers images et comparaison;
             DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(DossierRacine, registreView.Registre.CheminDossier));
             List<FileInfo> filesInfos = directoryInfo.GetFiles().ToList();
@@ -71,7 +70,7 @@ namespace DOCUMAT.Pages.Scannerisation
                     else
                     {
                         MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Garde"] + ", Vérifier le Dossier de Scan et importer la" +
-                            " PAGE DE GARDE si nécessaire !", "PAGE DE GARDE Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
+                            " PAGE DE GARDE si nécessaire !", "Registre N° : " + registreView.Registre.Numero, MessageBoxButton.OK, MessageBoxImage.Information);
                         return false;
                     }
                 }
@@ -89,7 +88,7 @@ namespace DOCUMAT.Pages.Scannerisation
                     else
                     {
                         MessageBox.Show("Le Dossier de Scan ne Contient pas d'image ayant le Nom : " + ConfigurationManager.AppSettings["Nom_Page_Ouverture"] + ", Vérifier le Dossier de Scan et importer la " +
-                        " PAGE D'OUVERTURE si nécessaire !", "PAGE D'OUVERTURE Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
+                        " PAGE D'OUVERTURE si nécessaire !", "Registre N° : " + registreView.Registre.Numero, MessageBoxButton.OK, MessageBoxImage.Information);
                         return false;
                     }
                 }
@@ -159,12 +158,11 @@ namespace DOCUMAT.Pages.Scannerisation
                             registre.DateModif = DateTime.Now;
                             registreView.context.SaveChanges();
                             RefreshRegistre();
-                            MessageBox.Show("Registre Validé et Prêt être à être Indexé !!!", "REGISTRE VALIDE", MessageBoxButton.OK, MessageBoxImage.Information);
                             return true;
                         }
                         else
                         {
-                            MessageBox.Show("L'agent de scan de login : " + LoginAgent + ", est introuvable, vérifier que l'agent existe dans la base de données", "Agent Introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show("L'agent de scan de login : " + LoginAgent + ", est introuvable, vérifier que l'agent existe dans la base de données", "Registre N° : " + registreView.Registre.Numero, MessageBoxButton.OK, MessageBoxImage.Warning);
                             return false;
                         }
                     }
@@ -173,7 +171,7 @@ namespace DOCUMAT.Pages.Scannerisation
                         MessageBox.Show("Le Nombre d'image est incorrect, Vérifier que le scan s'est bien déroulé et que le fichier log a bien été renseigné." +
                                         "\n Nombre Page Incorrect " +
                                         "\n Nombre Image Log (+PGO) : " + xmlfilesList.Count +
-                                        "\n Nombre Image Registre (+PGO) : " + (registreView.Registre.NombrePage + 2), "Nombre Page Incorrect", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                        "\n Nombre Image Registre (+PGO) : " + (registreView.Registre.NombrePage + 2), "Registre N° : " + registreView.Registre.Numero, MessageBoxButton.OK, MessageBoxImage.Warning);
                         return false;
                     }
                     #endregion
@@ -181,14 +179,14 @@ namespace DOCUMAT.Pages.Scannerisation
                 else
                 {
                     MessageBox.Show("Le fichier Métadonné de Nom : " + FileLogName + " est Introuvable. Vérifier que le Fichier a bien été importé " +
-                        "dans le Dossier du Registre et qu'il porte bien le Nom : " + FileLogName, "FICHIER LOG INTROUVABLE", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        "dans le Dossier du Registre et qu'il porte bien le Nom : " + FileLogName, "Registre N° : " + registreView.Registre.Numero, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return false;
                 }
             }
             else
             {
                 MessageBox.Show("Le nombre d'image compter dans le Dossier de Scan est différent du Nombre d'image attendu, " +
-                    "vérifier que toutes les images ont été scannées et importées !", "NOMBRE IMAGE INCORRECTE", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    "vérifier que toutes les images ont été scannées et importées !", "Registre N° : " + registreView.Registre.Numero, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
         }
@@ -350,7 +348,10 @@ namespace DOCUMAT.Pages.Scannerisation
                     {
                         // Vérification des fichiers Scannés                     
                         RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
-                        ValiderScan(registreView);
+                        if (ValiderScan(registreView))
+                        {
+                            MessageBox.Show("Scan Régistre validé !!!", "REGISTRE VALIDE", MessageBoxButton.OK, MessageBoxImage.Information);
+                        };
                     }
                 }
             }

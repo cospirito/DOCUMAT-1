@@ -338,6 +338,22 @@ namespace DOCUMAT.Pages.Image
 				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
 				if (imageView1 != null)
 				{
+					// Chargement de la visionneuse
+					if (!string.IsNullOrWhiteSpace(imageView1.Image.CheminImage))
+					{
+						if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
+						{
+							viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
+						}
+						else
+						{
+							MessageBox.Show("La page : \"" + imageView1.Image.NomPage + "\" est introuvable dans le Dossier de Scan !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+						}
+					}
+					else
+					{
+						MessageBox.Show("Le chemin de l'image de la page : " + imageView1.Image.NomPage + " est null", "Chemin image Introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
+					}
 
 					//On change l'image actuelle
 					CurrentImageView = imageView1;
@@ -363,23 +379,6 @@ namespace DOCUMAT.Pages.Image
 						tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + " / " + RegistreViewParent.Registre.NombrePage;
 						tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
 						tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
-					}
-
-					// Chargement de la visionneuse
-					if(!string.IsNullOrWhiteSpace(imageView1.Image.CheminImage))
-					{
-						if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
-						{
-							viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
-						}
-						else
-						{
-							MessageBox.Show("La page : \"" + imageView1.Image.NomPage + "\" est introuvable dans le Dossier de Scan !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
-						}
-					}
-					else
-					{
-						MessageBox.Show("Le chemin de l'image de la page : " + imageView1.Image.NomPage + " est null","Chemin image Introuvable",MessageBoxButton.OK,MessageBoxImage.Warning);
 					}
 					#endregion
 
@@ -590,7 +589,6 @@ namespace DOCUMAT.Pages.Image
 									"\n Nombre pages attendues : " + (RegistreViewParent.Registre.NombrePage + 2), "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Asterisk);
 				}
 
-
 				// Affichage et configuration de la TreeView
 				registreAbre.Header = RegistreViewParent.Registre.QrCode;
 				registreAbre.Tag = RegistreViewParent.Registre.QrCode;
@@ -612,7 +610,6 @@ namespace DOCUMAT.Pages.Image
 						fileTree.FontWeight = FontWeights.Normal;
 						fileTree.Foreground = Brushes.White;
 						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-						fileTree.MouseRightButtonUp += FileTree_MouseRightButtonUp;
 						fileInfos.Add(new FileInfo(file));
 						registreAbre.Items.Add(fileTree);
 					}
@@ -629,7 +626,6 @@ namespace DOCUMAT.Pages.Image
 						fileTree.FontWeight = FontWeights.Normal;
 						fileTree.Foreground = Brushes.White;
 						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-						fileTree.MouseRightButtonUp += FileTree_MouseRightButtonUp;
 						fileInfos.Add(new FileInfo(file));
 						registreAbre.Items.Add(fileTree);
 					}
@@ -661,7 +657,6 @@ namespace DOCUMAT.Pages.Image
 						fileTree.FontWeight = FontWeights.Normal;
 						fileTree.Foreground = Brushes.White;
 						fileTree.MouseDoubleClick += FileTree_MouseDoubleClick;
-                        fileTree.MouseRightButtonUp += FileTree_MouseRightButtonUp;
 						fileInfos.Add(new FileInfo(file.Value));
 						registreAbre.Items.Add(fileTree);
 					}
@@ -769,9 +764,11 @@ namespace DOCUMAT.Pages.Image
 				{
 					if(imageView.Image.NumeroPage != -1 && imageView.Image.NumeroPage != 0)
                     {
-						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NumeroPage.ToString());
+						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NomPage);
 						if(file == null)
-							ListPageIntrouvable = ListPageIntrouvable + imageView.Image.NumeroPage + ", ";
+                        {
+							ListPageIntrouvable = ListPageIntrouvable + file.Name + " ,";
+                        }
                     }			
 				}
 
@@ -798,10 +795,6 @@ namespace DOCUMAT.Pages.Image
 				ex.ExceptionCatcher();
 			}
 		}
-
-        private void FileTree_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        {			
-        }
 
         private void SupprimeSequence_Click(object sender, RoutedEventArgs e)
 		{
@@ -1336,11 +1329,17 @@ namespace DOCUMAT.Pages.Image
                         {
                             NumeroPage = Int32.Parse(tbNumeroPage.Text.Trim());
                             if (NumeroPage == -1)
+                            {
                                 NomPage = ConfigurationManager.AppSettings["Nom_Page_Garde"];
+                            }
                             else if (NumeroPage == 0)
-                                NomPage = ConfigurationManager.AppSettings["Nom_Page_Ouverture"];
+                            {
+                                 NomPage = ConfigurationManager.AppSettings["Nom_Page_Ouverture"];
+                            }
                             else
-                                NomPage = NumeroPage.ToString();
+                            {
+								NomPage = (NumeroPage > 9) ? NumeroPage.ToString() : $"0{NumeroPage}";
+							}
 
                             // Modification du fichier image dans le dossier de scan 						
                             string nomFichierOld = CurrentImageView.Image.NomPage + "." + CurrentImageView.Image.Type.ToLower();
@@ -1351,10 +1350,10 @@ namespace DOCUMAT.Pages.Image
                                 File.Move(System.IO.Path.Combine(DossierRacine, RegistreViewParent.Registre.CheminDossier, nomFichierOld)
                                     , System.IO.Path.Combine(DossierRacine, CheminFichier));								
                                 viewImage(System.IO.Path.Combine(DossierRacine, CheminFichier));
-                                if (File.Exists(System.IO.Path.Combine(DossierRacine, CheminFichier)))
-                                {
+                                //if (File.Exists(System.IO.Path.Combine(DossierRacine, CheminFichier)))
+                                //{
 
-                                }
+                                //}
                             }
                             else
                             {

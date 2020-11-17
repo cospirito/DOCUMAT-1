@@ -58,24 +58,8 @@ namespace DOCUMAT.Pages.Indexation
             Utilisateur = user;
         }
 
-        private void ImprimerQrCode_Click(object sender, RoutedEventArgs e)
-        {
-            //if (dgRegistre.SelectedItems.Count == 1)
-            //{
-            //    string qrCode = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
-            //    Impression.QrCode PageImp = new Impression.QrCode(qrCode);
-            //    PageImp.Show();
-            //}
-        }
-
         private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            //Définition de la colonne des numéros d'odre
-            // En plus il faut que EnableRowVirtualization="False"
-            //RegistreView view = (RegistreView)e.Row.Item;
-            //view.NumeroOrdre = e.Row.GetIndex() + 1;
-            //e.Row.Item = view;
-
             ((RegistreView)e.Row.Item).NumeroOrdre = e.Row.GetIndex() + 1;
         }
 
@@ -107,32 +91,40 @@ namespace DOCUMAT.Pages.Indexation
             ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cm;
             RefreshRegistre();
-            MenuItem menuItemRegistre = (MenuItem)cm.Items.GetItemAt(1);
+            MenuItem menuItemIndexation = (MenuItem)cm.Items.GetItemAt(0);
+            MenuItem menuItemSupervision = (MenuItem)cm.Items.GetItemAt(1);
 
             if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR 
                 || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
             {
-                menuItemRegistre.IsEnabled = true;
+                menuItemSupervision.IsEnabled = true;
+                menuItemIndexation.IsEnabled = false;
             }
             else
             {
-                menuItemRegistre.IsEnabled = false;
+                if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.INDEXATION)
+                {
+                    menuItemIndexation.IsEnabled = true;
+                }
+                else
+                {
+                    menuItemIndexation.IsEnabled = false;
+                }
+                menuItemSupervision.IsEnabled = false;
             }
         }
 
         private void IndexerImage_Click(object sender, RoutedEventArgs e)
         {
-            if(dgRegistre.SelectedItems.Count == 1)
+            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.INDEXATION)
             {
-                Image.ImageViewer imageViewer = new Image.ImageViewer((RegistreView)dgRegistre.SelectedItem,this);
-                this.IsEnabled = false;
-                imageViewer.Show();
+                if (dgRegistre.SelectedItems.Count == 1)
+                {
+                    Image.ImageViewer imageViewer = new Image.ImageViewer((RegistreView)dgRegistre.SelectedItem, this);
+                    this.IsEnabled = false;
+                    imageViewer.Show();
+                }
             }
-        }
-
-        private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
         }
 
         private void BtnRechercher_Click(object sender, RoutedEventArgs e)

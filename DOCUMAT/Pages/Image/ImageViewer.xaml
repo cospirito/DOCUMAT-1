@@ -25,20 +25,6 @@
     <Window.Resources>
         <local:StringToImageSourceConverter x:Key="ImageConverter"/>
         <local:DateConverter x:Key="DateConverter"/>
-        <!--<ContextMenu x:Key="cmButton">
-            <MenuItem Header="Ajouter"
-                      x:Name="AddSequence"
-                      Icon="{materialDesign:PackIcon Kind=AddCircle}"
-                      Click="AddSequence_Click" />
-            <MenuItem Header="Modifier"
-                      Name="ModifSequence"
-                      Icon="{materialDesign:PackIcon Kind=Edit}"
-                      Click="ModifSequence_Click" />
-            <MenuItem Header="Modifier"
-                      Name="SupprimeSequence"
-                      Icon="{materialDesign:PackIcon Kind=remove}"
-                      Click="SupprimeSequence_Click" />
-        </ContextMenu>-->
     </Window.Resources>
     <Grid Margin="0">
         <Grid.RowDefinitions>
@@ -243,8 +229,8 @@
                             Visibility="Collapsed"
                             Background="{x:Null}"
                             BorderBrush="GreenYellow"
-                            BorderThickness="1"
-                            Height="100"
+                            BorderThickness="15 1"
+                            Height="70"
                             ToolTip="Valider l'indexation du registre"                        
                                 Click="btnValideIndexation_Click">
                             <materialDesign:PackIcon Kind="CheckAll"

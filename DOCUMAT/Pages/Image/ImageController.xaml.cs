@@ -62,127 +62,135 @@ namespace DOCUMAT.Pages.Image
                 ImageView imageView1 = new ImageView();
 				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
 				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
-				//On change l'image actuelle
-				CurrentImageView = imageView1;
-				this.currentImage = currentImage;
 
-				if (imageView1.Image.NumeroPage == -1)
-				{
-					tbxNomPage.Text = "PAGE DE GARDE";
-					tbxNumeroPage.Text = "";
-					tbxDebSeq.Text = "";
-					tbxFinSeq.Text = "";
+                if (imageView1 != null)
+                {
+                    // Chargement de la visionneuse
+                    if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
+                        viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
+                    else
+                        throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
 
-				}
-				else if (imageView1.Image.NumeroPage == 0)
-				{
-					tbxNomPage.Text = "PAGE D'OUVERTURE";
-					tbxNumeroPage.Text = "";
-					tbxDebSeq.Text = "";
-					tbxFinSeq.Text = "";
+                    //On change l'image actuelle
+                    CurrentImageView = imageView1;
+                    this.currentImage = currentImage;
+
+                    if (imageView1.Image.NumeroPage == -1)
+                    {
+                        tbxNomPage.Text = "PAGE DE GARDE";
+                        tbxNumeroPage.Text = "";
+                        tbxDebSeq.Text = "";
+                        tbxFinSeq.Text = "";
+
+                    }
+                    else if (imageView1.Image.NumeroPage == 0)
+                    {
+                        tbxNomPage.Text = "PAGE D'OUVERTURE";
+                        tbxNumeroPage.Text = "";
+                        tbxDebSeq.Text = "";
+                        tbxFinSeq.Text = "";
+                    }
+                    else
+                    {
+                        tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
+                        tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
+                        tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
+                        tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
+                    }
+
+                    //Reinitialisation de l'affichage
+                    SequenceSide.IsExpanded = false;
+                    cbxManqueSequences.IsChecked = false;
+                    ImageSide.IsExpanded = false;
+                    cbxRejetImage.IsChecked = false;
+                    cbxSupprimerImage.IsChecked = false;
+
+                    #endregion
+
+                    #region RECUPERATION DES SEQUENCES DE L'IMAGE
+
+                    //On réinitialise les Manquants
+                    tbManqueSequences.Text = "";
+                    // On vide le Dictionary des séquences de l'image précédente
+                    ListeSequences.Clear();
+                    // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
+                    List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID
+                    && s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
+                    if (sequences.Count != 0)
+                    {
+                        //dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+                        //Ajout des séquences dans le Dictionary					
+                        foreach (var seq in SequenceView.GetViewsList(sequences))
+                        {
+                            ListeSequences.Add(seq.Sequence.SequenceID, seq);
+                        }
+
+                        dgSequence.ItemsSource = ListeSequences.Values.ToList();
+                    }
+                    else
+                    {
+                        //throw new Exception("Cette image n'as pas de séquences !!!");
+                    }
+                    #endregion
+
+                    #region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE
+                    // Procédure d'affichage lorsque les statuts d'images changes
+                    if (imageView1.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
+                    {
+                        using (var ct = new DocumatContext())
+                        {
+                            if (ct.Controle.FirstOrDefault(c => c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
+                                && c.PhaseControle == 1 && c.StatutControle == 0) != null)
+                            {
+                                PanelControleEnCours.Visibility = Visibility.Collapsed;
+                                PanelControleEffectue.Visibility = Visibility.Visible;
+                                ImgCorrecte.Visibility = Visibility.Visible;
+                                ImgEdit.Visibility = Visibility.Collapsed;
+                                tbxControleStatut.Text = "VALIDE";
+                            }
+                            else
+                            {
+                                PanelControleEnCours.Visibility = Visibility.Collapsed;
+                                PanelControleEffectue.Visibility = Visibility.Visible;
+                                ImgCorrecte.Visibility = Visibility.Collapsed;
+                                ImgEdit.Visibility = Visibility.Visible;
+                                tbxControleStatut.Text = "EN CORRECTION";
+                            }
+                        }
+                    }
+                    else if (imageView1.Image.StatutActuel == (int)Enumeration.Image.INDEXEE)
+                    {
+                        if (imageView1.Image.NumeroPage == -1 || imageView1.Image.NumeroPage == 0)
+                        {
+                            SequenceSide.Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            SequenceSide.Visibility = Visibility.Visible;
+                        }
+
+                        PanelControleEnCours.Visibility = Visibility.Visible;
+                        PanelControleEffectue.Visibility = Visibility.Collapsed;
+                    }
+
+                    //Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
+                    if (imageViews.All(i => i.Image.StatutActuel == (int)Enumeration.Image.PHASE1))
+                    {
+                        btnValideControle.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        btnValideControle.Visibility = Visibility.Collapsed;
+                    }
+                    #endregion
+
+                    // Actualisation de l'aborescence
+                    ActualiserArborescence();
 				}
 				else
 				{
-					tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
-					tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
-					tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
-					tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
+					MessageBox.Show("Impossible de charger la Page, Numero : " + currentImage + " , Elle n'est pas enregistrée !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
 				}
-
-				// Chargement de la visionneuse
-				if (File.Exists(Path.Combine(DossierRacine,imageView1.Image.CheminImage)))
-					viewImage(Path.Combine(DossierRacine,imageView1.Image.CheminImage));
-				else
-					throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
-
-				//Reinitialisation de l'affichage
-				SequenceSide.IsExpanded = false;
-				cbxManqueSequences.IsChecked = false;
-				ImageSide.IsExpanded = false;
-				cbxRejetImage.IsChecked = false;
-				cbxSupprimerImage.IsChecked = false;
-
-				#endregion
-
-				#region RECUPERATION DES SEQUENCES DE L'IMAGE
-
-				//On réinitialise les Manquants
-				tbManqueSequences.Text = "";
-				// On vide le Dictionary des séquences de l'image précédente
-				ListeSequences.Clear();
-				// Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
-				List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID
-				&& s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
-				if (sequences.Count != 0)
-				{
-					//dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
-					//Ajout des séquences dans le Dictionary					
-					foreach(var seq in SequenceView.GetViewsList(sequences))
-					{
-						ListeSequences.Add(seq.Sequence.SequenceID, seq);
-					}
-
-					dgSequence.ItemsSource = ListeSequences.Values.ToList();					
-				}
-				else
-				{
-					//throw new Exception("Cette image n'as pas de séquences !!!");
-				}
-				#endregion
-
-				#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE
-				// Procédure d'affichage lorsque les statuts d'images changes
-				if (imageView1.Image.StatutActuel == (int)Enumeration.Image.PHASE1)
-				{
-					using (var ct = new DocumatContext())
-					{
-						if (ct.Controle.FirstOrDefault(c => c.ImageID == imageView1.Image.ImageID && c.SequenceID == null
-							&& c.PhaseControle == 1 && c.StatutControle == 0) != null)
-						{
-							PanelControleEnCours.Visibility = Visibility.Collapsed;
-							PanelControleEffectue.Visibility = Visibility.Visible;
-							ImgCorrecte.Visibility = Visibility.Visible;
-							ImgEdit.Visibility = Visibility.Collapsed;
-							tbxControleStatut.Text = "VALIDE";
-						}
-						else
-						{
-							PanelControleEnCours.Visibility = Visibility.Collapsed;
-							PanelControleEffectue.Visibility = Visibility.Visible;
-							ImgCorrecte.Visibility = Visibility.Collapsed;
-							ImgEdit.Visibility = Visibility.Visible;
-							tbxControleStatut.Text = "EN CORRECTION";
-						}
-					}
-				}
-				else if (imageView1.Image.StatutActuel == (int)Enumeration.Image.INDEXEE)
-				{
-					if (imageView1.Image.NumeroPage == -1 || imageView1.Image.NumeroPage == 0)
-					{
-						SequenceSide.Visibility = Visibility.Collapsed;
-					}
-					else
-					{
-						SequenceSide.Visibility = Visibility.Visible;
-					}
-
-					PanelControleEnCours.Visibility = Visibility.Visible;
-					PanelControleEffectue.Visibility = Visibility.Collapsed;					
-				}
-
-				//Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
-				if (imageViews.All(i => i.Image.StatutActuel == (int)Enumeration.Image.PHASE1))
-				{
-					btnValideControle.Visibility = Visibility.Visible;
-				}
-				else
-				{
-					btnValideControle.Visibility = Visibility.Collapsed;
-				}
-				#endregion
-
-				// Actualisation de l'aborescence
-				ActualiserArborescence();
 			}
 			catch (Exception ex)
 			{
@@ -535,8 +543,8 @@ namespace DOCUMAT.Pages.Image
 					&& i.RegistreID == RegistreViewParent.Registre.RegistreID);
 					currentImage = (image != null) ? image.NumeroPage : -1;
 					ChargerImage(currentImage);
+					currentImage = numeroPage;
 				}
-				currentImage = numeroPage;
 			}
 			else if (treeViewItem.Header.ToString().Remove(treeViewItem.Header.ToString().Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
 			{
@@ -547,7 +555,6 @@ namespace DOCUMAT.Pages.Image
 				tbxNomPage.Text = "PAGE DE GARDE";
 				tbxNumeroPage.Text = "";
 				dgSequence.ItemsSource = null;
-
 			}
 			else if (treeViewItem.Header.ToString().Remove(treeViewItem.Header.ToString().Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
 			{
@@ -558,7 +565,6 @@ namespace DOCUMAT.Pages.Image
 				tbxNomPage.Text = "PAGE D'OUVERTURE";
 				tbxNumeroPage.Text = "";
 				dgSequence.ItemsSource = null;
-
 			}
 
 			// Chargement de l'image		

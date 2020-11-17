@@ -853,47 +853,50 @@ namespace DOCUMAT.Pages.Image
 		{
 			if (dgSequence.SelectedItems.Count == 1)
 			{
-				if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE3)
-				{
-					SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
-					if (sequenceView.ASupprimer)
+				if(MessageBox.Show("Confirmez la suppression ?","Confirmer Suppression",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+					if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE3)
 					{
-						using (var ct = new DocumatContext())
+						SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
+						if (sequenceView.ASupprimer)
 						{
-							//Suppression de la séquence
-							ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
-
-							// Création de la correction
-							Models.Correction correction = new Models.Correction()
+							using (var ct = new DocumatContext())
 							{
-								RegistreId = RegistreViewParent.Registre.RegistreID,
-								ImageID = sequenceView.Sequence.ImageID,
-								SequenceID = sequenceView.Sequence.SequenceID,
+								//Suppression de la séquence
+								ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
 
-								//Indexes Image mis à null
-								RejetImage_idx = null,
-								MotifRejetImage_idx = null,
+								// Création de la correction
+								Models.Correction correction = new Models.Correction()
+								{
+									RegistreId = RegistreViewParent.Registre.RegistreID,
+									ImageID = sequenceView.Sequence.ImageID,
+									SequenceID = sequenceView.Sequence.SequenceID,
 
-								//Indexes de la séquence de l'image
-								OrdreSequence_idx = null,
-								DateSequence_idx = null,
-								RefSequence_idx = null,
-								RefRejetees_idx = null,
-								ASupprimer = 1,
+									//Indexes Image mis à null
+									RejetImage_idx = null,
+									MotifRejetImage_idx = null,
 
-								DateCorrection = DateTime.Now,
-								DateCreation = DateTime.Now,
-								DateModif = DateTime.Now,
-								PhaseCorrection = 3,
-								StatutCorrection = 0,
-							};
-							ct.Correction.Add(correction);
-							ct.SaveChanges();
+									//Indexes de la séquence de l'image
+									OrdreSequence_idx = null,
+									DateSequence_idx = null,
+									RefSequence_idx = null,
+									RefRejetees_idx = null,
+									ASupprimer = 1,
+
+									DateCorrection = DateTime.Now,
+									DateCreation = DateTime.Now,
+									DateModif = DateTime.Now,
+									PhaseCorrection = 3,
+									StatutCorrection = 0,
+								};
+								ct.Correction.Add(correction);
+								ct.SaveChanges();
+							}
 						}
-					}
 
-					ActualiseDataCorriger();
-				}
+						ActualiseDataCorriger();
+					}
+                }
 			}
 		}
 
@@ -968,27 +971,6 @@ namespace DOCUMAT.Pages.Image
 
 		private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
 		{
-   //         try
-   //         {
-   //             SequenceView sequenceView = (SequenceView)e.Row.Item;
-			//	//if(sequenceView.Sequence.isSpeciale == "saut" || sequenceView.ASupprimer)
-			//	//{
-			//	//	((DockPanel)e.DetailsElement.FindName("DockPanel")).Visibility = Visibility.Collapsed;
-			//	//}
-			//	//else
-			//	//{
-			//		StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
-			//		foreach (var element in sequenceView.ListeRefecrences)
-			//		{
-			//			panel.Children.Add(element.Value);
-			//			element.Value.Click += cbxReadOnly_Click;
-			//		}
-			//	//}
-			//}
-			//catch (Exception ex)
-			//{
-			//	ex.ExceptionCatcher();
-			//}
 		}
 
 		private void btnNext_Click(object sender, RoutedEventArgs e)

@@ -104,18 +104,32 @@
                                             Height="25"
                                             Foreground="White"/>
                     </Button>
-
-                    <ComboBox x:Name="cbChoixRecherche" 
+                    <ComboBox x:Name="cbChoixunite" 
                                 Foreground="White"
-                                materialDesign:HintAssist.Hint="RECHERCHER PAR"
-                                materialDesign:HintAssist.HelperText="RECHERCHER PAR"                                                                                                      
+                                MinWidth="100"
+                                materialDesign:HintAssist.HelperText="PAR UNITE"                                                                                                      
                                 SelectedIndex="0"
-                                SelectionChanged="cbChoixRecherche_SelectionChanged"
+                                SelectionChanged="cbChoixunite_SelectionChanged"
                                 Margin="20">
-                        <ComboBoxItem Content="CODE REGISTRE"/>
-                        <ComboBoxItem Content="SERVICE" IsSelected="True" />
-                        <ComboBoxItem Content="REGION" />
-                        <ComboBoxItem Content="NUMERO VOLUME" />
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Libelle}" ></TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <ComboBox x:Name="cbChoixTranche" 
+                                Foreground="White"    
+                                MinWidth="100"
+                                materialDesign:HintAssist.HelperText="PAR TRANCHE"                                                                                                      
+                                SelectedIndex="0"
+                                SelectionChanged="cbChoixTranche_SelectionChanged"
+                                Margin="20">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Libelle}" ></TextBlock>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
                     </ComboBox>
                 </StackPanel>
 
@@ -149,7 +163,6 @@
                                     <DataGridTextColumn Header="pages attendues " Binding="{Binding Registre.NombrePage}" />
                                     <DataGridTextColumn Header="pages scannées " Binding="{Binding NombreImageScan}" />
                                     <DataGridTextColumn Header="pages enregistrées" Binding="{Binding NombreImageCompte}" />
-                                    <DataGridTextColumn Header="Agent Traitant" Binding="{Binding AgentTraitant.Noms}" />
                                     <DataGridTextColumn Header="Type de registre" Binding="{Binding Registre.Type}" />
                                     <DataGridTextColumn Header="Date Création" Binding="{Binding Registre.DateCreation, Converter={StaticResource DateConverter}}" />
                                 </DataGrid.Columns>

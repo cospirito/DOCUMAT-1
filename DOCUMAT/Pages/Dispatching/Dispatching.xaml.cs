@@ -19,6 +19,7 @@ namespace DOCUMAT.Pages.Dispatching
     {
         List<ListViewItem> listViewItems ;
         bool AllComponentisLoad = false;
+        public Models.Agent Utilisateur { get; }
 
         public void RefreshRegistre()
         {
@@ -52,6 +53,11 @@ namespace DOCUMAT.Pages.Dispatching
         public Dispatching()
         {
             InitializeComponent();
+        }
+
+        public Dispatching(Models.Agent user):this()
+        {
+            this.Utilisateur = user;
         }
 
         private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
@@ -113,7 +119,7 @@ namespace DOCUMAT.Pages.Dispatching
                     }
                     else
                     {
-                        bitmap = new BitmapImage(new Uri("/Images/user.png"), new System.Net.Cache.RequestCachePolicy());
+                        bitmap = new BitmapImage(new Uri("pack://application:,,,/Images/user.png"), new System.Net.Cache.RequestCachePolicy());
                     }
 
                     System.Windows.Controls.Image image = new System.Windows.Controls.Image()
@@ -138,16 +144,8 @@ namespace DOCUMAT.Pages.Dispatching
                         FontFamily = new System.Windows.Media.FontFamily("Agency Fb")
                     };
 
-                    //TextBlock affection = new TextBlock()
-                    //{
-                    //    Text = "Aff.. : " + Enum.GetName(typeof(Enumeration.AffectationAgent), agent.Affectation),
-                    //    VerticalAlignment = VerticalAlignment.Center,
-                    //    FontSize = 20,
-                    //    FontFamily = new System.Windows.Media.FontFamily("Agency Fb"),                        
-                    //};
                     stackPanelInfo.Children.Add(nom);
                     stackPanelInfo.Children.Add(login);
-                    //stackPanelInfo.Children.Add(affection);
 
                     ListViewItem listViewItem = new ListViewItem() { Name = "agent" + agent.AgentID.ToString(),Tag = agent.AgentID.ToString()};
                     listViewItem.MouseDoubleClick += ListViewItem_MouseDoubleClick;
@@ -185,7 +183,7 @@ namespace DOCUMAT.Pages.Dispatching
                                 if (traitement == null)
                                 {
                                     // traitement de l'attribution 
-                                    DocumatContext.AddTraitement(DocumatContext.TbRegistre, registreView.Registre.RegistreID, agent.AgentID, (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION);
+                                    DocumatContext.AddTraitement(DocumatContext.TbRegistre, registreView.Registre.RegistreID, agent.AgentID, (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION,"ATTRIBUTION POUR INDEXATION PAR L'AGENT ID N° " + Utilisateur.AgentID);
 
                                     // remise en place de l'affichage
                                     dgRegistre.IsEnabled = true;

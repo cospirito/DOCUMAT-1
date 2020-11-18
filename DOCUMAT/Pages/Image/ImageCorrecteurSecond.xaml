@@ -11,7 +11,8 @@
         mc:Ignorable="d" 
         Height="800" 
         Width="1280"
-        Background="SteelBlue">
+        Background="SteelBlue"
+        Loaded="Window_Loaded">
     <Window.Resources>
         <local:StringToImageSourceConverter x:Key="ImageConverter"/>
         <local:DateConverter x:Key="DateConverter"/>

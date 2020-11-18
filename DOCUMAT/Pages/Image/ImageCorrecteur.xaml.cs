@@ -918,6 +918,43 @@ namespace DOCUMAT.Pages.Image
 
 				// Modification des information d'entête
 				HeaderInfosGetter();
+
+				#region VERIFICATION DE L'AGENT 				
+				using (var ct = new DocumatContext())
+				{
+					if (MainParent.Utilisateur.Affectation != (int)Enumeration.AffectationAgent.ADMINISTRATEUR && MainParent.Utilisateur.Affectation != (int)Enumeration.AffectationAgent.SUPERVISEUR)
+					{
+						Models.Traitement traitementAttr = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
+															&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH1_DEBUT);
+						if (traitementAttr != null)
+						{
+							Models.Traitement traitementRegistreAgent = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
+													&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH1_DEBUT && t.AgentID == MainParent.Utilisateur.AgentID);
+							Models.Traitement traitementAutreAgent = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
+													&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH1_DEBUT && t.AgentID != MainParent.Utilisateur.AgentID);
+
+							if (traitementAutreAgent != null)
+							{
+								Models.Agent agent = ct.Agent.FirstOrDefault(t => t.AgentID == traitementAutreAgent.AgentID);
+								MessageBox.Show("Ce Registre est en Cours traitement par l'agent : " + agent.Noms, "REGISTRE EN CORRECTION PH1", MessageBoxButton.OK, MessageBoxImage.Information);
+								this.Close();
+							}
+						}
+						else
+						{
+							if (MessageBox.Show("Voulez vous commencez la correction ?", "COMMNCER LA CORRECTION PH1", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+							{
+								DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreViewParent.Registre.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CORRECTION_PH1_DEBUT, "CORRECTION PH1 COMMENCER");
+							}
+							else
+							{
+								this.Close();
+							}
+						}
+					}
+				}
+				#endregion
+
 			}
 			catch (Exception ex)
 			{
@@ -2151,63 +2188,74 @@ namespace DOCUMAT.Pages.Image
 
 		private void btnValideCorrection_Click(object sender, RoutedEventArgs e)
 		{
-			if (MessageBox.Show("Clôturer la correction du registre ?", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question)
-				== MessageBoxResult.Yes)
-			{						 
-				using (var ct = new DocumatContext())
-				{
-					//Récupération de toutes les images du registre 
-					ImageView imageView = new ImageView();
-					List<ImageView> imageViews = imageView.GetSimpleViewsList(RegistreViewParent.Registre);
+            try
+            {
+                if (MessageBox.Show("Clôturer la correction du registre ?", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question)
+            == MessageBoxResult.Yes)
+                {
+                    using (var ct = new DocumatContext())
+                    {
+                        //Récupération de toutes les images du registre 
+                        ImageView imageView = new ImageView();
+                        List<ImageView> imageViews = imageView.GetSimpleViewsList(RegistreViewParent.Registre);
 
-					Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == RegistreViewParent.Registre.RegistreID);
-					//Ajout de la correction avec le statut corriger
-					Models.Correction NewCorrection = new Models.Correction()
-					{														
-						RegistreId = RegistreViewParent.Registre.RegistreID,
-						ImageID = null,
-						SequenceID = null,
+                        Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == RegistreViewParent.Registre.RegistreID);
+                        //Ajout de la correction avec le statut corriger
+                        Models.Correction NewCorrection = new Models.Correction()
+                        {
+                            RegistreId = RegistreViewParent.Registre.RegistreID,
+                            ImageID = null,
+                            SequenceID = null,
 
-						//Indexes Image mis à null
-						RejetImage_idx = null,
-						MotifRejetImage_idx = null,
-						ASupprimer = null,
+                            //Indexes Image mis à null
+                            RejetImage_idx = null,
+                            MotifRejetImage_idx = null,
+                            ASupprimer = null,
 
-						//Indexes de la séquence de l'image
-						OrdreSequence_idx = null,
-						DateSequence_idx = null,
-						RefSequence_idx = null,
-						RefRejetees_idx = null,
+                            //Indexes de la séquence de l'image
+                            OrdreSequence_idx = null,
+                            DateSequence_idx = null,
+                            RefSequence_idx = null,
+                            RefRejetees_idx = null,
 
-						DateCorrection = DateTime.Now,
-						DateCreation = DateTime.Now,
-						DateModif = DateTime.Now,
-						PhaseCorrection = 1,
-						StatutCorrection = 0,							
-					};
-					ct.Correction.Add(NewCorrection);
-					ct.SaveChanges();
-						
-					// Récupération et modification de l'ancien statut du registre
-					Models.StatutRegistre AncienStatut = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == RegistreViewParent.Registre.RegistreID
-															&& s.Code == registre.StatutActuel);
-					AncienStatut.DateFin = AncienStatut.DateModif = DateTime.Now;
+                            DateCorrection = DateTime.Now,
+                            DateCreation = DateTime.Now,
+                            DateModif = DateTime.Now,
+                            PhaseCorrection = 1,
+                            StatutCorrection = 0,
+                        };
+                        ct.Correction.Add(NewCorrection);
+                        ct.SaveChanges();
 
-					// Création du nouveau statut de registre
-					Models.StatutRegistre NewStatut = new StatutRegistre();
-					NewStatut.Code = (int)Enumeration.Registre.PHASE2;
-					NewStatut.DateCreation = NewStatut.DateDebut = NewStatut.DateModif = DateTime.Now;
-					NewStatut.RegistreID = RegistreViewParent.Registre.RegistreID;
-					ct.StatutRegistre.Add(NewStatut);
+                        // Récupération et modification de l'ancien statut du registre
+                        Models.StatutRegistre AncienStatut = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == RegistreViewParent.Registre.RegistreID
+                                                                && s.Code == registre.StatutActuel);
+                        AncienStatut.DateFin = AncienStatut.DateModif = DateTime.Now;
 
-					//Changement du statut du registre
-					registre.StatutActuel = (int)Enumeration.Registre.PHASE2;
-					registre.DateModif = DateTime.Now;
-					ct.SaveChanges();
-					MainParent.RefreshRegistrePhase1();
-					this.Close();					
-				}
-			}
+                        // Création du nouveau statut de registre
+                        Models.StatutRegistre NewStatut = new StatutRegistre();
+                        NewStatut.Code = (int)Enumeration.Registre.PHASE2;
+                        NewStatut.DateCreation = NewStatut.DateDebut = NewStatut.DateModif = DateTime.Now;
+                        NewStatut.RegistreID = RegistreViewParent.Registre.RegistreID;
+                        ct.StatutRegistre.Add(NewStatut);
+
+                        //Changement du statut du registre
+                        registre.StatutActuel = (int)Enumeration.Registre.PHASE2;
+                        registre.DateModif = DateTime.Now;
+                        ct.SaveChanges();
+
+						//Enregistrement de la tâche
+						DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreViewParent.Registre.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CORRECTION_PH1_TERMINE, "FIN CORRECTION PH1 DU REGISTRE ID N° " + RegistreViewParent.Registre.RegistreID);
+
+						MainParent.RefreshRegistrePhase1();
+                        this.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+				ex.ExceptionCatcher();
+            }
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

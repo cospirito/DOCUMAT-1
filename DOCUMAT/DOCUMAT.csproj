@@ -147,6 +147,22 @@
     <Compile Include="Migrations\202010201935298_setDateNullableOnDateofSessionTravailTable.designer.cs">
       <DependentUpon>202010201935298_setDateNullableOnDateofSessionTravailTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202011171526538_AddTableUniteTableTranhe.cs" />
+    <Compile Include="Migrations\202011171526538_AddTableUniteTableTranhe.designer.cs">
+      <DependentUpon>202011171526538_AddTableUniteTableTranhe.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011171614335_addNumeroTranche.cs" />
+    <Compile Include="Migrations\202011171614335_addNumeroTranche.designer.cs">
+      <DependentUpon>202011171614335_addNumeroTranche.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011171638127_removeAutoInc.cs" />
+    <Compile Include="Migrations\202011171638127_removeAutoInc.designer.cs">
+      <DependentUpon>202011171638127_removeAutoInc.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011171649216_AddTbUniteTbTranche.cs" />
+    <Compile Include="Migrations\202011171649216_AddTbUniteTbTranche.designer.cs">
+      <DependentUpon>202011171649216_AddTbUniteTbTranche.cs</DependentUpon>
+    </Compile>
     <Compile Include="Models\Configs.cs" />
     <Compile Include="Models\Controle.cs" />
     <Compile Include="Models\Correction.cs" />
@@ -157,6 +173,8 @@
     <Compile Include="Models\Sequence.cs" />
     <Compile Include="Models\TableModel.cs" />
     <Compile Include="Models\Traitement.cs" />
+    <Compile Include="Models\Tranche.cs" />
+    <Compile Include="Models\Unite.cs" />
     <Compile Include="Outils\ProgressBarCirculaire.xaml.cs">
       <DependentUpon>ProgressBarCirculaire.xaml</DependentUpon>
     </Compile>
@@ -177,6 +195,12 @@
     </Compile>
     <Compile Include="Pages\Dispatching\Dispatching.xaml.cs">
       <DependentUpon>Dispatching.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Dispatching\DispatchingControle.xaml.cs">
+      <DependentUpon>DispatchingControle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Dispatching\DispatchingCorrection.xaml.cs">
+      <DependentUpon>DispatchingCorrection.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Home\Admin.Home.xaml.cs">
       <DependentUpon>Admin.Home.xaml</DependentUpon>
@@ -286,6 +310,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Dispatching\Dispatching.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Dispatching\DispatchingControle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Dispatching\DispatchingCorrection.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -413,6 +445,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202010201935298_setDateNullableOnDateofSessionTravailTable.resx">
       <DependentUpon>202010201935298_setDateNullableOnDateofSessionTravailTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011171526538_AddTableUniteTableTranhe.resx">
+      <DependentUpon>202011171526538_AddTableUniteTableTranhe.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011171614335_addNumeroTranche.resx">
+      <DependentUpon>202011171614335_addNumeroTranche.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011171638127_removeAutoInc.resx">
+      <DependentUpon>202011171638127_removeAutoInc.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011171649216_AddTbUniteTbTranche.resx">
+      <DependentUpon>202011171649216_AddTbUniteTbTranche.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

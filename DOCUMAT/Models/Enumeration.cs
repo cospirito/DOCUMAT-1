@@ -14,7 +14,7 @@ namespace DOCUMAT.Models
             INVENTAIRE,
             SCANNE,
             INDEXATION,
-            CONTROLEUR,            
+            CONTROLE,            
             CORRECTION,
             SUPERVISEUR,
             ADMINISTRATEUR
@@ -64,22 +64,30 @@ namespace DOCUMAT.Models
         // définit d'abord les traitement CUD de table générale
         public enum TypeTraitement
         {
-            CREATION,
-            MODIFICATION,
-            SUPPRESSION,
-            PREINDEXATION_REGISTRE,           
-            PREINDEXATION_REGISTRE_TERMINEE,
-            REGISTRE_SCANNE,
-            REGISTRE_ATTRIBUE_INDEXATION,
-            INDEXATION_REGISTRE_DEBUT,
-            INDEXATION_REGISTRE_TERMINE,
-            CONTROLE_PH1_DEBUT,
-            CONTROLE_PH1_TERMINE
+            CREATION, // TOUS
+            MODIFICATION, // TOUS
+            SUPPRESSION, // TOUS
+            PREINDEXATION_REGISTRE, // REGISTRE          
+            PREINDEXATION_REGISTRE_TERMINEE, // REGISTRE
+            REGISTRE_SCANNE, // REGISTRE
+            REGISTRE_ATTRIBUE_INDEXATION, // REGISTRE
+            INDEXATION_REGISTRE_DEBUT, // REGISTRE
+            INDEXATION_REGISTRE_TERMINE, // REGISTRE
+            CONTROLE_ATTIBUE, // UNITE
+            CONTROLE_PH1_DEBUT, // REGISTRE
+            CONTROLE_PH1_TERMINE, // REGISTRE
+            CORRECTION_ATTRIBUE, // UNITE
+            CORRECTION_PH1_DEBUT, // REGISTRE
+            CORRECTION_PH1_TERMINE, // REGISTRE
+            CONTROLE_PH3_DEBUT, // REGISTRE
+            CONTROLE_PH3_TERMINE, // REGISTRE
+            CORRECTION_PH3_DEBUT, // REGISTRE
+            CORRECTION_PH3_TERMINE, // REGISTRE
         }
 
         // Pour les séquences les statut sont :
         // ASupprimer : 1 oui, 0 non
         // PhaseControle : 1 phase1, 2 phase2, 3 phase3
-        //PhaseCorrection : 1 phase1, 2 phase2, 3 phase3
+        // PhaseCorrection : 1 phase1, 2 phase2, 3 phase3
     }
 }

@@ -27,6 +27,8 @@ namespace DOCUMAT.Models
         public static string TbTraitement = "Traitements";
         public static string TbConfigs = "Configs";
         public static string TbSessionTravail = "SessionTravail";
+        public static string TbUnite = "Unites";
+        public static string TbTranche = "Tranches";
 
         public DocumatContext() : base("name=DOCUMAT") {}
         public DbSet<Region> Region { get; set; }
@@ -46,6 +48,8 @@ namespace DOCUMAT.Models
         public DbSet<Traitement> Traitement { get; set; }
         public DbSet<Configs> Configs { get; set; }
         public DbSet<SessionTravail> SessionTravails { get; set; }
+        public DbSet<Unite> Unites { get; set; }
+        public DbSet<Tranche> Tranches { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

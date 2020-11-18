@@ -24,11 +24,17 @@ namespace DOCUMAT.Pages.Controle
         {
             try
             {
-                //Remplissage de la list de registre
-                //Les registres de type Phase 1 sont les registre nouvellement indexée 
-                //Devra être modifié pour empêcher l'affichage des régistres déja attribués
-                RegistreView registreView = new RegistreView();
-                dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE);
+                if (cbChoixunite.SelectedItem != null)
+                {
+                    // Liste des Unités de la Tranche
+                    Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
+                    //Remplissage de la list de registre
+                    //Les registres de type Phase 1 sont les registre nouvellement indexée 
+                    //Devra être modifié pour empêcher l'affichage des régistres déja attribués
+                    RegistreView registreView = new RegistreView();
+                    List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE && r.Registre.ID_Unite == unite.UniteID).ToList();
+                    dgRegistre.ItemsSource = registreViews;
+                }
             }
             catch (Exception ex)
             {
@@ -40,10 +46,17 @@ namespace DOCUMAT.Pages.Controle
         {
             try
             {
-                //Remplissage de la list de registre
-                // Devra être modifié pour empêcher l'affichage des régistres déja attribués
-                RegistreView registreView = new RegistreView();
-                dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2);
+                if (cbChoixunite.SelectedItem != null)
+                {
+                    // Liste des Unités de la Tranche
+                    Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
+                    //Remplissage de la list de registre
+                    //Les registres de type Phase 1 sont les registre nouvellement indexée 
+                    //Devra être modifié pour empêcher l'affichage des régistres déja attribués
+                    RegistreView registreView = new RegistreView();
+                    List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2 && r.Registre.ID_Unite == unite.UniteID).ToList();
+                    dgRegistre.ItemsSource = registreViews;
+                }
             }
             catch (Exception ex)
             {
@@ -62,36 +75,27 @@ namespace DOCUMAT.Pages.Controle
             Utilisateur = user;
         }
 
-        private void ImprimerQrCode_Click(object sender, RoutedEventArgs e)
-        {
-            //if (dgRegistre.SelectedItems.Count == 1)
-            //{
-            //    string qrCode = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
-            //    Impression.QrCode PageImp = new Impression.QrCode(qrCode);
-            //    PageImp.Show();
-            //}
-        }
-
         private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
-        {
-            //Définition de la colonne des numéros d'odre
-            // En plus il faut que EnableRowVirtualization="False"
-            //RegistreView view = (RegistreView)e.Row.Item;
-            //view.NumeroOrdre = e.Row.GetIndex() + 1;
-            //e.Row.Item = view;
-            
+        {            
             ((RegistreView)e.Row.Item).NumeroOrdre = e.Row.GetIndex() + 1;
         }
 
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
-            // Chargement de l'image du Qrcode de la ligne
-            Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
-            var element = e.DetailsElement.FindName("QrCode");
-            RegistreView registre = (RegistreView)e.Row.Item;
-            var image = qrcode.Draw(registre.Registre.QrCode, 40);
-            var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
-            ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            try
+            {
+                // Chargement de l'image du Qrcode de la ligne
+                Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
+                var element = e.DetailsElement.FindName("QrCode");
+                RegistreView registre = (RegistreView)e.Row.Item;
+                var image = qrcode.Draw(registre.Registre.QrCode, 40);
+                var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
+                ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
@@ -104,13 +108,10 @@ namespace DOCUMAT.Pages.Controle
             ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cm;
 
-            if (CurrentPhase == 1)
+            // Liste des Tranches 
+            using (var ct = new DocumatContext())
             {
-                RefreshRegistrePhase1();
-            }
-            else
-            {
-                RefreshRegistrePhase2();
+                cbChoixTranche.ItemsSource = ct.Tranches.ToList();
             }
         }
 
@@ -124,126 +125,39 @@ namespace DOCUMAT.Pages.Controle
                     case 1:
                         if (TbRechercher.Text != "")
                         {
-                            RegistreView RegistreView = new RegistreView();
-                            switch (cbChoixRecherche.SelectedIndex)
+
+                            if (cbChoixunite.SelectedItem != null)
                             {
-                                case 0:
-                                    dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.QrCode.Contains(TbRechercher.Text.ToUpper())
-                                                                && r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
-                                    break;
-                                case 1:
-                                    // Récupération des registre par service
-                                    List<Models.Service> Services1 = RegistreView.context.Service.ToList();
-                                    List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
-                                    List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
-                                    List<RegistreView> registreViews1 = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
-
-                                    var jointure1 = from r in registreViews1
-                                                    join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
-                                                    from v in table1.ToList()
-                                                    join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
-                                                    from l in table2.ToList()
-                                                    join s in Services1 on l.ServiceID equals s.ServiceID
-                                                    where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                                    select r;
-                                    dgRegistre.ItemsSource = jointure1;
-                                    break;
-                                case 2:
-                                    // Récupération des registre par service
-                                    List<Models.Region> Region2 = RegistreView.context.Region.ToList();
-                                    List<Models.Service> Services2 = RegistreView.context.Service.ToList();
-                                    List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
-                                    List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
-                                    List<RegistreView> registreViews2 = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
-
-                                    var jointure2 = from r in registreViews2
-                                                    join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
-                                                    from v in table1.ToList()
-                                                    join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
-                                                    from l in table2.ToList()
-                                                    join s in Services2 on l.ServiceID equals s.ServiceID into table3
-                                                    from s in table3.ToList()
-                                                    join rg in Region2 on s.RegionID equals rg.RegionID
-                                                    where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                                    select r;
-                                    dgRegistre.ItemsSource = jointure2;
-                                    break;
-                                case 3:
-                                    dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.Numero.Contains(TbRechercher.Text.ToUpper())
-                                                                && r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE).ToList();
-                                    break;
-                                default:
-                                    RefreshRegistrePhase1();
-                                    break;
+                                // Liste des Unités de la Tranche
+                                Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
+                                //Remplissage de la list de registre
+                                //Les registres de type Phase 1 sont les registre nouvellement indexée 
+                                //Devra être modifié pour empêcher l'affichage des régistres déja attribués
+                                RegistreView registreView = new RegistreView();
+                                List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.INDEXE 
+                                                                    && r.Registre.ID_Unite == unite.UniteID && r.Registre.Numero.ToLower().Contains(TbRechercher.Text.Trim().ToLower())).ToList();
+                                dgRegistre.ItemsSource = registreViews;
                             }
                         }
-                        else
-                        {
-                            RefreshRegistrePhase1();
-                        }
+                        else { RefreshRegistrePhase1(); }
                         break;
                     case 2:
                         if (TbRechercher.Text != "")
                         {
-                            RegistreView RegistreView = new RegistreView();
-                            switch (cbChoixRecherche.SelectedIndex)
+                            if (cbChoixunite.SelectedItem != null)
                             {
-                                case 0:
-                                    dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.QrCode.Contains(TbRechercher.Text.ToUpper())
-                                                                && r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2).ToList();
-                                    break;
-                                case 1:
-                                    // Récupération des registre par service
-                                    List<Models.Service> Services1 = RegistreView.context.Service.ToList();
-                                    List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
-                                    List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
-                                    List<RegistreView> registreViews1 = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2).ToList();
-
-                                    var jointure1 = from r in registreViews1
-                                                    join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
-                                                    from v in table1.ToList()
-                                                    join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
-                                                    from l in table2.ToList()
-                                                    join s in Services1 on l.ServiceID equals s.ServiceID
-                                                    where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                                    select r;
-                                    dgRegistre.ItemsSource = jointure1;
-                                    break;
-                                case 2:
-                                    // Récupération des registre par service
-                                    List<Models.Region> Region2 = RegistreView.context.Region.ToList();
-                                    List<Models.Service> Services2 = RegistreView.context.Service.ToList();
-                                    List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
-                                    List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
-                                    List<RegistreView> registreViews2 = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2).ToList();
-
-                                    var jointure2 = from r in registreViews2
-                                                    join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
-                                                    from v in table1.ToList()
-                                                    join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
-                                                    from l in table2.ToList()
-                                                    join s in Services2 on l.ServiceID equals s.ServiceID into table3
-                                                    from s in table3.ToList()
-                                                    join rg in Region2 on s.RegionID equals rg.RegionID
-                                                    where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                                    select r;
-                                    dgRegistre.ItemsSource = jointure2;
-                                    break;
-                                case 3:
-                                    dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.Numero.Contains(TbRechercher.Text.ToUpper())
-                                                               && r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2).ToList();
-                                    break;
-                                default:
-                                    RefreshRegistrePhase2();
-                                    break;
+                                // Liste des Unités de la Tranche
+                                Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
+                                //Remplissage de la list de registre
+                                //Les registres de type Phase 1 sont les registre nouvellement indexée 
+                                //Devra être modifié pour empêcher l'affichage des régistres déja attribués
+                                RegistreView registreView = new RegistreView();
+                                List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2 
+                                                                    && r.Registre.ID_Unite == unite.UniteID && r.Registre.Numero.ToLower().Contains(TbRechercher.Text.Trim().ToLower())).ToList();
+                                dgRegistre.ItemsSource = registreViews;
                             }
                         }
-                        else
-                        {
-                            RefreshRegistrePhase2();
-                        }
-                        break;
-                    default:
+                        else { RefreshRegistrePhase2(); }
                         break;
                 }
             }
@@ -251,11 +165,6 @@ namespace DOCUMAT.Pages.Controle
             {
                 ex.ExceptionCatcher();
             }
-        }
-
-        private void cbChoixRecherche_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
         }
 
         private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -317,6 +226,58 @@ namespace DOCUMAT.Pages.Controle
                     Image.ImageControllerSecond imageController = new Image.ImageControllerSecond((RegistreView)dgRegistre.SelectedItem, this);
                     imageController.Show();
                 }
+            }
+        }
+
+        private void cbChoixTranche_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbChoixTranche.SelectedItem != null)
+            {
+                // Liste des Unités de la Tranche
+                Models.Tranche tranche = (Models.Tranche)cbChoixTranche.SelectedItem;
+                using (var ct = new DocumatContext())
+                {
+                    if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                    {
+                        cbChoixunite.ItemsSource = ct.Unites.Where(u => u.TrancheID == tranche.TrancheID).ToList();
+                    }
+                    else if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.CONTROLE)
+                    {
+                        // Recherche des Traitement d'attibution d'Unité
+                        List<Models.Traitement> traitementsAttrAgent = ct.Traitement.Where(t => t.TableSelect.ToUpper() == DocumatContext.TbUnite.ToUpper()
+                            && t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_ATTIBUE && t.AgentID == Utilisateur.AgentID).ToList();
+                        List<Unite> unites = ct.Unites.Where(u => u.TrancheID == tranche.TrancheID ).ToList();
+
+                        var jointure = from t in traitementsAttrAgent
+                                       join u in unites on t.TableID equals u.UniteID
+                                       select u;
+
+                        cbChoixunite.ItemsSource = jointure;
+                    }
+                }
+            }
+        }
+
+        private void cbChoixunite_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if(cbChoixunite.SelectedItem != null)
+                {
+                    if (CurrentPhase == 1)
+                    {
+
+                        RefreshRegistrePhase1();
+                    }
+                    else
+                    {
+                        RefreshRegistrePhase2();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
             }
         }
     }

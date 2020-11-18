@@ -8,9 +8,10 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="Dispatching Indexation" 
+        MinHeight="800"
+        MinWidth="1200"
         Height="800" 
         Width="1200"
-        WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Background="SteelBlue"
         Loaded="Window_Loaded">
@@ -32,15 +33,10 @@
                       x:Name="AttRegistre"                      
                       Icon="{materialDesign:PackIcon Kind=VectorSelection}"
                       Click="AttRegistre_Click"/>
-            <!--<MenuItem Header="Supprimer"   
-                      Name="SupprimerFeuillet"
-                      Icon="{materialDesign:PackIcon Kind=Remove}"
-                      Click="SupprimerFeuillet_Click"/>-->
         </ContextMenu>
     </Window.Resources>
 
     <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
-
         <StackPanel 
                     Orientation="Horizontal"
                     VerticalAlignment="Center"
@@ -163,58 +159,6 @@
                             </Style.Triggers>
                         </Style>
                     </DataGrid.Resources>
-                    <!--Details sur le versement--><!--
-                    <DataGrid.RowDetailsTemplate>
-                        <DataTemplate>
-                            <DockPanel>
-                                <Image DockPanel.Dock="Left" 
-                                               x:Name="QrCode"
-                                               Source="{Binding QrCode}" 
-                                               Height="70"
-                                               Width="70"
-                                               Stretch="UniformToFill"
-                                               Margin="10" />
-                                <StackPanel Orientation="Vertical" Margin="10,10,10,10">
-                                    --><!--<StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="Agent Versant : " FontWeight="Bold" Grid.Row="2" />
-                                                <TextBlock Text="{Binding AgentVersant.Noms}" Grid.Column="1" Grid.Row="2" />
-                                            </StackPanel>--><!--
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Numéro dépôt du début : " FontWeight="Bold" Grid.Row="2" />
-                                        <TextBlock Text="{Binding Registre.NumeroDepotDebut}" Grid.Column="1" Grid.Row="2" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Date de dépôt du début : " FontWeight="Bold" Grid.Row="2" />
-                                        <TextBlock Text="{Binding Registre.DateDepotDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                    </StackPanel>
-                                </StackPanel>
-                                <StackPanel Orientation="Vertical" Margin="10,10,10,10">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Numéro de dépot de fin : " FontWeight="Bold" Grid.Row="2" />
-                                        <TextBlock Text="{Binding Registre.NumeroDepotFin}" Grid.Column="1" Grid.Row="2" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Date de dépôt de fin : " FontWeight="Bold" Grid.Row="2" />
-                                        <TextBlock Text="{Binding Registre.DateDepotFin,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Date de changement du statut : " FontWeight="Bold" Grid.Row="2" />
-                                        <TextBlock Text="{Binding StatutActuel.DateDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                    </StackPanel>
-                                </StackPanel>
-                                <StackPanel Orientation="Vertical" Margin="10,10,10,10">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Date de Création : " FontWeight="Bold" Grid.Row="2" />
-                                        <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Dernière modification : " FontWeight="Bold" Grid.Row="2" />
-                                        <TextBlock Text="{Binding Registre.DateModif,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </DockPanel>
-                        </DataTemplate>
-                    </DataGrid.RowDetailsTemplate>-->
                 </DataGrid>
             </Border>
 
@@ -235,44 +179,20 @@
                     </StackPanel>
                     <ListView ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               Height="500" x:Name="ListAgentSelected">
-                    <ListView.Resources>
-                        <Style TargetType="ListView">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="White" />
-                                    <Setter Property="Foreground" Value="SteelBlue" />
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="false">
-                                    <Setter Property="Background" Value="SteelBlue" />
-                                    <Setter Property="Foreground" Value="White" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListView.Resources>
-                        <!--<ListViewItem Padding="15">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="/Images/user.png"
-                                   Height="50">
-                                </Image>
-                                <StackPanel>
-                                    <TextBlock Margin="20 0 0 0"
-                                           Text="Nom et Prénoms" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
-                                    <TextBlock Margin="20 0 0 0"
-                                           Text="Login" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
-                                    <TextBlock Margin="20 0 0 0"
-                                           Text="SCANNERISATION" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </ListViewItem>-->
+                        <ListView.Resources>
+                            <Style TargetType="ListView">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="White" />
+                                        <Setter Property="Foreground" Value="SteelBlue" />
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="false">
+                                        <Setter Property="Background" Value="SteelBlue" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.Resources>
                     </ListView>
                 </StackPanel>
             </Border>

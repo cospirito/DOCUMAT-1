@@ -476,55 +476,6 @@ namespace DOCUMAT.Pages.Image
 
 		private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
 		{
-			//try
-			//{
-   //             SequenceView sequenceView = (SequenceView)e.Row.Item;
-   //             StackPanel panel = (StackPanel)e.DetailsElement.FindName("ListeReferences");
-   //             CheckBox cbxNumOrdre = (CheckBox)e.DetailsElement.FindName("cbxNumOrdre");
-   //             CheckBox cbxDate = (CheckBox)e.DetailsElement.FindName("cbxDate");
-
-   //             if (sequenceView.Is_ImageManquant == true)
-   //             {
-   //                 //cbxDate.Foreground = Brushes.White;
-   //                 cbxDate.IsEnabled = true;
-   //                 cbxNumOrdre.Foreground = Brushes.White;
-   //                 cbxNumOrdre.IsEnabled = true;
-   //             }
-   //             else
-   //             {
-   //                 if (sequenceView.DateFausse)
-   //                 {
-   //                     cbxDate.Foreground = Brushes.GreenYellow;
-   //                     cbxDate.IsEnabled = true;
-   //                 }
-   //                 else
-   //                 {
-   //                     cbxDate.Foreground = Brushes.White;
-   //                     cbxDate.IsEnabled = false;
-   //                 }
-
-   //                 if (sequenceView.OrdreFaux)
-   //                 {
-   //                     cbxNumOrdre.Foreground = Brushes.GreenYellow;
-   //                     cbxNumOrdre.IsEnabled = true;
-   //                 }
-   //                 else
-   //                 {
-   //                     cbxNumOrdre.Foreground = Brushes.White;
-   //                     cbxNumOrdre.IsEnabled = false;
-   //                 }
-   //             }
-
-   //             //foreach (var element in sequenceView.ListeRefecrences)
-   //             //{
-   //             //    element.Value.Click += CheckBoxReferences_Click;
-   //             //    panel.Children.Add(element.Value);
-   //             //}
-   //         }
-			//catch (Exception ex)
-			//{
-			//	ex.ExceptionCatcher();
-			//}
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -659,6 +610,42 @@ namespace DOCUMAT.Pages.Image
 
 				// Modification des information d'entête
 				HeaderInfosGetter();
+
+			    #region VERIFICATION DE L'AGENT 				
+				using (var ct = new DocumatContext())
+				{
+					if (MainParent.Utilisateur.Affectation != (int)Enumeration.AffectationAgent.ADMINISTRATEUR && MainParent.Utilisateur.Affectation != (int)Enumeration.AffectationAgent.SUPERVISEUR)
+					{
+						Models.Traitement traitementAttr = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
+															&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_PH3_DEBUT);
+						if (traitementAttr != null)
+						{
+							Models.Traitement traitementRegistreAgent = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
+													&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_PH3_DEBUT && t.AgentID == MainParent.Utilisateur.AgentID);
+							Models.Traitement traitementAutreAgent = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
+													&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_PH3_DEBUT && t.AgentID != MainParent.Utilisateur.AgentID);
+
+							if(traitementAutreAgent != null)
+							{
+								Models.Agent agent = ct.Agent.FirstOrDefault(t => t.AgentID == traitementAutreAgent.AgentID);
+								MessageBox.Show("Ce Registre est en Cours traitement par l'agent : " + agent.Noms, "REGISTRE EN CONTROLE PH3", MessageBoxButton.OK,MessageBoxImage.Information);
+								this.Close();
+							}
+						}
+						else
+						{
+							if (MessageBox.Show("Voulez vous commencez le contrôle ?", "COMMNCER LE CONTROLE PH3", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+							{							
+								DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreViewParent.Registre.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CONTROLE_PH3_DEBUT, "CONTROLE PH3 COMMENCER");
+							}
+							else
+							{
+								this.Close();
+							}
+						}
+					}
+				}
+				#endregion
 			}
 			catch (Exception ex)
 			{
@@ -1066,114 +1053,124 @@ namespace DOCUMAT.Pages.Image
 
 		private void btnValideControle_Click(object sender, RoutedEventArgs e)
 		{
-			ImageView imageView1 = new ImageView();
-			List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
-			//Si toute les images sont marqué en phase 1 
-			if (imageViews.All(i => i.Image.StatutActuel != (int)Enumeration.Image.PHASE2))
-			{
-				//On demande une autorisation
-				if (MessageBox.Show("Voulez vous terminer le contrôle de ce registre ?", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question)
-					== MessageBoxResult.Yes)
-				{
-					//Ne prends en charge pour l'instant les manquants d'image
-					using (var ct = new DocumatContext())
-					{
-						int Registre_is_check = 0;
-						// Cas où un index au moins à été réjété
-						if (ct.Controle.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.PhaseControle == 3
-														 && c.StatutControle == 1))
-						{
-							Registre_is_check = 1;
-						}
+            try
+            {
+                ImageView imageView1 = new ImageView();
+                List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
+                //Si toute les images sont marqué en phase 1 
+                if (imageViews.All(i => i.Image.StatutActuel != (int)Enumeration.Image.PHASE2))
+                {
+                    //On demande une autorisation
+                    if (MessageBox.Show("Voulez vous terminer le contrôle de ce registre ?", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                        == MessageBoxResult.Yes)
+                    {
+                        //Ne prends en charge pour l'instant les manquants d'image
+                        using (var ct = new DocumatContext())
+                        {
+                            int Registre_is_check = 0;
+                            // Cas où un index au moins à été réjété
+                            if (ct.Controle.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.PhaseControle == 3
+                                                             && c.StatutControle == 1))
+                            {
+                                Registre_is_check = 1;
+                            }
 
-						//Création du controle de registre 
-						Models.Controle controle = new Models.Controle()
-						{
-							RegistreId = RegistreViewParent.Registre.RegistreID,
-							ImageID = null,
-							SequenceID = null,
+                            //Création du controle de registre 
+                            Models.Controle controle = new Models.Controle()
+                            {
+                                RegistreId = RegistreViewParent.Registre.RegistreID,
+                                ImageID = null,
+                                SequenceID = null,
 
-							//Indexes Image mis à null
-							RejetImage_idx = null,
-							MotifRejetImage_idx = null,
-							ASupprimer = null,
+                                //Indexes Image mis à null
+                                RejetImage_idx = null,
+                                MotifRejetImage_idx = null,
+                                ASupprimer = null,
 
-							//Indexes de la séquence de l'image
-							OrdreSequence_idx = null,
-							DateSequence_idx = null,
-							RefSequence_idx = null,
-							RefRejetees_idx = null,
+                                //Indexes de la séquence de l'image
+                                OrdreSequence_idx = null,
+                                DateSequence_idx = null,
+                                RefSequence_idx = null,
+                                RefRejetees_idx = null,
 
-							DateControle = DateTime.Now,
-							DateCreation = DateTime.Now,
-							DateModif = DateTime.Now,
-							PhaseControle = 3,
-							StatutControle = Registre_is_check,
-						};
-						ct.Controle.Add(controle);
+                                DateControle = DateTime.Now,
+                                DateCreation = DateTime.Now,
+                                DateModif = DateTime.Now,
+                                PhaseControle = 3,
+                                StatutControle = Registre_is_check,
+                            };
+                            ct.Controle.Add(controle);
 
-						//Création de la correction au cas où le registre est réjété
-						if (Registre_is_check == 1)
-						{
-							Models.Correction correction = new Models.Correction()
-							{
-								RegistreId = RegistreViewParent.Registre.RegistreID,
-								ImageID = null,
-								SequenceID = null,
+                            //Création de la correction au cas où le registre est réjété
+                            if (Registre_is_check == 1)
+                            {
+                                Models.Correction correction = new Models.Correction()
+                                {
+                                    RegistreId = RegistreViewParent.Registre.RegistreID,
+                                    ImageID = null,
+                                    SequenceID = null,
 
-								//Indexes Image mis à null
-								RejetImage_idx = null,
-								MotifRejetImage_idx = null,
-								ASupprimer = null,
+                                    //Indexes Image mis à null
+                                    RejetImage_idx = null,
+                                    MotifRejetImage_idx = null,
+                                    ASupprimer = null,
 
-								//Indexes de la séquence de l'image
-								OrdreSequence_idx = null,
-								DateSequence_idx = null,
-								RefSequence_idx = null,
-								RefRejetees_idx = null,
+                                    //Indexes de la séquence de l'image
+                                    OrdreSequence_idx = null,
+                                    DateSequence_idx = null,
+                                    RefSequence_idx = null,
+                                    RefRejetees_idx = null,
 
-								DateCorrection = DateTime.Now,
-								DateCreation = DateTime.Now,
-								DateModif = DateTime.Now,
-								PhaseCorrection = 3,
-								StatutCorrection = Registre_is_check,
-							};
-							ct.Correction.Add(correction);
-						}
+                                    DateCorrection = DateTime.Now,
+                                    DateCreation = DateTime.Now,
+                                    DateModif = DateTime.Now,
+                                    PhaseCorrection = 3,
+                                    StatutCorrection = Registre_is_check,
+                                };
+                                ct.Correction.Add(correction);
+                            }
 
-						// Changement du statut du registre 
-						// Récupération de l'ancien statut 
-						Models.StatutRegistre StatutActu = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == RegistreViewParent.Registre.RegistreID
-																							&& s.Code == (int)Enumeration.Registre.PHASE2);
-						StatutActu.DateFin = DateTime.Now;
-						StatutActu.DateModif = DateTime.Now;
+                            // Changement du statut du registre 
+                            // Récupération de l'ancien statut 
+                            Models.StatutRegistre StatutActu = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == RegistreViewParent.Registre.RegistreID
+                                                                                                && s.Code == (int)Enumeration.Registre.PHASE2);
+                            StatutActu.DateFin = DateTime.Now;
+                            StatutActu.DateModif = DateTime.Now;
 
-						Models.StatutRegistre NewStatut = new StatutRegistre()
-						{
-							RegistreID = RegistreViewParent.Registre.RegistreID,
-							Code = (int)Enumeration.Registre.PHASE3,
-							DateDebut = DateTime.Now,
-							DateCreation = DateTime.Now,
-							DateModif = DateTime.Now,
-						};
-						ct.StatutRegistre.Add(NewStatut);
+                            Models.StatutRegistre NewStatut = new StatutRegistre()
+                            {
+                                RegistreID = RegistreViewParent.Registre.RegistreID,
+                                Code = (int)Enumeration.Registre.PHASE3,
+                                DateDebut = DateTime.Now,
+                                DateCreation = DateTime.Now,
+                                DateModif = DateTime.Now,
+                            };
+                            ct.StatutRegistre.Add(NewStatut);
 
-						//On peut Récupérer et changer le statutActuel du registre 
-						Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == RegistreViewParent.Registre.RegistreID);
-						registre.StatutActuel = (int)Enumeration.Registre.PHASE3;
-						registre.DateModif = DateTime.Now;
+                            //On peut Récupérer et changer le statutActuel du registre 
+                            Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == RegistreViewParent.Registre.RegistreID);
+                            registre.StatutActuel = (int)Enumeration.Registre.PHASE3;
+                            registre.DateModif = DateTime.Now;
+                            ct.SaveChanges();
 
-						ct.SaveChanges();
-						//On ferme la fenêtre et on met à jour le datagrid du controle
-						MainParent.BtnPhase2_Click(null,null);
-						this.Close();
-					}
-				}
-			}
-			else
-			{
-				btnValideControle.Visibility = Visibility.Collapsed;
-			}
+                            //Enregistrement de la tâche
+                            DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreViewParent.Registre.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CONTROLE_PH3_TERMINE, "FIN CONTROLE PH3 DU REGISTRE ID N° " + RegistreViewParent.Registre.RegistreID);
+
+                            //On ferme la fenêtre et on met à jour le datagrid du controle
+                            MainParent.BtnPhase2_Click(null, null);
+                            this.Close();
+                        }
+                    }
+                }
+                else
+                {
+                    btnValideControle.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+				ex.ExceptionCatcher();
+            }
 		}
 
 		private void btnSuivant_Click(object sender, RoutedEventArgs e)

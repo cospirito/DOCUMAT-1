@@ -8,8 +8,8 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen" 
         WindowStyle="ThreeDBorderWindow"
-        MinHeight="700"
-        MinWidth="1200"
+        MinHeight="777"
+        MinWidth="1250"
         ResizeMode="CanResizeWithGrip"
         SizeChanged="Window_SizeChanged"
         Loaded="Window_Loaded"       
@@ -239,22 +239,76 @@
                                            FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
-                        <ListViewItem x:Name="BtnDispatchAgent" 
+                        <Separator BorderBrush="White" BorderThickness="1">
+                            <Separator.Effect>
+                                <DropShadowEffect ShadowDepth="1"></DropShadowEffect>
+                            </Separator.Effect>
+                        </Separator>
+                        <ListViewItem x:Name="BtnDispatchAgent"                                       
                                       Padding="15"   
-                                      Mouse.MouseUp="BtnDispatchAgent_MouseDoubleClick">
+                                      Mouse.MouseUp="BtnDispatchAgent_MouseUp">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon 
-                                                 Width="30" 
-                                                 Height="30" 
+                                                 Width="15" 
+                                                 Height="15" 
                                                  Kind="BoxVariant"
                                                  Foreground="White"/>
+                                <materialDesign:PackIcon Width="20"
+                                                         Height="20"
+                                                         Kind="Numeric1"
+                                                         Foreground="White"/>
                                 <TextBlock Margin="20 0 0 0"
-                                           Text="Dispatching" 
+                                           Text="Disp. Indexation" 
                                            VerticalAlignment="Center" 
                                            FontSize="20"
                                            FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
+                        <ListViewItem x:Name="BtnDispatchControle" 
+                                      Padding="15"   
+                                      Mouse.MouseUp="BtnDispatchControle_MouseUp">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon 
+                                                 Width="15" 
+                                                 Height="15" 
+                                                 Kind="BoxVariant"
+                                                 Foreground="White"/>
+                                <materialDesign:PackIcon Width="20"
+                                                         Height="20"
+                                                         Kind="Numeric2"
+                                                         Foreground="White"/>
+                                <TextBlock Margin="20 0 0 0"
+                                           Text="Disp. Contrôle" 
+                                           VerticalAlignment="Center" 
+                                           FontSize="20"
+                                           FontFamily="Agency Fb"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem x:Name="BtnDispatchCorrection" 
+                                      Padding="15"   
+                                      Mouse.MouseUp="BtnDispatchCorrection_MouseUp">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon 
+                                                 Width="15" 
+                                                 Height="15" 
+                                                 Kind="BoxVariant"
+                                                 Foreground="White"/>
+                                <materialDesign:PackIcon Width="20"
+                                                         Height="20"
+                                                         Kind="Numeric3"
+                                                         Foreground="White"/>
+                                <TextBlock Margin="20 0 0 0"
+                                           Text="Disp. Correction" 
+                                           VerticalAlignment="Center" 
+                                           FontSize="20"
+                                           FontFamily="Agency Fb"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <Separator BorderBrush="White" BorderThickness="1">
+                            <Separator.Effect>
+                                <DropShadowEffect ShadowDepth="1"></DropShadowEffect>
+                            </Separator.Effect>
+                        </Separator>
                         <ListViewItem Padding="15" x:Name="BtnDeconnex" 
                                       MouseDoubleClick="BtnDeconnex_MouseDoubleClick">
                             <StackPanel Orientation="Horizontal">

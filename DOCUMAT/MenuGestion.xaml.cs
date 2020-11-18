@@ -32,7 +32,9 @@ namespace DOCUMAT
         
         Pages.Parametre.Parametre Parametre;
         Pages.Agent.GestionAgent GestionAgent;
-        Pages.Dispatching.Dispatching Dispatching;
+        Pages.Dispatching.Dispatching Dispatching; //Dispatching Indexation
+        Pages.Dispatching.DispatchingControle DispatchingControle; //Dispatching Indexation
+        Pages.Dispatching.DispatchingCorrection DispatchingCorrection; //Dispatching Indexation
 
         bool isDeconex = false;
 
@@ -78,6 +80,8 @@ namespace DOCUMAT
                         BtnGestionAgent.IsEnabled = false;
                         BtnParametre.IsEnabled = false;
                         BtnDispatchAgent.IsEnabled = false;
+                        BtnDispatchControle.IsEnabled = false;
+                        BtnDispatchCorrection.IsEnabled = false;
                         break;
                     case 1: //SCAN
                         BtnINVENTAIRE.IsEnabled = false;
@@ -89,6 +93,8 @@ namespace DOCUMAT
                         BtnGestionAgent.IsEnabled = false;
                         BtnDispatchAgent.IsEnabled = false;
                         BtnParametre.IsEnabled = false;
+                        BtnDispatchControle.IsEnabled = false;
+                        BtnDispatchCorrection.IsEnabled = false;
                         break;
                     case 2: //INDEXATION
                         BtnINVENTAIRE.IsEnabled = false;
@@ -100,6 +106,8 @@ namespace DOCUMAT
                         BtnGestionAgent.IsEnabled = false;
                         BtnDispatchAgent.IsEnabled = false;
                         BtnParametre.IsEnabled = false;
+                        BtnDispatchControle.IsEnabled = false;
+                        BtnDispatchCorrection.IsEnabled = false;
                         break;
                     case 3: //CONTROLE
                         BtnINVENTAIRE.IsEnabled = false;
@@ -111,6 +119,8 @@ namespace DOCUMAT
                         BtnGestionAgent.IsEnabled = false;
                         BtnDispatchAgent.IsEnabled = false;
                         BtnParametre.IsEnabled = false;
+                        BtnDispatchControle.IsEnabled = false;
+                        BtnDispatchCorrection.IsEnabled = false;
                         break;
                     case 4: // CORRECTION
                         BtnINVENTAIRE.IsEnabled = false;
@@ -122,6 +132,8 @@ namespace DOCUMAT
                         BtnGestionAgent.IsEnabled = false;
                         BtnDispatchAgent.IsEnabled = false;
                         BtnParametre.IsEnabled = false;
+                        BtnDispatchControle.IsEnabled = false;
+                        BtnDispatchCorrection.IsEnabled = false;
                         break;
                     case 5: // SUPERVISION
                         BtnINVENTAIRE.IsEnabled = true;
@@ -133,6 +145,8 @@ namespace DOCUMAT
                         BtnGestionAgent.IsEnabled = true;
                         BtnDispatchAgent.IsEnabled =true;
                         BtnParametre.IsEnabled = false;
+                        BtnDispatchControle.IsEnabled = true;
+                        BtnDispatchCorrection.IsEnabled = true;
                         break;
                     case 6: // ADMINISTRATEUR 
                         BtnINVENTAIRE.IsEnabled = true;
@@ -144,6 +158,8 @@ namespace DOCUMAT
                         BtnGestionAgent.IsEnabled = true;
                         BtnDispatchAgent.IsEnabled = true;
                         BtnParametre.IsEnabled = true;
+                        BtnDispatchControle.IsEnabled = true;
+                        BtnDispatchCorrection.IsEnabled = true;
                         break;
                     default:
                         break;
@@ -220,7 +236,9 @@ namespace DOCUMAT
             //Correction = new Pages.Correction.Correction(Utilisateur);
             Parametre = new Pages.Parametre.Parametre();
             GestionAgent = new Pages.Agent.GestionAgent(Utilisateur);
-            Dispatching = new Pages.Dispatching.Dispatching();
+            Dispatching = new Pages.Dispatching.Dispatching(Utilisateur);
+            DispatchingControle = new Pages.Dispatching.DispatchingControle(Utilisateur);
+            DispatchingCorrection = new Pages.Dispatching.DispatchingCorrection(Utilisateur);
             this.ContenuAdd.Navigate(Accueil);
 
             // Vérouillage des onglet de contrôle et de correction 
@@ -397,17 +415,47 @@ namespace DOCUMAT
             }
         }
 
-        private void BtnDispatchAgent_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {           
-            if(Dispatching.IsVisible)
+        private void BtnDispatchCorrection_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (DispatchingCorrection.IsVisible)
             {
-                if(!Dispatching.IsActive)
+                if (!DispatchingCorrection.IsActive)
+                    DispatchingCorrection.Activate();
+                DispatchingCorrection.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                DispatchingCorrection = new Pages.Dispatching.DispatchingCorrection(Utilisateur);
+                DispatchingCorrection.Show();
+            }
+        }
+
+        private void BtnDispatchControle_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (DispatchingControle.IsVisible)
+            {
+                if (!DispatchingControle.IsActive)
+                    DispatchingControle.Activate();
+                DispatchingControle.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                DispatchingControle = new Pages.Dispatching.DispatchingControle(Utilisateur);
+                DispatchingControle.Show();
+            }
+        }
+
+        private void BtnDispatchAgent_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (Dispatching.IsVisible)
+            {
+                if (!Dispatching.IsActive)
                     Dispatching.Activate();
                 Dispatching.WindowState = WindowState.Normal;
             }
             else
             {
-                Dispatching = new Pages.Dispatching.Dispatching();
+                Dispatching = new Pages.Dispatching.Dispatching(Utilisateur);
                 Dispatching.Show();
             }
         }

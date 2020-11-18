@@ -1139,7 +1139,6 @@ namespace DOCUMAT.Pages.Image
         {
             try
             {
-
                 ImageView imageView1 = new ImageView();
                 List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
                 //Si toute les images sont marqué en phase 1 
@@ -1285,8 +1284,7 @@ namespace DOCUMAT.Pages.Image
 			}
 			else
 			{
-				MessageBox.Show("Le nombre d'images dans le dossier n'est pas identique à celui attendu !!! "
-					+ fileInfos.Count + "  " + images.Count);
+				MessageBox.Show("Le nombre d'images dans le dossier n'est pas identique à celui attendu !!! " + fileInfos.Count + " / " + images.Count);
 			}
 		}
 

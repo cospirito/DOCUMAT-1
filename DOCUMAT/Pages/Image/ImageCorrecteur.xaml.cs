@@ -377,8 +377,11 @@ namespace DOCUMAT.Pages.Image
                                         UpManquant.DateCorrectionManquant = DateTime.Now;
                                         ct.SaveChanges();
 
-                                        //Chargement de la nouvelle image ajouté
-                                        currentImage = manquantImage.NumeroPage;
+										// Enregistrement du Traitement
+										DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH1 : IMAGE MANQUANT AJOUTER");
+
+										//Chargement de la nouvelle image ajouté
+										currentImage = manquantImage.NumeroPage;
 										LoadAborescence();
 										ChargerImage(currentImage);
                                     }
@@ -975,6 +978,10 @@ namespace DOCUMAT.Pages.Image
 						{
 							ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
 							ct.SaveChanges();
+
+							// Enregistrement du Traitement
+							DocumatContext.AddTraitement(DocumatContext.TbSequence, sequenceView.Sequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION, "CORRECTION PH1 : SUPPRESSION DE L'IMAGE N° ID : " + sequenceView.Sequence.ImageID);
+
 							ActualiseDataIndexer();
 						}
 					}
@@ -1020,6 +1027,9 @@ namespace DOCUMAT.Pages.Image
 								};
 								ct.Correction.Add(correction);
 								ct.SaveChanges();
+
+								// Enregistrement du Traitement
+								DocumatContext.AddTraitement(DocumatContext.TbSequence, sequenceView.Sequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION, "CORRECTION PH1 : SUPPRESSION DE L'IMAGE N° ID : " + sequenceView.Sequence.ImageID);
 							}
 						}
 
@@ -1858,6 +1868,9 @@ namespace DOCUMAT.Pages.Image
 								image.DateModif = DateTime.Now;
 								ct.SaveChanges();
 
+								// Enregistrement du Traitement
+								DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH1 : IMAGE TERMINE");
+
 								this.BtnImageSuivante_Click(sender, e);
 							}
 							else
@@ -1932,6 +1945,9 @@ namespace DOCUMAT.Pages.Image
 							image.StatutActuel = (int)Enumeration.Image.PHASE2;
 							image.DateModif = DateTime.Now;
 							ct.SaveChanges();
+
+							// Enregistrement du Traitement
+							DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH1 : IMAGE TERMINE");
 
 							this.BtnImageSuivante_Click(sender, e);
 							ActualiserArborescence();
@@ -2191,7 +2207,7 @@ namespace DOCUMAT.Pages.Image
             try
             {
                 if (MessageBox.Show("Clôturer la correction du registre ?", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question)
-            == MessageBoxResult.Yes)
+									== MessageBoxResult.Yes)
                 {
                     using (var ct = new DocumatContext())
                     {
@@ -2418,7 +2434,10 @@ namespace DOCUMAT.Pages.Image
                         };
                         ct.Correction.Add(correction);
                         ct.SaveChanges();
-                    }
+
+						// Enregistrement du Traitement
+						DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH1 : IMAGE IMPORTER SOURCE : " + btnImporterImage.Tag.ToString());
+					}
                 }
                 catch (Exception ex)
                 {

@@ -362,6 +362,9 @@ namespace DOCUMAT.Pages.Image
 									UpManquant.DateCorrectionManquant = DateTime.Now;
 									ct.SaveChanges();
 
+									// Enregistrement du Traitement
+									DocumatContext.AddTraitement(DocumatContext.TbImage,image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION,"CORRECTION PH3 : IMAGE MANQUANT AJOUTER");
+
 									//Chargement de la nouvelle image ajouté
 									currentImage = manquantImage.NumeroPage;
 									ChargerImage(currentImage);
@@ -882,53 +885,63 @@ namespace DOCUMAT.Pages.Image
 
 		private void SupprimeSequence_Click(object sender, RoutedEventArgs e)
 		{
-			if (dgSequence.SelectedItems.Count == 1)
-			{
-				if(MessageBox.Show("Confirmez la suppression ?","Confirmer Suppression",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+            try
+            {
+                if (dgSequence.SelectedItems.Count == 1)
                 {
-					if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE3)
-					{
-						SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
-						if (sequenceView.ASupprimer)
-						{
-							using (var ct = new DocumatContext())
-							{
-								//Suppression de la séquence
-								ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
+                    if (MessageBox.Show("Confirmez la suppression ?", "Confirmer Suppression", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    {
+                        if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE3)
+                        {
+                            SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
+                            if (sequenceView.ASupprimer)
+                            {
+                                using (var ct = new DocumatContext())
+                                {
+                                    //Suppression de la séquence
+                                    ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
 
-								// Création de la correction
-								Models.Correction correction = new Models.Correction()
-								{
-									RegistreId = RegistreViewParent.Registre.RegistreID,
-									ImageID = sequenceView.Sequence.ImageID,
-									SequenceID = sequenceView.Sequence.SequenceID,
+                                    // Création de la correction
+                                    Models.Correction correction = new Models.Correction()
+                                    {
+                                        RegistreId = RegistreViewParent.Registre.RegistreID,
+                                        ImageID = sequenceView.Sequence.ImageID,
+                                        SequenceID = sequenceView.Sequence.SequenceID,
 
-									//Indexes Image mis à null
-									RejetImage_idx = null,
-									MotifRejetImage_idx = null,
+                                        //Indexes Image mis à null
+                                        RejetImage_idx = null,
+                                        MotifRejetImage_idx = null,
 
-									//Indexes de la séquence de l'image
-									OrdreSequence_idx = null,
-									DateSequence_idx = null,
-									RefSequence_idx = null,
-									RefRejetees_idx = null,
-									ASupprimer = 1,
+                                        //Indexes de la séquence de l'image
+                                        OrdreSequence_idx = null,
+                                        DateSequence_idx = null,
+                                        RefSequence_idx = null,
+                                        RefRejetees_idx = null,
+                                        ASupprimer = 1,
 
-									DateCorrection = DateTime.Now,
-									DateCreation = DateTime.Now,
-									DateModif = DateTime.Now,
-									PhaseCorrection = 3,
-									StatutCorrection = 0,
-								};
-								ct.Correction.Add(correction);
-								ct.SaveChanges();
-							}
-						}
+                                        DateCorrection = DateTime.Now,
+                                        DateCreation = DateTime.Now,
+                                        DateModif = DateTime.Now,
+                                        PhaseCorrection = 3,
+                                        StatutCorrection = 0,
+                                    };
+                                    ct.Correction.Add(correction);
+                                    ct.SaveChanges();
 
-						ActualiseDataCorriger();
-					}
+                                    // Enregistrement du Traitement
+                                    DocumatContext.AddTraitement(DocumatContext.TbSequence, sequenceView.Sequence.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH3 : SUPPRESSION SEQUENCE DE L'IMAGE ID N° : " + sequenceView.Sequence.ImageID);
+                                }
+                            }
+
+                            ActualiseDataCorriger();
+                        }
+                    }
                 }
-			}
+            }
+            catch (Exception ex)
+            {
+				ex.ExceptionCatcher();
+            }
 		}
 
 		private void dgSequence_LoadingRow(object sender, DataGridRowEventArgs e)
@@ -1320,80 +1333,90 @@ namespace DOCUMAT.Pages.Image
 
 		private void BtnTerminerImage_Click(object sender, RoutedEventArgs e)
 		{
-			if (MessageBox.Show("Voulez vous terminer cette image ?", "TERMINER IMAGE", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-			{
-				if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE3)
-				{
-					#region FINALISATION DES IMAGES EN CORRECTION
-					//Vérification que l'image est totalement corrigée
-					//On vérifie que le tableau des séquences erroné est vide cela évite de faire des réquêtes supplementaires
-					//On vérifie aussi que le panel rejet image est fermé !!!
-					if (dgSequence.Items.Count == 0 && PanelRejetImage.Visibility == Visibility.Collapsed)
-					{
-						using (var ct = new DocumatContext())
-						{
-							//Récupération de la demande de correction 
-							Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID
-																&& c.SequenceID == null && c.ImageID == CurrentImageView.Image.ImageID);
+            try
+            {
+                if (MessageBox.Show("Voulez vous terminer cette image ?", "TERMINER IMAGE", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE3)
+                    {
+                        #region FINALISATION DES IMAGES EN CORRECTION
+                        //Vérification que l'image est totalement corrigée
+                        //On vérifie que le tableau des séquences erroné est vide cela évite de faire des réquêtes supplementaires
+                        //On vérifie aussi que le panel rejet image est fermé !!!
+                        if (dgSequence.Items.Count == 0 && PanelRejetImage.Visibility == Visibility.Collapsed)
+                        {
+                            using (var ct = new DocumatContext())
+                            {
+                                //Récupération de la demande de correction 
+                                Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID
+                                                                    && c.SequenceID == null && c.ImageID == CurrentImageView.Image.ImageID);
 
-							// Création d'une correction pour de l'image 
-							Models.Correction correction = new Models.Correction()
-							{
-								RegistreId = RegistreViewParent.Registre.RegistreID,
-								ImageID = CurrentImageView.Image.ImageID,
-								SequenceID = null,
+                                // Création d'une correction pour de l'image 
+                                Models.Correction correction = new Models.Correction()
+                                {
+                                    RegistreId = RegistreViewParent.Registre.RegistreID,
+                                    ImageID = CurrentImageView.Image.ImageID,
+                                    SequenceID = null,
 
-								//Indexes Image mis à null
-								RejetImage_idx = CorrectionOld.RejetImage_idx,
-								MotifRejetImage_idx = CorrectionOld.MotifRejetImage_idx,
-								ASupprimer = CorrectionOld.ASupprimer,
+                                    //Indexes Image mis à null
+                                    RejetImage_idx = CorrectionOld.RejetImage_idx,
+                                    MotifRejetImage_idx = CorrectionOld.MotifRejetImage_idx,
+                                    ASupprimer = CorrectionOld.ASupprimer,
 
-								//Indexes de la séquence de l'image
-								OrdreSequence_idx = null,
-								DateSequence_idx = null,
-								RefSequence_idx = null,
-								RefRejetees_idx = null,
+                                    //Indexes de la séquence de l'image
+                                    OrdreSequence_idx = null,
+                                    DateSequence_idx = null,
+                                    RefSequence_idx = null,
+                                    RefRejetees_idx = null,
 
-								DateCorrection = DateTime.Now,
-								DateCreation = DateTime.Now,
-								DateModif = DateTime.Now,
-								PhaseCorrection = 3,
-								StatutCorrection = 0,
-							};
-							ct.Correction.Add(correction);
-							ct.SaveChanges();
+                                    DateCorrection = DateTime.Now,
+                                    DateCreation = DateTime.Now,
+                                    DateModif = DateTime.Now,
+                                    PhaseCorrection = 3,
+                                    StatutCorrection = 0,
+                                };
+                                ct.Correction.Add(correction);
+                                ct.SaveChanges();
 
-							//Récupération du statut pour le Modifier
-							Models.StatutImage statutOld = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID
-																						&& s.Code == CurrentImageView.Image.StatutActuel);
-							statutOld.DateFin = DateTime.Now;
-							statutOld.DateModif = DateTime.Now;
-							ct.SaveChanges();
+                                //Récupération du statut pour le Modifier
+                                Models.StatutImage statutOld = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID
+                                                                                            && s.Code == CurrentImageView.Image.StatutActuel);
+                                statutOld.DateFin = DateTime.Now;
+                                statutOld.DateModif = DateTime.Now;
+                                ct.SaveChanges();
 
-							//Création du nouveau statut en PHASE 2
-							Models.StatutImage statutNew = new StatutImage()
-							{
-								Code = (int)Enumeration.Image.PHASE2,
-								ImageID = CurrentImageView.Image.ImageID,
-								DateModif = DateTime.Now,
-								DateDebut = DateTime.Now,
-								DateCreation = DateTime.Now,
-							};
-							ct.StatutImage.Add(statutNew);
-							ct.SaveChanges();
+                                //Création du nouveau statut en PHASE 2
+                                Models.StatutImage statutNew = new StatutImage()
+                                {
+                                    Code = (int)Enumeration.Image.PHASE2,
+                                    ImageID = CurrentImageView.Image.ImageID,
+                                    DateModif = DateTime.Now,
+                                    DateDebut = DateTime.Now,
+                                    DateCreation = DateTime.Now,
+                                };
+                                ct.StatutImage.Add(statutNew);
+                                ct.SaveChanges();
 
-							Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
-							image.StatutActuel = (int)Enumeration.Image.PHASE2;
-							image.DateModif = DateTime.Now;
-							ct.SaveChanges();
+                                Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
+                                image.StatutActuel = (int)Enumeration.Image.PHASE2;
+                                image.DateModif = DateTime.Now;
+                                ct.SaveChanges();
 
-							this.BtnImageSuivante_Click(sender, e);
-							ActualiserArborescence();
-						}
-					}
-					#endregion
-				}
-			}
+                                // Enregistrement du Traitement
+                                DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH3 : CORRECTION TERMINE DE L'IMAGE DU REGISTRE ID N° : " + RegistreViewParent.Registre.RegistreID);
+
+                                this.BtnImageSuivante_Click(sender, e);
+                                ActualiserArborescence();
+                            }
+                        }
+                        #endregion
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+				ex.ExceptionCatcher();
+            }
 		}
 
 		private void tbDateSequence_TextChanged(object sender, TextChangedEventArgs e)
@@ -1752,18 +1775,25 @@ namespace DOCUMAT.Pages.Image
 
 		private void btnImporterImage_Click(object sender, RoutedEventArgs e)
 		{
-			OpenFileDialog open = new OpenFileDialog();
-			open.Filter = "Fichier image |*.jpg;*.png;*.tif";
-			open.Multiselect = false;
-			string NomFichier = "";
+            try
+            {
+                OpenFileDialog open = new OpenFileDialog();
+                open.Filter = "Fichier image |*.jpg;*.png;*.tif";
+                open.Multiselect = false;
+                string NomFichier = "";
 
-			if (open.ShowDialog() == true)
-			{
-				NomFichier = open.FileNames[0];
-				btnValiderImageImporte.Foreground = Brushes.GreenYellow;
-				btnImporterImage.Tag = NomFichier;
-				viewImage(NomFichier);
-			}
+                if (open.ShowDialog() == true)
+                {
+                    NomFichier = open.FileNames[0];
+                    btnValiderImageImporte.Foreground = Brushes.GreenYellow;
+                    btnImporterImage.Tag = NomFichier;
+                    viewImage(NomFichier);
+                }
+            }
+            catch (Exception ex)
+            {
+				ex.ExceptionCatcher();
+            }
 		}
 
 		private void btnValiderImageImporte_Click(object sender, RoutedEventArgs e)

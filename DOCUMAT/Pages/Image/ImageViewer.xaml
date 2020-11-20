@@ -20,7 +20,7 @@
         GotFocus="Window_GotFocus"
         Background="SteelBlue" 
         Height="900"
-        Width="1200">
+        Width="1253">
 
     <Window.Resources>
         <local:StringToImageSourceConverter x:Key="ImageConverter"/>
@@ -195,7 +195,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
-                        <RowDefinition Height="150"></RowDefinition>
+                        <RowDefinition Height="200"></RowDefinition>
                     </Grid.RowDefinitions>
                     <TreeView x:Name="FolderView"
                               Foreground="White"
@@ -358,7 +358,6 @@
                                     BorderThickness="0 1 0 1">
                                 <TextBlock x:Name="tbxNbRefsList"
                                            Text="Nb : ND" 
-                                           FontSize="15"
                                            Foreground="White"
                                            FontFamily="Agency Fb">
                                 </TextBlock>
@@ -380,7 +379,6 @@
                                     BorderThickness="0 1 0 1">
                                 <TextBlock x:Name="tbxNbRefs"
                                            Text="Refs : ND" 
-                                           FontSize="15"
                                            Foreground="White"
                                            FontFamily="Agency Fb">
                                 </TextBlock>
@@ -399,7 +397,7 @@
                                 Focusable="False"
                                 InputScope="Number"
                                 Width="50"
-                                FontSize="13"
+                                FontSize="12"
                                 Typography.NumeralAlignment="Proportional"
                                 materialDesign:HintAssist.Hint="ORDRE       "
                                 materialDesign:HintAssist.HelperText="ORDRE"
@@ -410,7 +408,7 @@
                                 CharacterCasing="Upper"
                                 InputScope="Date"
                                 Width="80"                                  
-                                FontSize="13"
+                                FontSize="12"
                                 Typography.NumeralAlignment="Proportional"
                                 materialDesign:HintAssist.Hint="DATE  "
                                 materialDesign:HintAssist.HelperText="DATE"
@@ -425,7 +423,7 @@
                                 CharacterCasing="Upper"
                                 InputScope="Number" 
                                 Width="70"
-                                FontSize="13"
+                                FontSize="12"
                                 Typography.NumeralAlignment="Proportional"
                                 materialDesign:HintAssist.Hint="REF  "
                                 materialDesign:HintAssist.HelperText="REF"
@@ -434,6 +432,29 @@
                                 LostFocus="tbReference_LostFocus"
                                 GotFocus="tbReference_GotFocus"
                                 Margin="40 20 0 10"/>
+                            <StackPanel>
+                                <Button x:Name="BtnGenererAutoRefs"
+                                            Margin="5"
+                                            BorderBrush="White"
+                                            Background="Transparent"
+                                            BorderThickness="0 3 0 0"
+                                            Foreground="White"
+                                            Click="BtnGenererAutoRefs_Click">
+                                    <materialDesign:PackIcon Kind="FlashAuto" Width="15"  />
+                                </Button>
+                                <!--<TextBox x:Name="tbAutoGenRef" 
+                                        Foreground="White"
+                                        CharacterCasing="Upper"
+                                        InputScope="Number" 
+                                        Width="20"
+                                        FontSize="12"
+                                        materialDesign:HintAssist.HelperText="Nb"
+                                        TextChanged="tbReference_TextChanged"
+                                        KeyUp="tbReference_KeyUp"
+                                        LostFocus="tbReference_LostFocus"
+                                        GotFocus="tbReference_GotFocus"/>-->       
+                            </StackPanel>
+
                         </StackPanel>
                         <StackPanel HorizontalAlignment="Center" 
                                     Orientation="Horizontal"

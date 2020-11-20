@@ -7,9 +7,9 @@
         xmlns:local="clr-namespace:DOCUMAT"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen" 
-        WindowStyle="ThreeDBorderWindow"
-        MinHeight="777"
-        MinWidth="1250"
+        WindowStyle="ThreeDBorderWindow"        
+        MinHeight="600"
+        MinWidth="900"
         ResizeMode="CanResizeWithGrip"
         SizeChanged="Window_SizeChanged"
         Loaded="Window_Loaded"       
@@ -38,7 +38,7 @@
         </EventTrigger>
     </Window.Triggers> 
     <Grid>
-        <StackPanel Margin="50 0 0 0" Background="Transparent"> 
+        <StackPanel Margin="50,0,0,0" Background="Transparent"> 
             <Grid  Height="120" Margin="0 0 0 0" >
                 <Border BorderBrush="CornflowerBlue" BorderThickness="0 0 0 1">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20">
@@ -65,7 +65,8 @@
                         MouseEnter="Button_MouseEnter"
                         MouseLeave="Button_MouseLeave"/>
                     <Button x:Name="BtnINVENTAIRE" 
-                        Uid="1" Width="150" 
+                        Uid="1" 
+                        Width="150" 
                         Content="INVENTAIRE" Height="50" 
                         Background="{x:Null}" BorderBrush="{x:Null}"
                         HorizontalAlignment="Center"                      
@@ -140,15 +141,6 @@
             <Grid x:Name="GridMain"
               SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical" 
               Background="SteelBlue">
-                <!-- shadow -->
-                <!--<Rectangle HorizontalAlignment="Left" 
-                       VerticalAlignment="Stretch" 
-                Width="12" Fill="#77000000">
-                    <Rectangle.Effect>
-                        <BlurEffect Radius="5" />
-                    </Rectangle.Effect>
-                </Rectangle>-->
-
                 <Frame x:Name="ContenuAdd" 
                    NavigationUIVisibility="Hidden" 
                    Navigated="ContenuAdd_Navigated"
@@ -157,6 +149,7 @@
                 </Frame>
             </Grid>
         </StackPanel>
+        
         <Grid x:Name="GridMenu" Width="60" HorizontalAlignment="Left" 
               Background="SteelBlue">
             <Grid.Effect>
@@ -164,8 +157,12 @@
             </Grid.Effect>
 
             <Border BorderBrush="SteelBlue" BorderThickness="0 0 1 0" >
-                <StackPanel>
-                    <Grid Background="White"> 
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="300"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid Background="White">
                         <Button x:Name="btnOpenMenu"
                             VerticalAlignment="Top" 
                             HorizontalAlignment="Right"
@@ -211,32 +208,34 @@
                                        FontFamily="Agency Fb"/>
                         </StackPanel>
                     </Grid>
-                    <ListView ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView Grid.Row="1" x:Name="optionPanel"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListViewItem x:Name="BtnParametre" Padding="15"
-                                      Mouse.MouseUp="BtnParametre_MouseDoubleClick">
+                                          Mouse.MouseUp="BtnParametre_MouseDoubleClick">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Width="30" Height="30" 
-                                                 Kind="Settings"
-                                                 Foreground="White"/>
+                                                     Kind="Settings"
+                                                     Foreground="White"/>
                                 <TextBlock Margin="20 0 0 0"
-                                           Text="Configuration" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
+                                               Text="Configuration" 
+                                               VerticalAlignment="Center" 
+                                               FontSize="20"
+                                               FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem x:Name="BtnGestionAgent" 
-                                      Padding="15" 
-                                      Mouse.MouseUp="BtnGestionAgent_MouseDoubleClick">
+                                          Padding="15" 
+                                          Mouse.MouseUp="BtnGestionAgent_MouseDoubleClick">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Width="30" Height="30" 
-                                                 Kind="UserSettings"
-                                                 Foreground="White"/>
+                                                     Kind="UserSettings"
+                                                     Foreground="White"/>
                                 <TextBlock Margin="20 0 0 0"
-                                           Text="Comptes" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
+                                               Text="Comptes" 
+                                               VerticalAlignment="Center" 
+                                               FontSize="20"
+                                               FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
                         <Separator BorderBrush="White" BorderThickness="1">
@@ -245,63 +244,63 @@
                             </Separator.Effect>
                         </Separator>
                         <ListViewItem x:Name="BtnDispatchAgent"                                       
-                                      Padding="15"   
-                                      Mouse.MouseUp="BtnDispatchAgent_MouseUp">
+                                          Padding="15"   
+                                          Mouse.MouseUp="BtnDispatchAgent_MouseUp">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon 
-                                                 Width="15" 
-                                                 Height="15" 
-                                                 Kind="BoxVariant"
-                                                 Foreground="White"/>
+                                                     Width="15" 
+                                                     Height="15" 
+                                                     Kind="BoxVariant"
+                                                     Foreground="White"/>
                                 <materialDesign:PackIcon Width="20"
-                                                         Height="20"
-                                                         Kind="Numeric1"
-                                                         Foreground="White"/>
+                                                             Height="20"
+                                                             Kind="Numeric1"
+                                                             Foreground="White"/>
                                 <TextBlock Margin="20 0 0 0"
-                                           Text="Disp. Indexation" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
+                                               Text="Disp. Indexation" 
+                                               VerticalAlignment="Center" 
+                                               FontSize="20"
+                                               FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem x:Name="BtnDispatchControle" 
-                                      Padding="15"   
-                                      Mouse.MouseUp="BtnDispatchControle_MouseUp">
+                                          Padding="15"   
+                                          Mouse.MouseUp="BtnDispatchControle_MouseUp">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon 
-                                                 Width="15" 
-                                                 Height="15" 
-                                                 Kind="BoxVariant"
-                                                 Foreground="White"/>
+                                                     Width="15" 
+                                                     Height="15" 
+                                                     Kind="BoxVariant"
+                                                     Foreground="White"/>
                                 <materialDesign:PackIcon Width="20"
-                                                         Height="20"
-                                                         Kind="Numeric2"
-                                                         Foreground="White"/>
+                                                             Height="20"
+                                                             Kind="Numeric2"
+                                                             Foreground="White"/>
                                 <TextBlock Margin="20 0 0 0"
-                                           Text="Disp. Contrôle" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
+                                               Text="Disp. Contrôle" 
+                                               VerticalAlignment="Center" 
+                                               FontSize="20"
+                                               FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem x:Name="BtnDispatchCorrection" 
-                                      Padding="15"   
-                                      Mouse.MouseUp="BtnDispatchCorrection_MouseUp">
+                                          Padding="15"   
+                                          Mouse.MouseUp="BtnDispatchCorrection_MouseUp">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon 
-                                                 Width="15" 
-                                                 Height="15" 
-                                                 Kind="BoxVariant"
-                                                 Foreground="White"/>
+                                                     Width="15" 
+                                                     Height="15" 
+                                                     Kind="BoxVariant"
+                                                     Foreground="White"/>
                                 <materialDesign:PackIcon Width="20"
-                                                         Height="20"
-                                                         Kind="Numeric3"
-                                                         Foreground="White"/>
+                                                             Height="20"
+                                                             Kind="Numeric3"
+                                                             Foreground="White"/>
                                 <TextBlock Margin="20 0 0 0"
-                                           Text="Disp. Correction" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
+                                               Text="Disp. Correction" 
+                                               VerticalAlignment="Center" 
+                                               FontSize="20"
+                                               FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
                         <Separator BorderBrush="White" BorderThickness="1">
@@ -310,33 +309,33 @@
                             </Separator.Effect>
                         </Separator>
                         <ListViewItem Padding="15" x:Name="BtnDeconnex" 
-                                      MouseDoubleClick="BtnDeconnex_MouseDoubleClick">
+                                          MouseDoubleClick="BtnDeconnex_MouseDoubleClick">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Width="30" Height="30" 
-                                                 Kind="Logout"
-                                                 Foreground="White"/>
+                                                     Kind="Logout"
+                                                     Foreground="White"/>
                                 <TextBlock Margin="20 0 0 0"
-                                           Text="Déconnecter" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
+                                               Text="Déconnecter" 
+                                               VerticalAlignment="Center" 
+                                               FontSize="20"
+                                               FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Padding="15" x:Name="BtnFermer" 
-                                      MouseDoubleClick="BtnFermer_MouseDoubleClick">
+                                          MouseDoubleClick="BtnFermer_MouseDoubleClick">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Width="30" Height="30" 
-                                                 Kind="CloseCircle"
-                                                 Foreground="White"/>
+                                                     Kind="CloseCircle"
+                                                     Foreground="White"/>
                                 <TextBlock Margin="20 0 0 0"
-                                           Text="Quitter" 
-                                           VerticalAlignment="Center" 
-                                           FontSize="20"
-                                           FontFamily="Agency Fb"/>
+                                               Text="Quitter" 
+                                               VerticalAlignment="Center" 
+                                               FontSize="20"
+                                               FontFamily="Agency Fb"/>
                             </StackPanel>
                         </ListViewItem>
                     </ListView>
-                </StackPanel>
+                </Grid>
             </Border>
         </Grid>
     </Grid>

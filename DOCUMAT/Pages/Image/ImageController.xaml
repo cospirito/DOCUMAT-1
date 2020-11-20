@@ -461,7 +461,7 @@
                                                 Checked="cbxRejetImage_Checked"
                                                 Unchecked="cbxRejetImage_Unchecked"/>
                                             <CheckBox x:Name="cbxSupprimerImage"
-                                                Content="Supprimé"
+                                                Content="A Supprimer"
                                                 Foreground="White"
                                                 Background="White"                                                  
                                                 Margin="10 0"

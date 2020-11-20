@@ -1039,9 +1039,7 @@ namespace DOCUMAT.Pages.Image
 			//tbSuprrimeSequences.Text = "";
 		}
 
-		private void BtnAnnuleManqueSequences_Click(object sender, RoutedEventArgs e)
-		{		
-		}
+		private void BtnAnnuleManqueSequences_Click(object sender, RoutedEventArgs e){}
 
 		private void SuppSequence_Click(object sender, RoutedEventArgs e)
 		{

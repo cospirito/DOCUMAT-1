@@ -586,9 +586,17 @@ namespace DOCUMAT.Pages.Image
 					tbListeReferences.Text = "";
 					tbListeReferences.Visibility = Visibility.Collapsed;
 					References.Clear();
-					BtnTerminerImage.IsEnabled = false;
 					BtnModifierSequence.IsEnabled = true;
 					BtnAddSequence.IsEnabled = true;
+
+					if(CurrentImageView.Image.NumeroPage == 0 || CurrentImageView.Image.NumeroPage == -1)
+                    {
+						BtnTerminerImage.IsEnabled = true;
+                    }
+					else
+                    {
+						BtnTerminerImage.IsEnabled = false;
+					}
 				}
 			}
 			#endregion
@@ -1878,6 +1886,65 @@ namespace DOCUMAT.Pages.Image
 								throw new Exception("Certaines séquences sont Manquantes !!!");
 							}
 						}
+						else if(CurrentImageView.Image.NumeroPage == 0 || CurrentImageView.Image.NumeroPage == -1)
+                        {
+							// Recherche de la date de manquant de l'image
+							Models.ManquantImage manquantImage = ct.ManquantImage.FirstOrDefault(mq => mq.IdImage == CurrentImageView.Image.ImageID);
+
+
+							//Ajout d'un Manquant Image Corrigé
+							Models.ManquantImage manquantImageFirst = new ManquantImage()
+							{
+								IdRegistre = CurrentImageView.Image.RegistreID,
+								IdImage = CurrentImageView.Image.ImageID,
+								NumeroPage = CurrentImageView.NumeroOrdre,
+								statutManquant = 0,
+								DateDeclareManquant = manquantImage.DateDeclareManquant,
+								DateCorrectionManquant = DateTime.Now,
+								DateCreation = DateTime.Now,
+								DateModif = DateTime.Now,
+								DebutSequence = manquantImage.DebutSequence,
+								DateSequenceDebut = manquantImage.DateSequenceDebut,
+								FinSequence = manquantImage.FinSequence,
+							};
+							ct.ManquantImage.Add(manquantImageFirst);
+							ct.SaveChanges();
+
+							//Modifiication du Manque séquence non corrigé
+							manquantImage.DateModif = DateTime.Now;
+							ct.SaveChanges();
+
+							// Changement du statut de l'image directement en phase 2
+							Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
+
+							//Récupération du statut de l'image pour changer sa date de modif 
+							Models.StatutImage statutImage = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID
+																							&& s.Code == CurrentImageView.Image.StatutActuel);
+							statutImage.DateModif = DateTime.Now;
+							statutImage.DateFin = DateTime.Now;
+							ct.SaveChanges();
+
+							//Création du nouveau statut de type PHASE 2
+							Models.StatutImage NewStatutImage = new StatutImage()
+							{
+								ImageID = CurrentImageView.Image.ImageID,
+								Code = (int)Enumeration.Image.PHASE2,
+								DateModif = DateTime.Now,
+								DateCreation = DateTime.Now,
+								DateDebut = DateTime.Now,
+							};
+							ct.StatutImage.Add(NewStatutImage);
+							ct.SaveChanges();
+
+							image.StatutActuel = (int)Enumeration.Image.PHASE2;
+							image.DateModif = DateTime.Now;
+							ct.SaveChanges();
+
+							// Enregistrement du Traitement
+							DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH1 : IMAGE TERMINE");
+
+							this.BtnImageSuivante_Click(sender, e);
+						}
 					}
 					#endregion
 				}
@@ -2198,9 +2265,7 @@ namespace DOCUMAT.Pages.Image
 			}
 		}
 
-		private void Window_GotFocus(object sender, RoutedEventArgs e)
-		{
-		}
+		private void Window_GotFocus(object sender, RoutedEventArgs e){}
 
 		private void btnValideCorrection_Click(object sender, RoutedEventArgs e)
 		{

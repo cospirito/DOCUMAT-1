@@ -1785,5 +1785,54 @@ namespace DOCUMAT.Pages.Image
 				}
 			}
 		}
-	}
+
+        private void BtnGenererAutoRefs_Click(object sender, RoutedEventArgs e)
+        {
+			// Génération automatique des references sequencées
+			Regex regex = new Regex("^[0-9]{1,}/[\\w*-]{1,}$");
+			if (regex.IsMatch(tbReference.Text))
+			{
+				//Récupération du nombre d'index demande
+				string[] refEtNbRef = tbReference.Text.Split('-');
+				int nbRefs = 0;
+				if(refEtNbRef.Length == 2 && Int32.TryParse(refEtNbRef[1].Trim(),out nbRefs))
+                {
+					if(nbRefs > 1 && nbRefs < 100)
+                    {
+						string refVariantIndice = refEtNbRef[0].Split('/')[0];
+						string refRacine = refEtNbRef[0].Split('/')[1];
+						string[] AllRefVariant = new string[nbRefs];
+						int refVariantInt = Int32.Parse(refVariantIndice);
+
+						for (int i = 0; i < nbRefs; i++)
+                        {
+							AllRefVariant[i] = (refVariantInt + i) + "/" + refRacine;
+							try
+							{
+								References.Add(RefInitiale + AllRefVariant[i], RefInitiale + AllRefVariant[i]);
+							}
+							catch (Exception) {}
+						}
+
+						tbListeReferences.Text = "";
+						tbListeReferences.ToolTip = "";
+						tbListeReferences.Visibility = Visibility.Visible;
+						tbxNbRefsList.Visibility = Visibility.Visible;
+						tbxNbRefsList.Text = "Nb : " + References.Count;
+						tbReference.Text = "";
+
+						foreach (var reference in References)
+						{
+							tbListeReferences.Text += reference.Value + " ";
+							tbListeReferences.ToolTip += reference.Value + " ";
+						}
+					}
+                }
+				else
+                {
+					MessageBox.Show("Spécifier le nombre de references exemple(s) : 1/27-2, 1/27-3", "Reference Mal spécifiée", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+			}
+		}
+    }
 }

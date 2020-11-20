@@ -163,6 +163,14 @@
     <Compile Include="Migrations\202011171649216_AddTbUniteTbTranche.designer.cs">
       <DependentUpon>202011171649216_AddTbUniteTbTranche.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202011182226553_addDateControle.cs" />
+    <Compile Include="Migrations\202011182226553_addDateControle.designer.cs">
+      <DependentUpon>202011182226553_addDateControle.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011190046322_NbVuesLivreNbRegistreLivre.cs" />
+    <Compile Include="Migrations\202011190046322_NbVuesLivreNbRegistreLivre.designer.cs">
+      <DependentUpon>202011190046322_NbVuesLivreNbRegistreLivre.cs</DependentUpon>
+    </Compile>
     <Compile Include="Models\Configs.cs" />
     <Compile Include="Models\Controle.cs" />
     <Compile Include="Models\Correction.cs" />
@@ -207,9 +215,6 @@
     </Compile>
     <Compile Include="Pages\Image\FormManquantImage.xaml.cs">
       <DependentUpon>FormManquantImage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\Image\Image.Main.xaml.cs">
-      <DependentUpon>Image.Main.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Image\ImageController.xaml.cs">
       <DependentUpon>ImageController.xaml</DependentUpon>
@@ -326,10 +331,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Image\FormManquantImage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\Image\Image.Main.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -457,6 +458,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202011171649216_AddTbUniteTbTranche.resx">
       <DependentUpon>202011171649216_AddTbUniteTbTranche.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011182226553_addDateControle.resx">
+      <DependentUpon>202011182226553_addDateControle.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011190046322_NbVuesLivreNbRegistreLivre.resx">
+      <DependentUpon>202011190046322_NbVuesLivreNbRegistreLivre.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

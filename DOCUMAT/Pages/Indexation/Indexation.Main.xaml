@@ -118,7 +118,7 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
                           IsReadOnly="True"
-                          MaxHeight="350" 
+                          MaxHeight="400" 
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgRegistre_LoadingRow"

@@ -130,10 +130,6 @@
             </StackPanel>
             <!--Grid View des Registres -->
             <Grid Margin="20" x:Name="gridViewPanelRegistre">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1109*"/>
-                    <ColumnDefinition Width="131*"/>
-                </Grid.ColumnDefinitions>
                 <DataGrid Name="dgRegistre" 
                           AutoGenerateColumns="False" 
                           VerticalScrollBarVisibility="Auto"
@@ -141,10 +137,10 @@
                           IsReadOnly="True"
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
+                          MaxHeight="400"
                           LoadingRow="dgRegistre_LoadingRow"
                           AreRowDetailsFrozen="False"
-                          LoadingRowDetails="dgRegistre_LoadingRowDetails" 
-                          Grid.ColumnSpan="2">
+                          LoadingRowDetails="dgRegistre_LoadingRowDetails">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
                         <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />

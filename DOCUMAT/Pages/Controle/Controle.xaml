@@ -7,8 +7,8 @@
       xmlns:local="clr-namespace:DOCUMAT.Pages.Controle"
       xmlns:src="clr-namespace:DOCUMAT.Converter"
       mc:Ignorable="d" 
-      Height="800" 
-      d:DesignWidth="1280"
+      Height="600" 
+      d:DesignWidth="900"
       Loaded="Page_Loaded"
       Title="Controle">
     <Page.Resources>
@@ -59,7 +59,7 @@
                         Foreground="White"
                         ToolTip="Supprimer une Séquence"
                         Click="BtnPhase2_Click">
-                PHASE 2
+                PHASE 3
             </Button>
         </StackPanel>
 
@@ -150,6 +150,7 @@
                             IsReadOnly="True"
                             RowDetailsVisibilityMode="VisibleWhenSelected" 
                             Margin="0,-2,0,2"
+                            MaxHeight="400"
                             LoadingRow="dgRegistre_LoadingRow"
                             SelectionChanged="dgRegistre_SelectionChanged"
                             AreRowDetailsFrozen="False"

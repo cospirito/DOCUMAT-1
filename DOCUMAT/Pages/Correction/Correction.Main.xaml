@@ -7,8 +7,8 @@
       xmlns:src="clr-namespace:DOCUMAT.Converter"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d"       
-      Height="800"       
-      d:DesignWidth="1280"
+      Height="600"       
+      d:DesignWidth="900"
       Loaded="Page_Loaded"
       Title="Correction">
     <Page.Resources>
@@ -53,7 +53,7 @@
                         Margin="0 0 0 10"
                         Foreground="SteelBlue"
                         Click="BtnPhase1_Click">
-                PHASE 1
+                PHASE 2 : REJET 1
             </Button>
             <Button
                         x:Name="BtnPhase2"
@@ -64,7 +64,7 @@
                         Foreground="White"
                         ToolTip="Correction Phase 2"
                         Click="BtnPhase2_Click">
-                PHASE 2
+                PHASE 2 : REJET 2
             </Button>
         </StackPanel>
 
@@ -154,7 +154,7 @@
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
                             IsReadOnly="True"
-                            MaxHeight="350" 
+                            MaxHeight="400"
                             RowDetailsVisibilityMode="VisibleWhenSelected" 
                             Margin="0,-2,0,2"
                             LoadingRow="dgRegistre_LoadingRow"

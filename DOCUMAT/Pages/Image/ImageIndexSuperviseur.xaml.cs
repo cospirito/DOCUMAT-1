@@ -767,7 +767,7 @@ namespace DOCUMAT.Pages.Image
 						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NomPage);
 						if(file == null)
                         {
-							ListPageIntrouvable = ListPageIntrouvable + file.Name + " ,";
+							ListPageIntrouvable = ListPageIntrouvable + imageView.Image.NomPage + " ,";
                         }
                     }			
 				}

@@ -8,9 +8,9 @@
         xmlns:src="clr-namespace:DOCUMAT.Converter"
         mc:Ignorable="d"
         Title="GESTION DES AGENTS" 
-        Height="800" 
+        Height="600" 
         WindowStartupLocation="CenterScreen"
-        Width="1080"
+        Width="900"
         Loaded="Page_Loaded"
         Background="SteelBlue">
     
@@ -80,7 +80,7 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
                           IsReadOnly="True"
-                          MaxHeight="600"    
+                          MaxHeight="400" 
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgAgent_LoadingRow" 

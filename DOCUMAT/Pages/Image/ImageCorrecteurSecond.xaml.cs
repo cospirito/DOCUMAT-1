@@ -162,16 +162,21 @@ namespace DOCUMAT.Pages.Image
 																&& i.RegistreID == RegistreViewParent.Registre.RegistreID);
 					if (image1 != null)
 					{
-						if (image1.StatutActuel == (int)Enumeration.Image.PHASE1 || image1.StatutActuel == (int)Enumeration.Image.PHASE2)
-						{
+						if (image1.StatutActuel == (int)Enumeration.Image.PHASE1)
+						{							
 							item.Tag = "valide";
+
+						}
+						else if(image1.StatutActuel == (int)Enumeration.Image.PHASE2)
+                        {
+							item.Tag = "Correct";
 						}
 						else if (image1.StatutActuel == (int)Enumeration.Image.PHASE3)
 						{ 
 							if (ct.Controle.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
 								&& c.PhaseControle == 3 && c.StatutControle == 0) != null)
 							{
-								item.Tag = "Correct";
+								item.Tag = "valide";
 							}
 							else
 							{
@@ -185,7 +190,6 @@ namespace DOCUMAT.Pages.Image
 									item.Tag = "instance";
 								}
 							}
-
 						}
 
 						// Cas de la PAGE DE GARDE AYANT LES INDEX DE REGISTRES ERRONES
@@ -692,7 +696,6 @@ namespace DOCUMAT.Pages.Image
 																			  || c.NumeroDepotFin_idx == 1 || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 
 																			  || c.NombrePage_idx == 1)))
                                 {
-									PanelRejetImage.Visibility = Visibility.Collapsed;
 									PanelCorrectionEnCours.Visibility = Visibility.Visible;
 									PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
 									BtnSupprimerImage.Visibility = Visibility.Visible;
@@ -714,6 +717,16 @@ namespace DOCUMAT.Pages.Image
 									tbxNbPage.Text = RegistreViewParent.Registre.NombrePage.ToString();
 									PanelIndexRegistre.Visibility = Visibility.Visible;
                                 }
+								else
+								{
+									//Affichage des images validées 
+									PanelCorrectionEnCours.Visibility = Visibility.Collapsed;
+									PanelCorrectionEffectue.Visibility = Visibility.Visible;
+									ImgCorrecte.Visibility = Visibility.Visible;
+									ImgEdit.Visibility = Visibility.Collapsed;
+									PanelRejetImage.Visibility = Visibility.Collapsed;
+									tbxControleStatut.Text = "VALIDE";
+								}
                             } 
                         }
 					}

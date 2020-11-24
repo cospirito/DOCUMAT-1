@@ -1768,7 +1768,7 @@ namespace DOCUMAT.Pages.Image
 		{
             double MyWindowWidth = 1600;
             double MyWindowHeight = 900;
-            double dgSMaxHeight = 400;
+            double dgSMaxHeight = 300;
 
             // Gestion de l'IHM
             if (this.ActualHeight < MyWindowHeight)

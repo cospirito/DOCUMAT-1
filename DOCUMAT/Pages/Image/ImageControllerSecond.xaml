@@ -426,6 +426,7 @@
                                                 <ComboBoxItem Content="Qualité Visuelle" 
                                                           IsSelected="True"/>
                                                 <ComboBoxItem Content="Ecriture Illisible"/>
+                                                <ComboBoxItem Content="Mauvaise Image"/>
                                             </ComboBox>
                                         </StackPanel>
                                     </StackPanel>

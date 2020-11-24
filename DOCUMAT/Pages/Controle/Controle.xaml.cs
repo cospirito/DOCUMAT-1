@@ -351,9 +351,13 @@ namespace DOCUMAT.Pages.Controle
 
                         RefreshRegistrePhase1();
                     }
-                    else
+                    else if(CurrentPhase == 2)
                     {
                         RefreshRegistrePhase2();
+                    }
+                    else if(CurrentPhase == 3)
+                    {
+                        RefreshRegistrePhase3();
                     }
                 }
             }
@@ -397,16 +401,6 @@ namespace DOCUMAT.Pages.Controle
 
             CurrentPhase = 3;
             RefreshRegistrePhase3();
-        }
-
-        private void BtnPhaseLast_Click_1(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void BtnPhaseLast_Click_2(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

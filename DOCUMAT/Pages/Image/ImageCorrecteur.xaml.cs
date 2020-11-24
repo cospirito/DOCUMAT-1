@@ -812,27 +812,31 @@ namespace DOCUMAT.Pages.Image
 																  || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1));
 								if(controle != null)
 								{
-									PanelRejetImage.Visibility = Visibility.Collapsed;
-									PanelCorrectionEnCours.Visibility = Visibility.Visible;
-									PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
-									BtnSupprimerImage.Visibility = Visibility.Visible;
-									PanelBoutonCorrection.Visibility = Visibility.Collapsed;
+									if (!ct.Correction.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.StatutCorrection == 0 && c.PhaseCorrection == 1
+																   && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
+																   || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)))
+									{
+										PanelCorrectionEnCours.Visibility = Visibility.Visible;
+										PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
+										BtnSupprimerImage.Visibility = Visibility.Visible;
+										PanelBoutonCorrection.Visibility = Visibility.Collapsed;
 
-									// Gestion d'accès au index à corriger
-									if (controle.Numero_idx == 1) tbxVolume.IsEnabled = true; else tbxVolume.IsEnabled = false;
-									if (controle.NumeroDebut_idx == 1) tbxNumDepotDebut.IsEnabled = true; else tbxNumDepotDebut.IsEnabled = false;
-									if (controle.NumeroDepotFin_idx == 1) tbxNumDepotFin.IsEnabled = true; else tbxNumDepotFin.IsEnabled = false;
-									if (controle.DateDepotDebut_idx == 1) tbxDateDepotDebut.IsEnabled = true; else tbxDateDepotDebut.IsEnabled = false;
-									if (controle.DateDepotFin_idx == 1) tbxDateDepotFin.IsEnabled = true; else tbxDateDepotFin.IsEnabled = false;
-									if (controle.NombrePage_idx == 1) tbxNbPage.IsEnabled = true; else tbxNbPage.IsEnabled = false;
+										// Gestion d'accès au index à corriger
+										if (controle.Numero_idx == 1) tbxVolume.IsEnabled = true; else tbxVolume.IsEnabled = false;
+										if (controle.NumeroDebut_idx == 1) tbxNumDepotDebut.IsEnabled = true; else tbxNumDepotDebut.IsEnabled = false;
+										if (controle.NumeroDepotFin_idx == 1) tbxNumDepotFin.IsEnabled = true; else tbxNumDepotFin.IsEnabled = false;
+										if (controle.DateDepotDebut_idx == 1) tbxDateDepotDebut.IsEnabled = true; else tbxDateDepotDebut.IsEnabled = false;
+										if (controle.DateDepotFin_idx == 1) tbxDateDepotFin.IsEnabled = true; else tbxDateDepotFin.IsEnabled = false;
+										if (controle.NombrePage_idx == 1) tbxNbPage.IsEnabled = true; else tbxNbPage.IsEnabled = false;
 
-									tbxVolume.Text = RegistreViewParent.Registre.Numero.ToString();
-									tbxNumDepotDebut.Text = RegistreViewParent.Registre.NumeroDepotDebut.ToString();
-									tbxDateDepotDebut.Text = RegistreViewParent.Registre.DateDepotDebut.ToShortDateString();
-									tbxNumDepotFin.Text = RegistreViewParent.Registre.NumeroDepotFin.ToString();
-									tbxDateDepotFin.Text = RegistreViewParent.Registre.DateDepotFin.ToShortDateString();
-									tbxNbPage.Text = RegistreViewParent.Registre.NombrePage.ToString();
-									PanelIndexRegistre.Visibility = Visibility.Visible;
+										tbxVolume.Text = RegistreViewParent.Registre.Numero.ToString();
+										tbxNumDepotDebut.Text = RegistreViewParent.Registre.NumeroDepotDebut.ToString();
+										tbxDateDepotDebut.Text = RegistreViewParent.Registre.DateDepotDebut.ToShortDateString();
+										tbxNumDepotFin.Text = RegistreViewParent.Registre.NumeroDepotFin.ToString();
+										tbxDateDepotFin.Text = RegistreViewParent.Registre.DateDepotFin.ToShortDateString();
+										tbxNbPage.Text = RegistreViewParent.Registre.NombrePage.ToString();
+										PanelIndexRegistre.Visibility = Visibility.Visible;
+									}
 								}
 							}
 							else
@@ -2690,7 +2694,6 @@ namespace DOCUMAT.Pages.Image
 								DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH1 : PAGE DE GARDE TERMINE");
                             }
 						}
-
 						// Récupération du rejet index propre au registre
 						Models.Correction correctionRegistre = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.StatutCorrection == 1 && c.PhaseCorrection == 1
 														  && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1

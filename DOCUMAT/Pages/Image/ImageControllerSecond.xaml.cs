@@ -224,6 +224,23 @@ namespace DOCUMAT.Pages.Image
 									tbxNbPage.Text = ": " + RegistreViewParent.Registre.NombrePage.ToString();
 									PanelIndexRegistre.Visibility = Visibility.Visible;
                                 }
+								else if(ct.Controle.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.PhaseControle == 3 && c.ImageID == null && c.SequenceID == null
+														&& c.StatutControle == 0))
+								{
+									PanelControleEnCours.Visibility = Visibility.Collapsed;
+									PanelControleEffectue.Visibility = Visibility.Visible;
+									ImgCorrecte.Visibility = Visibility.Visible;
+									ImgEdit.Visibility = Visibility.Collapsed;
+									tbxControleStatut.Text = "VALIDE";
+								}
+								else
+                                {
+									PanelControleEnCours.Visibility = Visibility.Collapsed;
+									PanelControleEffectue.Visibility = Visibility.Visible;
+									ImgCorrecte.Visibility = Visibility.Collapsed;
+									ImgEdit.Visibility = Visibility.Visible;
+									tbxControleStatut.Text = "INDEX REGISTRE EN CORRECTION (2x)";
+								}
 							}
                         }
 					}

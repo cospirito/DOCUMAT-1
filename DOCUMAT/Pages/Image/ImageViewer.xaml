@@ -263,7 +263,7 @@
                         <RowDefinition Height="50"></RowDefinition>
                         <RowDefinition Height="30"></RowDefinition>
                         <RowDefinition Height="auto"></RowDefinition>
-                        <RowDefinition MaxHeight="330"></RowDefinition>
+                        <RowDefinition MaxHeight="400"></RowDefinition>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" 
                                 Background="White"
@@ -323,7 +323,7 @@
                         Name="dgSequence" 
                         VerticalAlignment="Top"
                         AutoGenerateColumns="False" 
-                        Height="Auto"
+                        MaxHeight="300"
                         VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Auto"
                         IsReadOnly="True"  

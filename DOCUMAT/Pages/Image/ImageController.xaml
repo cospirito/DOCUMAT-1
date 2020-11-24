@@ -278,7 +278,6 @@
                             <RowDefinition MaxHeight="165"></RowDefinition>
                             <RowDefinition Height="300"></RowDefinition>
                         </Grid.RowDefinitions>
-
                         <StackPanel Grid.Row="0"
                                 Background="White">
                             <TextBlock Text="CONTROLE D'IMAGE"
@@ -291,7 +290,6 @@
                                         Margin="10"
                                         />
                         </StackPanel>
-
                         <StackPanel Grid.Row="1"
                                 VerticalAlignment="Top"
                                 Orientation="Horizontal" 
@@ -321,7 +319,6 @@
                                     InputScope="Number"                        
                                     Margin="10"/>
                         </StackPanel>
-
                         <StackPanel Background="White" 
                                     Grid.Row="2">
                             <TextBlock Text="Séquences de l'image" 
@@ -495,7 +492,7 @@
                                                 >
                                             <ComboBoxItem Content="Qualité Visuelle" IsSelected="True"/>
                                             <ComboBoxItem Content="Ecriture Illisible"/>
-                                            <!--<ComboBoxItem Content="Page Incorrecte"/>-->
+                                            <ComboBoxItem Content="Mauvaise Image"/>
                                         </ComboBox>
                                     </StackPanel>
                                 </StackPanel>

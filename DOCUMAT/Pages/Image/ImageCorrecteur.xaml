@@ -258,7 +258,7 @@
                             <RowDefinition Height="35"></RowDefinition>
                             <RowDefinition Height="50"></RowDefinition>
                             <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition Height="100"></RowDefinition>
+                            <RowDefinition MaxHeight="100"></RowDefinition>
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0" Background="White">
@@ -581,7 +581,6 @@
                         </StackPanel>
                     </Grid>
 
-
                     <StackPanel x:Name="PanelIndexRegistre" 
                             Visibility="Collapsed"
                             VerticalAlignment="Top"
@@ -610,7 +609,6 @@
                                 <RowDefinition></RowDefinition>
                                 <RowDefinition></RowDefinition>
                             </Grid.RowDefinitions>
-
                             <TextBlock Foreground="White"
                                         Grid.Column="0"
                                         Grid.Row="0"

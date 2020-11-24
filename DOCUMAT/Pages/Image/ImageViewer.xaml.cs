@@ -1766,25 +1766,20 @@ namespace DOCUMAT.Pages.Image
 
 		private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			// Reéquilibre la taille minimal du GridMenuContainer height pour 
-			// ne pas avoir de pied de page blanc
-			if (e.HeightChanged)
-			{
-				Size size = e.NewSize;
-				double minGridHeight = 500;
-				double menuHeight = 700;
+            double MyWindowWidth = 1600;
+            double MyWindowHeight = 900;
+            double dgSMaxHeight = 400;
 
-				if (size.Height > menuHeight)
-				{
-					double ratio = size.Height - menuHeight;
-					DocumentViewer.MinHeight = minGridHeight + ratio;
-				}
-				else
-				{
-					borderDocument.MinHeight = minGridHeight;
-				}
-			}
-		}
+            // Gestion de l'IHM
+            if (this.ActualHeight < MyWindowHeight)
+            {
+                dgSequence.MaxHeight = dgSMaxHeight - (MyWindowHeight - this.ActualHeight);
+            }
+            else
+            {
+                dgSequence.MaxHeight = dgSMaxHeight + (MyWindowHeight - this.ActualHeight);
+            }
+        }
 
         private void BtnGenererAutoRefs_Click(object sender, RoutedEventArgs e)
         {

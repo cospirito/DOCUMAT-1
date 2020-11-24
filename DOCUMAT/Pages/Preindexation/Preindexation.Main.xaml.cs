@@ -558,7 +558,7 @@ namespace DOCUMAT.Pages.Preindexation
                     MarquerPreindexer.Visibility = Visibility.Collapsed;
 
                     // Affichage de l'impression du code barre
-                    Impression.QrCode PageImp = new Impression.QrCode(registre);
+                    Impression.BordereauRegistre PageImp = new Impression.BordereauRegistre(registre);
                     PageImp.Show();
                 }
                 else

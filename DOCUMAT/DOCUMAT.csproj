@@ -41,11 +41,47 @@
     <ApplicationIcon>ftp.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.5.0, Culture=neutral, PublicKeyToken=0e99375e54769942, processorArchitecture=MSIL">
+      <HintPath>..\packages\Portable.BouncyCastle.1.8.5\lib\net40\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging, Version=3.4.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.3.4.1\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging.Core, Version=3.4.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.Core.3.4.1\lib\net40\Common.Logging.Core.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.barcodes, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.barcodes.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.forms, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.forms.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.io, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.io.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.kernel, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.kernel.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.layout, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.layout.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.pdfa, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.pdfa.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.sign, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.sign.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.styledxmlparser, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.styledxmlparser.dll</HintPath>
+    </Reference>
+    <Reference Include="itext.svg, Version=7.1.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\itext7.7.1.13\lib\net40\itext.svg.dll</HintPath>
     </Reference>
     <Reference Include="itextsharp, Version=5.5.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>..\packages\iTextSharp.5.5.13\lib\itextsharp.dll</HintPath>
@@ -75,6 +111,7 @@
     <Reference Include="Microsoft.WindowsAPICodePack.ShellExtensions, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAPICodePack-ShellExtensions.1.1.1\lib\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
     </Reference>
+    <Reference Include="ReachFramework" />
     <Reference Include="Syncfusion.Licensing, Version=18.1460.0.36, Culture=neutral, PublicKeyToken=632609b4d040f6b4, processorArchitecture=MSIL">
       <HintPath>..\packages\Syncfusion.Licensing.18.1.0.36-beta\lib\net46\Syncfusion.Licensing.dll</HintPath>
     </Reference>
@@ -86,6 +123,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Printing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -116,6 +154,9 @@
     <Compile Include="Converter\HeaderToImageConverter.cs" />
     <Compile Include="Converter\ImageConverter.cs" />
     <Compile Include="ExtendClass.cs" />
+    <Compile Include="Impression\BordereauRegistre.xaml.cs">
+      <DependentUpon>BordereauRegistre.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Impression\QrCode.Print.xaml.cs">
       <DependentUpon>QrCode.Print.xaml</DependentUpon>
     </Compile>
@@ -171,6 +212,14 @@
     <Compile Include="Migrations\202011190046322_NbVuesLivreNbRegistreLivre.designer.cs">
       <DependentUpon>202011190046322_NbVuesLivreNbRegistreLivre.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202011212248256_addIndexRegistreToControleAndCorrection.cs" />
+    <Compile Include="Migrations\202011212248256_addIndexRegistreToControleAndCorrection.designer.cs">
+      <DependentUpon>202011212248256_addIndexRegistreToControleAndCorrection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202011221127566_CorrectionModelsControle.cs" />
+    <Compile Include="Migrations\202011221127566_CorrectionModelsControle.designer.cs">
+      <DependentUpon>202011221127566_CorrectionModelsControle.cs</DependentUpon>
+    </Compile>
     <Compile Include="Models\Configs.cs" />
     <Compile Include="Models\Controle.cs" />
     <Compile Include="Models\Correction.cs" />
@@ -222,6 +271,9 @@
     <Compile Include="Pages\Image\ImageControllerSecond.xaml.cs">
       <DependentUpon>ImageControllerSecond.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Image\ImageControllerValidation.xaml.cs">
+      <DependentUpon>ImageControllerValidation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Image\ImageCorrecteur.xaml.cs">
       <DependentUpon>ImageCorrecteur.xaml</DependentUpon>
     </Compile>
@@ -233,6 +285,9 @@
     </Compile>
     <Compile Include="Pages\Image\ImageViewer.xaml.cs">
       <DependentUpon>ImageViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\SimpleViewer.xaml.cs">
+      <DependentUpon>SimpleViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Indexation\Indexation.Main.xaml.cs">
       <DependentUpon>Indexation.Main.xaml</DependentUpon>
@@ -282,6 +337,10 @@
       <DependentUpon>Connexion.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Impression\BordereauRegistre.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Impression\QrCode.Print.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -342,6 +401,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\Image\ImageControllerValidation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\Image\ImageCorrecteur.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -355,6 +418,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Image\ImageViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\SimpleViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -464,6 +531,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202011190046322_NbVuesLivreNbRegistreLivre.resx">
       <DependentUpon>202011190046322_NbVuesLivreNbRegistreLivre.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011212248256_addIndexRegistreToControleAndCorrection.resx">
+      <DependentUpon>202011212248256_addIndexRegistreToControleAndCorrection.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202011221127566_CorrectionModelsControle.resx">
+      <DependentUpon>202011221127566_CorrectionModelsControle.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -691,6 +764,11 @@
     <None Include="ASSETS\AVATAR\avatar9.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Resource Include="Images\fileStar.png" />
+    <Resource Include="Images\ancfcclogo.png" />
+    <Resource Include="Images\folderError.png" />
+    <Resource Include="Images\fileDelete.png" />
+    <Resource Include="Images\checked-red.png" />
     <Content Include="Images\home5.svg" />
     <Resource Include="Images\home6.png" />
     <Resource Include="Images\home3.jpg" />
@@ -700,7 +778,6 @@
     <Resource Include="Images\loader2.gif" />
     <Resource Include="Images\home_stats.jpg" />
     <Resource Include="Images\fileNoted.png" />
-    <Resource Include="Images\fileTrash.png" />
     <Resource Include="Images\fileNotFound.png" />
     <Resource Include="Images\flag.png" />
     <Resource Include="Images\list.png" />

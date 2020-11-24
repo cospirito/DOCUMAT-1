@@ -195,7 +195,7 @@ namespace DOCUMAT.Pages.Image
 			// On extrait en premier la page de garde 
 			foreach (var file in files)
 			{
-				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
+				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower())
 				{
 					var fileTree = new TreeViewItem();
 					fileTree.Header = GetFileFolderName(file);
@@ -211,7 +211,7 @@ namespace DOCUMAT.Pages.Image
 			// Puis la page d'ouverture				
 			foreach (var file in files)
 			{
-				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
+				if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
 				{
 					var fileTree = new TreeViewItem();
 					fileTree.Header = GetFileFolderName(file);
@@ -241,8 +241,8 @@ namespace DOCUMAT.Pages.Image
 			//var fileSorted = files.OrderBy(f => f.ToLower());
 			foreach (var file in fileSorted)
 			{
-				if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
-					&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
+				if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower()
+					&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
 				{
 					var fileTree = new TreeViewItem();
 					fileTree.Header = GetFileFolderName(file.Value);
@@ -301,14 +301,14 @@ namespace DOCUMAT.Pages.Image
 				int numeroPage = 0;
 				if (currentImage == -1)
 				{
-					if (item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
+					if (item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower())
 					{
 						item.FontWeight = FontWeights.Bold;
 					}
 				}
 				else if (currentImage == 0)
 				{
-					if (item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
+					if (item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
 					{
 						item.FontWeight = FontWeights.Bold;
 					}
@@ -361,14 +361,14 @@ namespace DOCUMAT.Pages.Image
 
 					if (imageView1.Image.NumeroPage == -1)
 					{
-						tbxNomPage.Text = "PAGE DE GARDE";
+						tbxNomPage.Text = ConfigurationManager.AppSettings["Nom_Page_Garde"];
 						tbxNumeroPage.Text = "";
 						tbxDebSeq.Text = "";
 						tbxFinSeq.Text = "";
 					}
 					else if (imageView1.Image.NumeroPage == 0)
 					{
-						tbxNomPage.Text = "PAGE D'OUVERTURE";
+						tbxNomPage.Text = ConfigurationManager.AppSettings["Nom_Page_Ouverture"];
 						tbxNumeroPage.Text = "";
 						tbxDebSeq.Text = "";
 						tbxFinSeq.Text = "";
@@ -383,12 +383,13 @@ namespace DOCUMAT.Pages.Image
 					#endregion
 
 					#region RECUPERATION DES SEQUENCES DE L'IMAGE
-
 					// Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
 					List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
 					dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);
 					if (sequences.Count != 0)
-						dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+					{
+						dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));				
+					}
 
 					//Vide les champs du formulaire de séquence 
 					ChampsSequence.Visibility = Visibility.Collapsed;
@@ -409,7 +410,6 @@ namespace DOCUMAT.Pages.Image
 					FichierImporte = "";
 					BtnImporterImage.Foreground = Brushes.White;
 					BtnValiderModifImage.Foreground = Brushes.White;
-
 					#endregion
 
 					#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE
@@ -597,12 +597,14 @@ namespace DOCUMAT.Pages.Image
 
 				// Définition de la lettre de référence pour ce registre
 				if (RegistreViewParent.Registre.Type == "R4")
+                {
 					RefInitiale = "T";
+                }
 
 				// On extrait en premier la page de garde 
 				foreach (var file in files)
 				{
-					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
+					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower())
 					{
 						var fileTree = new TreeViewItem();
 						fileTree.Header = GetFileFolderName(file);
@@ -618,7 +620,7 @@ namespace DOCUMAT.Pages.Image
 				// Puis la page d'ouverture				
 				foreach (var file in files)
 				{
-					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
+					if (GetFileFolderName(file).Remove(GetFileFolderName(file).Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
 					{
 						var fileTree = new TreeViewItem();
 						fileTree.Header = GetFileFolderName(file);
@@ -648,8 +650,8 @@ namespace DOCUMAT.Pages.Image
 				//var fileSorted = files.OrderBy(f => f.ToLower());
 				foreach (var file in fileSorted)
 				{
-					if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
-						&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
+					if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower()
+						&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
 					{
 						var fileTree = new TreeViewItem();
 						fileTree.Header = GetFileFolderName(file.Value);
@@ -673,7 +675,7 @@ namespace DOCUMAT.Pages.Image
 					{
 						Models.Image pageGarde = new Models.Image();
 						pageGarde.NumeroPage = -1;
-						pageGarde.NomPage = "PAGE DE GARDE";
+						pageGarde.NomPage = ConfigurationManager.AppSettings["Nom_Page_Garde"];
 						var file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == pageGarde.NomPage);
 
 						//On vérifie que le fichier existe 
@@ -715,7 +717,7 @@ namespace DOCUMAT.Pages.Image
 					{
 						Models.Image pageOuverture = new Models.Image();
 						pageOuverture.NumeroPage = 0;
-						pageOuverture.NomPage = "PAGE D'OUVERTURE";
+						pageOuverture.NomPage = ConfigurationManager.AppSettings["Nom_Page_Ouverture"];
 						var file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == pageOuverture.NomPage);
 
 						//On vérifie que le fichier existe 
@@ -1096,23 +1098,18 @@ namespace DOCUMAT.Pages.Image
 
 		private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			// Reéquilibre la taille minimal du GridMenuContainer height pour 
-			// ne pas avoir de pied de page blanc
-			if (e.HeightChanged)
-			{
-                System.Windows.Size size = e.NewSize;
-				double minGridHeight = 500;
-				double menuHeight = 700;
+			double MyWindowWidth = 1600;
+			double MyWindowHeight = 900;
+			double dgSMaxHeight = 400;
 
-				if (size.Height > menuHeight)
-				{
-					double ratio = size.Height - menuHeight;
-					DocumentViewer.MinHeight = minGridHeight + ratio;
-				}
-				else
-				{
-					borderDocument.MinHeight = minGridHeight;
-				}
+			// Gestion de l'IHM
+			if (this.ActualHeight < MyWindowHeight)
+			{
+				dgSequence.MaxHeight = dgSMaxHeight - (MyWindowHeight - this.ActualHeight);
+			}
+			else
+			{
+				dgSequence.MaxHeight = dgSMaxHeight + (MyWindowHeight - this.ActualHeight);
 			}
 		}
 

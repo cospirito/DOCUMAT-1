@@ -153,6 +153,29 @@ namespace DOCUMAT.ViewModels
             }
         }
 
+        //Utilisé lors du controle final
+        static public List<SequenceView> GetSequenceCorrecte2(List<Sequence> sequences)
+        {
+            using (var ct = new DocumatContext())
+            {
+                List<SequenceView> sequenceViews = GetViewsList(sequences);
+                List<Correction> corrections = ct.Correction.ToList();
+
+                var joins = from s in sequenceViews
+                            join c in corrections
+                            on s.Sequence.SequenceID equals c.SequenceID
+                            where c.PhaseCorrection == 3 && c.StatutCorrection == 0
+                            select s;
+
+                foreach (var m in joins.ToList())
+                {
+                    m.Is_ImageManquant = false;
+                }
+
+                return joins.ToList();
+            }
+        }
+
         static public List<SequenceView> GetViewsList(List<Sequence> sequences)
         {
             List<SequenceView> sequenceViews = new List<SequenceView>();            

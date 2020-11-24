@@ -1,11 +1,6 @@
-﻿using DOCUMAT.Migrations;
-using DOCUMAT.Models;
+﻿using DOCUMAT.Models;
 using DOCUMAT.Pages.Registre;
 using DOCUMAT.ViewModels;
-using iTextSharp.xmp.impl;
-using Microsoft.VisualBasic.CompilerServices;
-using Microsoft.Win32;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -23,7 +18,7 @@ namespace DOCUMAT.Pages.Inventaire
     {
         public Models.Agent Utilisateur = null;
 
-        public string DossierRacine = ConfigurationManager.AppSettings["Nom_Log_Scan"];
+        public string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
 
         // Refresh dgRegistre
         public void RefreshVersement()
@@ -54,7 +49,7 @@ namespace DOCUMAT.Pages.Inventaire
             dgVersement.ContextMenu = cmVersement;
             ContextMenu cmRegistre = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cmRegistre;
-            MenuItem menuItemVersement = (MenuItem)cmVersement.Items.GetItemAt(2);
+            MenuItem menuItemVersement = (MenuItem)cmVersement.Items.GetItemAt(3);
 
             if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR)
             {
@@ -212,16 +207,6 @@ namespace DOCUMAT.Pages.Inventaire
             }
         }
 
-        private void ImprimerQrCode_Click(object sender, RoutedEventArgs e)
-        {
-            //if (dgRegistre.SelectedItems.Count == 1)
-            //{
-            //    string qrCode = ((RegistreView)dgRegistre.SelectedItem).Registre.QrCode;
-            //    Impression.QrCode PageImp = new Impression.QrCode(qrCode);
-            //    PageImp.Show();
-            //}
-        }
-
         private void DelRegistre_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -280,10 +265,10 @@ namespace DOCUMAT.Pages.Inventaire
             try
             {
                 // Chargement de l'image du Qrcode de la ligne
-                Zen.Barcode.CodeQrBarcodeDraw code128 = Zen.Barcode.BarcodeDrawFactory.CodeQr;
+                Zen.Barcode.CodeQrBarcodeDraw codeQr = Zen.Barcode.BarcodeDrawFactory.CodeQr;
                 var element = e.DetailsElement.FindName("QrCode");
                 RegistreView registre = (RegistreView)e.Row.Item;
-                var image = code128.Draw(registre.Registre.CheminDossier, 100);
+                var image = codeQr.Draw(registre.Registre.QrCode, 100);
                 var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
                 ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
             }
@@ -361,6 +346,16 @@ namespace DOCUMAT.Pages.Inventaire
             //    {
             //    }
             //}
+        }
+
+        private void voirBordereau_Click(object sender, RoutedEventArgs e)
+        {
+            if(dgVersement.SelectedItems.Count == 1)
+            {
+                Models.Versement versement = ((VersementView)dgVersement.SelectedItem).Versement;
+                Pages.Image.SimpleViewer simpleViewer = new Image.SimpleViewer(Path.Combine(DossierRacine,versement.cheminBordereau));
+                simpleViewer.Show();
+            }
         }
     }
 }

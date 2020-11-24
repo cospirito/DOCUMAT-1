@@ -34,10 +34,10 @@
                       Name="EditVersement"
                       Icon="{materialDesign:PackIcon Kind=Edit}" 
                       Click="EditVersement_Click"/>
-            <!--<MenuItem Header="Ouvrir le Dossier Scan" 
-                      Name="OpenDossier"
-                      Icon="{materialDesign:PackIcon Kind=FolderOpen}"  
-                      Click="OpenDossier_Click"/>-->
+            <MenuItem Header="Voir le Bordereau" 
+                      Name="voirBordereau"
+                      Icon="{materialDesign:PackIcon Kind=ImageAlbum}"  
+                      Click="voirBordereau_Click"/>
             <MenuItem Header="Supprimer" 
                       Name="DelVersement"
                       Icon="{materialDesign:PackIcon Kind=Remove}"  

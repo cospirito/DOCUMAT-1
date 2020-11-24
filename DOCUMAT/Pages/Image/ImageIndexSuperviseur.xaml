@@ -9,16 +9,15 @@
         Title="Supervision d'Indexation" 
         WindowState="Maximized"
         ResizeMode="CanResize"
-        MinWidth="1200"
-        MinHeight="900"
+        MinHeight="700"
+        MinWidth="1024"
         WindowStartupLocation="CenterOwner"
         Closed="Window_Closed"
         Loaded="Window_Loaded"
         Closing="Window_Closing"
         GotFocus="Window_GotFocus"
         Background="SteelBlue" 
-        Height="900"
-        Width="1200">
+        SizeChanged="Window_SizeChanged">
     <Window.Resources>
         <local:StringToImageSourceConverter x:Key="ImageConverter"/>
         <local:DateConverter x:Key="DateConverter"/>

@@ -51,7 +51,7 @@
                         BorderThickness="0 0 1 0"
                         ToolTip="Correction Phase 1"
                         Margin="0 0 0 10"
-                        Foreground="SteelBlue"
+                        Foreground="SteelBlue"                        
                         Click="BtnPhase1_Click">
                 PHASE 2 : REJET 1
             </Button>

@@ -6,10 +6,11 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:local="clr-namespace:DOCUMAT.Pages.Controle"
       xmlns:src="clr-namespace:DOCUMAT.Converter"
-      mc:Ignorable="d" 
-      Height="600" 
-      d:DesignWidth="900"
+      mc:Ignorable="d"        
+      MinHeight="700"
+      MinWidth="1024"
       Loaded="Page_Loaded"
+      SizeChanged="Page_SizeChanged"
       Title="Controle">
     <Page.Resources>
         <src:DateConverter x:Key="DateConverter"/>
@@ -44,7 +45,7 @@
                         Background="White"
                         BorderBrush="SteelBlue"
                         BorderThickness="0 0 1 0"
-                        ToolTip="Supprimer une Séquence"
+                        ToolTip="Registre en Phase 1"
                         Margin="0 0 0 10"
                         Foreground="SteelBlue"
                         Click="BtnPhase1_Click">
@@ -57,9 +58,21 @@
                         BorderBrush="white"
                         BorderThickness="0 0 1 0"
                         Foreground="White"
-                        ToolTip="Supprimer une Séquence"
+                        Margin="0 0 0 10"
+                        ToolTip="Registre en Phase 3"
                         Click="BtnPhase2_Click">
                 PHASE 3
+            </Button>
+            <Button
+                        x:Name="BtnPhaseLast"
+                        Height="100"
+                        Background="{x:Null}"
+                        BorderBrush="white"
+                        BorderThickness="0 0 1 0"
+                        Foreground="White"
+                        ToolTip="Registre à Finaliser"
+                        Click="BtnPhaseLast_Click">
+                VALIDATION
             </Button>
         </StackPanel>
 
@@ -68,7 +81,7 @@
             <Grid  x:Name="PanelMainPhase">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="150"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
                 <!--Bouton d'interaction-->
                 <StackPanel x:Name="panelInteracBtn"
@@ -148,9 +161,11 @@
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
                             IsReadOnly="True"
+                            ScrollViewer.CanContentScroll="True"
+                            ScrollViewer.IsDeferredScrollingEnabled="True"
+                            MaxHeight="400"                                      
                             RowDetailsVisibilityMode="VisibleWhenSelected" 
                             Margin="0,-2,0,2"
-                            MaxHeight="400"
                             LoadingRow="dgRegistre_LoadingRow"
                             SelectionChanged="dgRegistre_SelectionChanged"
                             AreRowDetailsFrozen="False"
@@ -165,7 +180,6 @@
                                     <DataGridTextColumn Header="pages scannées " Binding="{Binding NombreImageScan}" />
                                     <DataGridTextColumn Header="pages enregistrées" Binding="{Binding NombreImageCompte}" />
                                     <DataGridTextColumn Header="Type de registre" Binding="{Binding Registre.Type}" />
-                                    <DataGridTextColumn Header="Date Création" Binding="{Binding Registre.DateCreation, Converter={StaticResource DateConverter}}" />
                                 </DataGrid.Columns>
 
                                 <!--Details sur le versement-->

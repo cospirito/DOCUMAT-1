@@ -1,5 +1,11 @@
-﻿using System;
+﻿using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using iTextSharp.text;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +25,9 @@ namespace DOCUMAT.Impression
     /// </summary>
     public partial class QrCode : Window
     {
+        string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
+        Models.Registre Registre;
+
         public QrCode()
         {
             InitializeComponent();
@@ -28,6 +37,7 @@ namespace DOCUMAT.Impression
         {
             try
             {
+                Registre = registre;
                 // Chargement du formulaire du code barre
                 string[] cheminServices = registre.CheminDossier.Split(new char[2] { '/', '\\' });
                 string CheminService = cheminServices[1] + "/" + cheminServices[2];
@@ -43,13 +53,13 @@ namespace DOCUMAT.Impression
                 ex.ExceptionCatcher();
             }
         }
+
         /// <summary>
         ///  Convertir une image de type System.Drawing.Image en System.Controls.Image
         /// </summary>
         private System.Windows.Controls.Image ConvertDrawingImageToWPFImage(System.Drawing.Image gdiImg)
         {
             System.Windows.Controls.Image img = new System.Windows.Controls.Image();
-
             //convert System.Drawing.Image to WPF image
             System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(gdiImg);
             IntPtr hBitmap = bmp.GetHbitmap();
@@ -64,23 +74,31 @@ namespace DOCUMAT.Impression
 
         public void btnImprimer_Click(object sender, RoutedEventArgs e)
         {
-            //Résolution 1024 * 768
+            // Must have write permissions to the path folder
+            PdfWriter writer = new PdfWriter(System.IO.Path.Combine(DossierRacine,Registre.CheminDossier,"demo.pdf"));
+            PdfDocument pdf = new PdfDocument(writer);
+            iText.Layout.Document document = new iText.Layout.Document(pdf);
+            iText.Layout.Element.Paragraph header = new iText.Layout.Element.Paragraph("HEADER")
+               .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER).SetFontSize(20);
 
-            var printDlg = new PrintDialog();
-            //this.Visibility = Visibility.Hidden;
-            if (printDlg.ShowDialog() == true)
-            {
-                //this.Height = 1024;
-                //this.Width = 768;
-                //QrCodeImage.Margin = new Thickness(20);
-                //parentImage.HorizontalAlignment = HorizontalAlignment.Left;
-                //this.WindowState = WindowState.Maximized;
-                //this.Visibility = Visibility.Visible;
-                // Impression du contenu de l'écran.
-                btnImprimer.Visibility = Visibility.Hidden;
-                printDlg.PrintVisual(this, "IMPRESSION DU QRCODE");
-                this.Close();
-            }
+            document.Add(header);
+            document.Close();
+   
+            //var printDlg = new PrintDialog();
+            ////this.Visibility = Visibility.Hidden;
+            //if (printDlg.ShowDialog() == true)
+            //{
+            //    //this.Height = 1024;
+            //    //this.Width = 768;
+            //    //QrCodeImage.Margin = new Thickness(20);
+            //    //parentImage.HorizontalAlignment = HorizontalAlignment.Left;
+            //    //this.WindowState = WindowState.Maximized;
+            //    //this.Visibility = Visibility.Visible;
+            //    // Impression du contenu de l'écran.
+            //    btnImprimer.Visibility = Visibility.Hidden;
+            //    printDlg.PrintVisual(this, "IMPRESSION DU QRCODE");
+            //    this.Close();
+            //}
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

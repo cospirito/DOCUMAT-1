@@ -7,16 +7,17 @@
         xmlns:local1="clr-namespace:DOCUMAT.Converter"
         xmlns:local="clr-namespace:DOCUMAT.Converter"
         xmlns:id="http://schemas.microsoft.com/expression/2010/drawing"
-        Title="Controleur Phase 2"
+        Title="Controle Phase 2"
         mc:Ignorable="d"        
         WindowState="Maximized"
-        MinWidth="1280"
         ResizeMode="CanResizeWithGrip"
-        MinHeight="800"
-        WindowStartupLocation="CenterOwner"        
+        WindowStartupLocation="CenterOwner"
+        MinHeight="700"
+        MinWidth="1024"        
         Loaded="Window_Loaded"
         Closing="Window_Closing"
-        Background="SteelBlue">
+        Background="SteelBlue"
+        SizeChanged="Window_SizeChanged">
     <Window.Resources>
         <local1:StringToImageSourceConverter x:Key="ImageConverter"/>
         <local1:DateConverter x:Key="DateConverter"/>
@@ -271,8 +272,9 @@
                                     Foreground="SteelBlue"
                                     FontSize="15"
                                     FontWeight="Bold"
+                                    FontFamily="Agency Fb"
                                     HorizontalAlignment="Center"
-                                    Margin="5"
+                                    Margin="7"
                                     />
                     </StackPanel>
                     <StackPanel Grid.Row="1"
@@ -442,6 +444,241 @@
                                             Foreground="White"/>
                                     </Button>
                                 </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel x:Name="PanelIndexRegistre" 
+                            Visibility="Collapsed"
+                            VerticalAlignment="Top"
+                            Margin="0 20"
+                            Grid.Row="3">
+                            <StackPanel Background="White"
+                                    Height="50">
+                                <TextBlock Foreground="SteelBlue"
+                                        FontWeight="Bold"
+                                        FontSize="20"
+                                        FontFamily="Agency Fb"
+                                        Padding="15"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">  INDEX REGISTRE</TextBlock>
+                            </StackPanel>
+                            <Grid Margin="20 10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Foreground="White"
+                                        Grid.Column="0"
+                                        Grid.Row="0"
+                                        Margin="5"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        VerticalAlignment="Center"> 
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="EyeCheck" 
+                                                                        VerticalAlignment="Center"
+                                                                        Margin="5 0"/>
+                                            <TextBlock> N° Volume :</TextBlock>                                           
+                                        </StackPanel>
+                                </TextBlock>
+                                <TextBlock x:Name="tbxVolume"
+                                        Grid.Column="1" 
+                                        Foreground="White"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        FontWeight="Bold"    
+                                        VerticalAlignment="Center"                                      
+                                        Grid.Row="0"
+                                        ></TextBlock>
+                                <CheckBox Foreground="White" 
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Agency Fb"
+                                        Background="White"  
+                                        x:Name="cbVolume"                                        
+                                        Grid.Row="0">rejete</CheckBox>
+
+                                <TextBlock Foreground="White"
+                                        Grid.Column="0"
+                                        Grid.Row="1"
+                                        Margin="5"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        VerticalAlignment="Center"> 
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="EyeCheck" 
+                                                                        VerticalAlignment="Center"
+                                                                        Margin="5 0"/>
+                                            <TextBlock> N° depôt Debut :</TextBlock>                                           
+                                        </StackPanel>                                           
+                                </TextBlock>
+                                <TextBlock x:Name="tbxNumDepotDebut"
+                                        Grid.Column="1" 
+                                        Foreground="White"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        FontWeight="Bold"    
+                                        VerticalAlignment="Center"                                   
+                                        Grid.Row="1"
+                                        ></TextBlock>
+                                <CheckBox Foreground="White" 
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Agency Fb"
+                                        Background="White"
+                                        x:Name="cbNumDepotDebut"
+                                        Grid.Row="1">rejete</CheckBox>
+
+                                <TextBlock Foreground="White"
+                                        Grid.Column="0"
+                                        Grid.Row="2"
+                                        Margin="5"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        VerticalAlignment="Center"> 
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="EyeCheck" 
+                                                                        VerticalAlignment="Center"
+                                                                        Margin="5 0"/>
+                                            <TextBlock> Date depôt debut :</TextBlock>                                           
+                                        </StackPanel>                                           
+                                </TextBlock>
+                                <TextBlock x:Name="tbxDateDepotDebut"
+                                        Grid.Column="1" 
+                                        Foreground="White"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        FontWeight="Bold"  
+                                        VerticalAlignment="Center"                                     
+                                        Grid.Row="2"
+                                        ></TextBlock>
+                                <CheckBox Foreground="White" 
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Agency Fb"
+                                        Background="White"
+                                        x:Name="cbDateDepotDebut"
+                                        Grid.Row="2">rejete</CheckBox>
+
+                                <TextBlock Foreground="White"
+                                        Grid.Column="0"
+                                        Grid.Row="3"
+                                        Margin="5"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        VerticalAlignment="Center"> 
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="EyeCheck" 
+                                                                        VerticalAlignment="Center"
+                                                                        Margin="5 0"/>
+                                            <TextBlock>N° Depôt Fin :</TextBlock>                                           
+                                        </StackPanel>                                           
+                                </TextBlock>
+                                <TextBlock x:Name="tbxNumDepotFin"
+                                        Grid.Column="1"  
+                                        Foreground="White"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        FontWeight="Bold"  
+                                        VerticalAlignment="Center"                                    
+                                        Grid.Row="3"
+                                        ></TextBlock>
+                                <CheckBox Foreground="White" 
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Agency Fb"
+                                        Background="White"
+                                        x:Name="cbNumDepotFin"
+                                        Grid.Row="3">rejete</CheckBox>
+
+                                <TextBlock Foreground="White"
+                                        Grid.Column="0"
+                                        Grid.Row="4"
+                                        Margin="5"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        VerticalAlignment="Center"> 
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="EyeCheck" 
+                                                                        VerticalAlignment="Center"
+                                                                        Margin="5 0"/>
+                                            <TextBlock> Date Depôt Fin :</TextBlock>                                           
+                                        </StackPanel>                                           
+                                </TextBlock>
+                                <TextBlock x:Name="tbxDateDepotFin"
+                                        Grid.Column="1" 
+                                        Foreground="White"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        FontWeight="Bold"  
+                                        VerticalAlignment="Center"                                     
+                                        Grid.Row="4"
+                                        ></TextBlock>
+                                <CheckBox Foreground="White" 
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Agency Fb"
+                                        Background="White"
+                                        x:Name="cbDateDepotFin"
+                                        Grid.Row="4">rejete</CheckBox>
+
+                                <TextBlock Foreground="White"
+                                        Grid.Column="0"
+                                        Grid.Row="6"
+                                        Margin="5"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        VerticalAlignment="Center"> 
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="EyeCheck" 
+                                                                        VerticalAlignment="Center"
+                                                                        Margin="5 0"/>
+                                            <TextBlock> Nombre de Page :</TextBlock>                                           
+                                        </StackPanel>                                           
+                            </TextBlock>
+                                <TextBlock x:Name="tbxNbPage"
+                                        Grid.Column="1" 
+                                        Foreground="White"
+                                        FontFamily="Agency Fb"
+                                        FontSize="15"
+                                        FontWeight="Bold"  
+                                        VerticalAlignment="Center"                                    
+                                        Grid.Row="6"
+                                        ></TextBlock>
+                                <CheckBox Foreground="White" 
+                                        Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Agency Fb"
+                                        Background="White"
+                                        x:Name="cbNbPage"
+                                        Grid.Row="6">rejete</CheckBox>
+                            </Grid>
+                            <StackPanel>
+                                <Button x:Name="BtnTerminerControlePageDeGarde"
+                                    Margin="5 0"
+                                    BorderThickness="0 5 0 5"
+                                    BorderBrush="White"
+                                    Background="Transparent"
+                                    Height="50"
+                                    Click="BtnTerminerControlePageDeGarde_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Margin="10 0" > Terminer Contrôle</TextBlock>
+                                        <materialDesign:PackIcon Kind="CheckCircle"
+                                        Width="25"
+                                        Height="25"
+                                        Foreground="White"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </StackPanel>
 

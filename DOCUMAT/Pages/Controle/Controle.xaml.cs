@@ -55,7 +55,41 @@ namespace DOCUMAT.Pages.Controle
                     //Devra être modifié pour empêcher l'affichage des régistres déja attribués
                     RegistreView registreView = new RegistreView();
                     List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2 && r.Registre.ID_Unite == unite.UniteID).ToList();
-                    dgRegistre.ItemsSource = registreViews;
+                    List<Models.Correction> correctionsRegistrePh3 = registreView.context.Correction.Where(c => c.StatutCorrection == 0 && c.PhaseCorrection == 3 && c.ImageID == null && c.SequenceID == null).ToList();
+
+                    var jointure = from r in registreViews
+                                   join c in correctionsRegistrePh3 on r.Registre.RegistreID equals c.RegistreId
+                                   select r;
+
+                    dgRegistre.ItemsSource = registreViews.Except(jointure);
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
+        private void RefreshRegistrePhase3()
+        {
+            try
+            {
+                if (cbChoixunite.SelectedItem != null)
+                {
+                    // Liste des Unités de la Tranche
+                    Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
+                    //Remplissage de la list de registre
+                    //Les registres de type Phase 1 sont les registre nouvellement indexée 
+                    //Devra être modifié pour empêcher l'affichage des régistres déja attribués
+                    RegistreView registreView = new RegistreView();
+                    List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2 && r.Registre.ID_Unite == unite.UniteID).ToList();
+                    List<Models.Correction> correctionsRegistrePh3 = registreView.context.Correction.Where(c => c.StatutCorrection == 0 && c.PhaseCorrection == 3 && c.ImageID == null && c.SequenceID == null).ToList();
+
+                    var jointure = from r in registreViews
+                                   join c in correctionsRegistrePh3 on r.Registre.RegistreID equals c.RegistreId
+                                   select r;
+
+                    dgRegistre.ItemsSource = jointure;
                 }
             }
             catch (Exception ex)
@@ -154,10 +188,41 @@ namespace DOCUMAT.Pages.Controle
                                 RegistreView registreView = new RegistreView();
                                 List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2 
                                                                     && r.Registre.ID_Unite == unite.UniteID && r.Registre.Numero.ToLower().Contains(TbRechercher.Text.Trim().ToLower())).ToList();
-                                dgRegistre.ItemsSource = registreViews;
+                                List<Models.Correction> correctionsRegistrePh3 = registreView.context.Correction.Where(c => c.StatutCorrection == 0 && c.PhaseCorrection == 3 && c.ImageID == null && c.SequenceID == null).ToList();
+
+                                var jointure = from r in registreViews
+                                               join c in correctionsRegistrePh3 on r.Registre.RegistreID equals c.RegistreId
+                                               select r;
+
+                                dgRegistre.ItemsSource = registreViews.Except(jointure);
                             }
                         }
                         else { RefreshRegistrePhase2(); }
+                        break;
+                    case 3:
+                        if (TbRechercher.Text != "")
+                        {
+                            if (cbChoixunite.SelectedItem != null)
+                            {
+                                // Liste des Unités de la Tranche
+                                Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
+                                //Remplissage de la list de registre
+                                //Les registres de type Phase 1 sont les registre nouvellement indexée 
+                                //Devra être modifié pour empêcher l'affichage des régistres déja attribués
+                                RegistreView registreView = new RegistreView();
+                                List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE2
+                                                                    && r.Registre.ID_Unite == unite.UniteID && r.Registre.Numero.ToLower().Contains(TbRechercher.Text.Trim().ToLower())).ToList();
+                                List<Models.Correction> correctionsRegistrePh3 = registreView.context.Correction.Where(c => c.StatutCorrection == 0 && c.PhaseCorrection == 3 && c.ImageID == null && c.SequenceID == null).ToList();
+
+                                var jointure = from r in registreViews
+                                               join c in correctionsRegistrePh3 on r.Registre.RegistreID equals c.RegistreId
+                                               select r;
+
+                                dgRegistre.ItemsSource = jointure;
+                            }
+                        }
+                        else { RefreshRegistrePhase2(); }
+
                         break;
                 }
             }
@@ -178,9 +243,13 @@ namespace DOCUMAT.Pages.Controle
             {
                 RefreshRegistrePhase1();
             }
-            else
+            else if(CurrentPhase == 2)
             {
                 RefreshRegistrePhase2();
+            }
+            else if(CurrentPhase == 3)
+            {
+                RefreshRegistrePhase3();
             }
         }
 
@@ -194,6 +263,10 @@ namespace DOCUMAT.Pages.Controle
             BtnPhase2.Foreground = BtnPhase2.BorderBrush = Brushes.White;
             BtnPhase2.Background = null;
 
+            // On Déselectionne le btnPhaseLast par son design           
+            BtnPhaseLast.Foreground = BtnPhaseLast.BorderBrush = Brushes.White;
+            BtnPhaseLast.Background = null;
+
             CurrentPhase = 1;
             RefreshRegistrePhase1();
         }
@@ -201,12 +274,16 @@ namespace DOCUMAT.Pages.Controle
         public void BtnPhase2_Click(object sender, RoutedEventArgs e)
         {
             // On Met le design en place pour changer de selection
-            BtnPhase2.Background = Brushes.White;
             BtnPhase2.Foreground = BtnPhase2.BorderBrush = Brushes.SteelBlue;
+            BtnPhase2.Background = Brushes.White;
 
             // On Déselectionne le btnPhase2 par son design           
             BtnPhase1.Foreground = BtnPhase1.BorderBrush = Brushes.White;
             BtnPhase1.Background = null;
+
+            // On Déselectionne le btnPhaseLast par son design           
+            BtnPhaseLast.Foreground = BtnPhaseLast.BorderBrush = Brushes.White;
+            BtnPhaseLast.Background = null;
 
             CurrentPhase = 2;
             RefreshRegistrePhase2();
@@ -221,10 +298,15 @@ namespace DOCUMAT.Pages.Controle
                     Image.ImageController imageController = new Image.ImageController((RegistreView)dgRegistre.SelectedItem,this);
                     imageController.Show();            
                 }
-                else
+                else if(CurrentPhase == 2)
                 {
                     Image.ImageControllerSecond imageController = new Image.ImageControllerSecond((RegistreView)dgRegistre.SelectedItem, this);
                     imageController.Show();
+                }
+                else if(CurrentPhase == 3)
+                {
+                    Image.ImageControllerValidation imageControllerValidation = new Image.ImageControllerValidation((RegistreView)dgRegistre.SelectedItem, this);
+                    imageControllerValidation.Show();
                 }
             }
         }
@@ -279,6 +361,52 @@ namespace DOCUMAT.Pages.Controle
             {
                 ex.ExceptionCatcher();
             }
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            //MessageBox.Show("size changed !!! : " + this.ActualHeight);
+            double MyWindowWidth = 1600;
+            double MyWindowHeight = 900;
+            double dgSMaxHeight = 400;
+
+            // Gestion de l'IHM
+            if (this.ActualHeight < MyWindowHeight)
+            {
+                dgRegistre.MaxHeight = dgSMaxHeight - ((MyWindowHeight - this.ActualHeight)/2);
+            }
+            else
+            {
+                dgRegistre.MaxHeight = dgSMaxHeight + ((MyWindowHeight - this.ActualHeight)/2);
+            }
+        }
+
+        private void BtnPhaseLast_Click(object sender, RoutedEventArgs e)
+        {
+            // On Met le design en place pour changer de selection
+            BtnPhaseLast.Background = Brushes.White;
+            BtnPhaseLast.Foreground = BtnPhaseLast.BorderBrush = Brushes.SteelBlue;
+
+            // On Met le design en place pour changer de selection
+            BtnPhase2.Foreground = BtnPhase2.BorderBrush = Brushes.White;
+            BtnPhase2.Background = null;
+
+            // On Déselectionne le btnPhase2 par son design           
+            BtnPhase1.Foreground = BtnPhase1.BorderBrush = Brushes.White;
+            BtnPhase1.Background = null;
+
+            CurrentPhase = 3;
+            RefreshRegistrePhase3();
+        }
+
+        private void BtnPhaseLast_Click_1(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnPhaseLast_Click_2(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

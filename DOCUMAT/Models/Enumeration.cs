@@ -87,7 +87,7 @@ namespace DOCUMAT.Models
 
         // Pour les séquences les statut sont :
         // ASupprimer : 1 oui, 0 non
-        // PhaseControle : 1 phase1, 2 phase2, 3 phase3
+        // PhaseControle : 1 phase1, 2 phase2, 3 phase3, 4 phase 4 (Terminé)
         // PhaseCorrection : 1 phase1, 2 phase2, 3 phase3
     }
 }

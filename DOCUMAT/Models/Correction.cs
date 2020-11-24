@@ -13,6 +13,14 @@ namespace DOCUMAT.Models
         public int? ImageID { get; set; }
         public int? SequenceID { get; set; }
 
+        // Index Registre
+        public int? Numero_idx { get; set; }
+        public int? DateDepotDebut_idx { get; set; }
+        public int? DateDepotFin_idx { get; set; }
+        public int? NumeroDebut_idx { get; set; }
+        public int? NumeroDepotFin_idx { get; set; }
+        public int? NombrePage_idx { get; set; }
+
         // Indexes Images
         public int? NumeroPageImage_idx { get; set; }
         public int? NomPageImage_idx { get; set; }

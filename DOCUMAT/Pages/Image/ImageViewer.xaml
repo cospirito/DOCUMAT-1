@@ -10,17 +10,16 @@
         mc:Ignorable="d"
         Title="Indexation" 
         WindowState="Maximized"
-        ResizeMode="CanResize"
-        MinWidth="1200"
-        MinHeight="900"
+        ResizeMode="CanResize"        
+        MinHeight="700"
+        MinWidth="1024"
         WindowStartupLocation="CenterOwner"
         Closed="Window_Closed"
         Loaded="Window_Loaded"
         Closing="Window_Closing"
         GotFocus="Window_GotFocus"
         Background="SteelBlue" 
-        Height="900"
-        Width="1253">
+        SizeChanged="Window_SizeChanged">
 
     <Window.Resources>
         <local:StringToImageSourceConverter x:Key="ImageConverter"/>
@@ -263,8 +262,8 @@
                         <RowDefinition Height="35"></RowDefinition>
                         <RowDefinition Height="50"></RowDefinition>
                         <RowDefinition Height="30"></RowDefinition>
-                        <RowDefinition Height="*"></RowDefinition>
-                        <RowDefinition Height="400"></RowDefinition>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition MaxHeight="330"></RowDefinition>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" 
                                 Background="White"

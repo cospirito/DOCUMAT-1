@@ -28,6 +28,6 @@ namespace DOCUMAT.Models
         public virtual List<StatutRegistre> StatutRegistres { get; set; }
 
         // Définition de la Tranche
-        public int ID_Unite { get; set; }
+        public int? ID_Unite { get; set; }
     }
 }

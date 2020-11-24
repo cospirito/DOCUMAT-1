@@ -455,8 +455,12 @@ namespace DOCUMAT.Pages.Scannerisation
                     if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
                     {
                         // Affichage de l'impression du code barre
-                        Impression.QrCode PageImp = new Impression.QrCode(((RegistreView)dgRegistre.SelectedItem).Registre);
-                        PageImp.Show();
+                        //Impression.QrCode PageImp = new Impression.QrCode(((RegistreView)dgRegistre.SelectedItem).Registre);
+                        //PageImp.Show();
+
+                        // Affichage de l'impression du code barre
+                        Impression.BordereauRegistre bordereauRegistre = new Impression.BordereauRegistre(((RegistreView)dgRegistre.SelectedItem).Registre);
+                        bordereauRegistre.Show();
                     }
                 }
             }

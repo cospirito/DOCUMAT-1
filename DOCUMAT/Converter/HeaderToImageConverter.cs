@@ -35,19 +35,41 @@ namespace DOCUMAT.Converter
 
             // If the name is blank, we presume it's a drive as we cannot have a blank file or folder name
             if (string.IsNullOrEmpty(name))
+            {
                 image = "Images/drive.png";
+            }
             else if (path == "valide")
+            {
                 image = "Images/valide2.png";
+            }
             else if (path == "instance")
+            {
                 image = "Images/warning1.png";
+            }
             else if (path == "edit")
+            {
                 image = "Images/edit.png";
+            }
             else if (path == "notFound")
+            {
                 image = "Images/fileNotFound.png";
+            }
             else if (path == "fileDelele")
-                image = "Images/fileTrash.png";
+            {
+                image = "Images/fileDelete.png";
+            }
+            else if (path == "Correct")
+            {
+                image = "Images/fileStar.png";
+            }
+            else if(path == "ErrorFolder")
+            {
+                image = "Images/folderError.png";
+            }
             else if (new FileInfo(path).Extension == "")
+            {
                 image = "Images/folder-closed.png";
+            }
 
 
             return new BitmapImage(new Uri($"pack://application:,,,/{image}"));

@@ -7,10 +7,9 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:src="clr-namespace:DOCUMAT.Converter"
       mc:Ignorable="d" 
-      Height="800" 
-      d:DesignWidth="1280"
       Loaded="Page_Loaded"
-      Title="Indexation">
+      Title="Indexation"
+      SizeChanged="Page_SizeChanged">
     <Page.Resources>
         <src:DateConverter x:Key="DateConverter"/>
         <Style TargetType="DataGridRow">
@@ -108,7 +107,7 @@
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
             <!--Grid View des Registres -->
-            <Grid Margin="20" x:Name="gridViewPanelRegistre">
+            <Grid Margin="20 20 20 0" x:Name="gridViewPanelRegistre">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1109*"/>
                     <ColumnDefinition Width="131*"/>
@@ -118,7 +117,6 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
                           IsReadOnly="True"
-                          MaxHeight="400" 
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgRegistre_LoadingRow"

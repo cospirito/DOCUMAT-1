@@ -37,6 +37,8 @@ namespace DOCUMAT
         Pages.Dispatching.DispatchingCorrection DispatchingCorrection; //Dispatching Indexation
 
         bool isDeconex = false;
+        // Index du Btn Module sélectionné 
+        int IndexSelect = 0;
 
         public Menu()
         {
@@ -181,6 +183,7 @@ namespace DOCUMAT
         {
             Button btn = (Button)sender;
             int index = int.Parse(((Button)e.Source).Uid);
+            IndexSelect = index;
 
             double tailleBtn = btn.ActualWidth;
             GridCursor.Margin = new Thickness(20 + (tailleBtn * index), 50, 0, 0);
@@ -228,22 +231,12 @@ namespace DOCUMAT
         {
             //Service = new Main();
             Accueil = new Pages.Home.Admin();
-            //Inventaire = new Pages.Inventaire.Inventaire(Utilisateur);
-            //Preindexation = new Pages.Preindexation.Preindexation(Utilisateur);
-            //Scannerisation = new Pages.Scannerisation.Scannerisation(Utilisateur);
-            //Indexation = new Pages.Indexation.Indexation(Utilisateur);
-            //Controle = new Pages.Controle.Controle(Utilisateur);
-            //Correction = new Pages.Correction.Correction(Utilisateur);
             Parametre = new Pages.Parametre.Parametre();
             GestionAgent = new Pages.Agent.GestionAgent(Utilisateur);
             Dispatching = new Pages.Dispatching.Dispatching(Utilisateur);
             DispatchingControle = new Pages.Dispatching.DispatchingControle(Utilisateur);
             DispatchingCorrection = new Pages.Dispatching.DispatchingCorrection(Utilisateur);
             this.ContenuAdd.Navigate(Accueil);
-
-            // Vérouillage des onglet de contrôle et de correction 
-            //BtnCORRECTION.IsEnabled = false;
-            //BtnCONTROLE.IsEnabled = false;
 
             // Définition du Timer de maintient de session 
             Timer = new System.Timers.Timer() { AutoReset = true, Interval = 1 * 60 * 1000 };
@@ -303,7 +296,9 @@ namespace DOCUMAT
             if (GestionAgent.IsVisible)
             {
                 if (!GestionAgent.IsActive)
+                {
                     GestionAgent.Activate();
+                }
                 GestionAgent.WindowState = WindowState.Normal;
             }
             else
@@ -358,7 +353,7 @@ namespace DOCUMAT
             if (MessageBox.Show("DECONNECTER SE COMPTE ? ", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 // Enregistrement de la fin de la session de travail
-                using(var ct = new DocumatContext())
+                using (var ct = new DocumatContext())
                 {
                     SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
                     sessionTravail.DateFin = sessionTravail.DateModif = DateTime.Now;
@@ -369,6 +364,32 @@ namespace DOCUMAT
                     isDeconex = true;
                     Timer.Stop();
                     this.Close();
+
+                    // Fermeture des Fenetres Potentiellement Ouverte 
+                    if(Dispatching.IsVisible)
+                    {
+                        Dispatching.Close();
+                    }
+
+                    if (DispatchingControle.IsVisible)
+                    {
+                        DispatchingControle.Close();
+                    }
+
+                    if(DispatchingCorrection.IsVisible)
+                    {
+                        DispatchingCorrection.Close();
+                    }
+
+                    if(Parametre.IsVisible)
+                    {
+                        Parametre.Close();
+                    }
+
+                    if(GestionAgent.IsVisible)
+                    {
+                        GestionAgent.Close();
+                    }
                 }
             }
         }
@@ -383,7 +404,9 @@ namespace DOCUMAT
             if (Parametre.IsVisible)
             {
                 if (!Dispatching.IsActive)
+                {
                     Parametre.Activate();
+                }
                 Parametre.WindowState = WindowState.Normal;
             }
             else
@@ -413,6 +436,50 @@ namespace DOCUMAT
                     GridMain.MinHeight = minGridHeight;
                 }
             }
+
+            if(e.WidthChanged)
+            {
+                if(e.NewSize.Width < 1140)
+                {
+                    BtnACCUEIL.Width = 100;
+                    BtnACCUEIL.Content = "ACC..";
+                    BtnINVENTAIRE.Width = 100;
+                    BtnINVENTAIRE.Content = "INV..";
+                    BtnPREINDEXATION.Width = 100;
+                    BtnPREINDEXATION.Content = "PRE..";
+                    BtnSCANNERISATION.Width = 100;
+                    BtnSCANNERISATION.Content = "SCA..";
+                    BtnINDEXATION.Width = 100;
+                    BtnINDEXATION.Content = "IND..";
+                    BtnCONTROLE.Width = 100;
+                    BtnCONTROLE.Content = "CTR..";
+                    BtnCORRECTION.Width = 100;
+                    BtnCORRECTION.Content = "CRR..";
+                    GridCursor.Width = 100;
+                    GridCursor.Margin = new Thickness(20 + (100 * IndexSelect), 50, 0, 0);
+                    GridCursor2.Width = 100;
+                }
+                else
+                {
+                    BtnACCUEIL.Width = 150;
+                    BtnACCUEIL.Content = "ACCUEIL";
+                    BtnINVENTAIRE.Width = 150;
+                    BtnINVENTAIRE.Content = "INVENTAIRE";
+                    BtnPREINDEXATION.Width = 150;
+                    BtnPREINDEXATION.Content = "PREINDEXATION";
+                    BtnSCANNERISATION.Width = 150;
+                    BtnSCANNERISATION.Content = "SCANNERISATION";
+                    BtnINDEXATION.Width = 150;
+                    BtnINDEXATION.Content = "INDEXATION";
+                    BtnCONTROLE.Width = 150;
+                    BtnCONTROLE.Content = "CONTROLE";
+                    BtnCORRECTION.Width = 150;
+                    BtnCORRECTION.Content = "CORRECTION";
+                    GridCursor.Width = 150;
+                    GridCursor.Margin = new Thickness(20 + (150 * IndexSelect), 50, 0, 0);
+                    GridCursor2.Width = 150;
+                }
+            }
         }
 
         private void BtnDispatchCorrection_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -420,7 +487,9 @@ namespace DOCUMAT
             if (DispatchingCorrection.IsVisible)
             {
                 if (!DispatchingCorrection.IsActive)
+                {
                     DispatchingCorrection.Activate();
+                }
                 DispatchingCorrection.WindowState = WindowState.Normal;
             }
             else
@@ -435,7 +504,9 @@ namespace DOCUMAT
             if (DispatchingControle.IsVisible)
             {
                 if (!DispatchingControle.IsActive)
+                {
                     DispatchingControle.Activate();
+                }
                 DispatchingControle.WindowState = WindowState.Normal;
             }
             else
@@ -450,7 +521,9 @@ namespace DOCUMAT
             if (Dispatching.IsVisible)
             {
                 if (!Dispatching.IsActive)
+                {
                     Dispatching.Activate();
+                }
                 Dispatching.WindowState = WindowState.Normal;
             }
             else

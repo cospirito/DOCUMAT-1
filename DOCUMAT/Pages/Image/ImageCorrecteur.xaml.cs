@@ -330,6 +330,10 @@ namespace DOCUMAT.Pages.Image
                                 {
                                     newfichier = "PAGE D'OUVERTURE";
                                 }
+								else
+                                {
+									newfichier = (manquantImage.NumeroPage < 10) ? $"0{manquantImage.NumeroPage}" : manquantImage.NumeroPage.ToString();
+								}
 
                                 //Préparation du chemin de l'image et déplacement de l'image dans le dossier parent
                                 if (imageView.context.Image.FirstOrDefault(i => i.NumeroPage == manquantImage.NumeroPage) != null)
@@ -349,7 +353,7 @@ namespace DOCUMAT.Pages.Image
                                             CheminImage = Destination,
                                             Taille = fichierSource.Length,
                                             Type = fichierSource.Extension.Substring(1).ToUpper(),
-                                            DateScan = DateTime.Now,
+                                            DateScan = fichierSource.CreationTime,
                                             StatutActuel = (int)Enumeration.Image.CREEE,
                                             DebutSequence = manquantImage.DebutSequence,
                                             FinSequence = manquantImage.FinSequence,

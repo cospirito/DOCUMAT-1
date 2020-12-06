@@ -53,7 +53,8 @@
             <Grid HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Top" 
                         Margin="20 0 0 0" Grid.ColumnSpan="2">
-                    <Button Uid="0" Width="150" 
+                    <Button x:Name="BtnACCUEIL"
+                        Uid="0" Width="150" 
                         Content="ACCUEIL" 
                         Height="50" 
                         Background="{x:Null}" 

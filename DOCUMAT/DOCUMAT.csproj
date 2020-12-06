@@ -160,66 +160,6 @@
     <Compile Include="Impression\QrCode.Print.xaml.cs">
       <DependentUpon>QrCode.Print.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202009071707334_CreationBD.cs" />
-    <Compile Include="Migrations\202009071707334_CreationBD.designer.cs">
-      <DependentUpon>202009071707334_CreationBD.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202009081222532_RemoveDependancetTablTraitement.cs" />
-    <Compile Include="Migrations\202009081222532_RemoveDependancetTablTraitement.designer.cs">
-      <DependentUpon>202009081222532_RemoveDependancetTablTraitement.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202009081524519_TableTraitementModif.cs" />
-    <Compile Include="Migrations\202009081524519_TableTraitementModif.designer.cs">
-      <DependentUpon>202009081524519_TableTraitementModif.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202009101311431_nombreRegistre.cs" />
-    <Compile Include="Migrations\202009101311431_nombreRegistre.designer.cs">
-      <DependentUpon>202009101311431_nombreRegistre.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202009101415347_registreNumeroVolumeToString.cs" />
-    <Compile Include="Migrations\202009101415347_registreNumeroVolumeToString.designer.cs">
-      <DependentUpon>202009101415347_registreNumeroVolumeToString.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202009281347029_TbTraitementAddObservation.cs" />
-    <Compile Include="Migrations\202009281347029_TbTraitementAddObservation.designer.cs">
-      <DependentUpon>202009281347029_TbTraitementAddObservation.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202010201935298_setDateNullableOnDateofSessionTravailTable.cs" />
-    <Compile Include="Migrations\202010201935298_setDateNullableOnDateofSessionTravailTable.designer.cs">
-      <DependentUpon>202010201935298_setDateNullableOnDateofSessionTravailTable.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011171526538_AddTableUniteTableTranhe.cs" />
-    <Compile Include="Migrations\202011171526538_AddTableUniteTableTranhe.designer.cs">
-      <DependentUpon>202011171526538_AddTableUniteTableTranhe.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011171614335_addNumeroTranche.cs" />
-    <Compile Include="Migrations\202011171614335_addNumeroTranche.designer.cs">
-      <DependentUpon>202011171614335_addNumeroTranche.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011171638127_removeAutoInc.cs" />
-    <Compile Include="Migrations\202011171638127_removeAutoInc.designer.cs">
-      <DependentUpon>202011171638127_removeAutoInc.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011171649216_AddTbUniteTbTranche.cs" />
-    <Compile Include="Migrations\202011171649216_AddTbUniteTbTranche.designer.cs">
-      <DependentUpon>202011171649216_AddTbUniteTbTranche.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011182226553_addDateControle.cs" />
-    <Compile Include="Migrations\202011182226553_addDateControle.designer.cs">
-      <DependentUpon>202011182226553_addDateControle.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011190046322_NbVuesLivreNbRegistreLivre.cs" />
-    <Compile Include="Migrations\202011190046322_NbVuesLivreNbRegistreLivre.designer.cs">
-      <DependentUpon>202011190046322_NbVuesLivreNbRegistreLivre.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011212248256_addIndexRegistreToControleAndCorrection.cs" />
-    <Compile Include="Migrations\202011212248256_addIndexRegistreToControleAndCorrection.designer.cs">
-      <DependentUpon>202011212248256_addIndexRegistreToControleAndCorrection.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202011221127566_CorrectionModelsControle.cs" />
-    <Compile Include="Migrations\202011221127566_CorrectionModelsControle.designer.cs">
-      <DependentUpon>202011221127566_CorrectionModelsControle.cs</DependentUpon>
-    </Compile>
     <Compile Include="Models\Configs.cs" />
     <Compile Include="Models\Controle.cs" />
     <Compile Include="Models\Correction.cs" />
@@ -493,51 +433,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Migrations\202009071707334_CreationBD.resx">
-      <DependentUpon>202009071707334_CreationBD.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202009081222532_RemoveDependancetTablTraitement.resx">
-      <DependentUpon>202009081222532_RemoveDependancetTablTraitement.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202009081524519_TableTraitementModif.resx">
-      <DependentUpon>202009081524519_TableTraitementModif.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202009101311431_nombreRegistre.resx">
-      <DependentUpon>202009101311431_nombreRegistre.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202009101415347_registreNumeroVolumeToString.resx">
-      <DependentUpon>202009101415347_registreNumeroVolumeToString.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202009281347029_TbTraitementAddObservation.resx">
-      <DependentUpon>202009281347029_TbTraitementAddObservation.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202010201935298_setDateNullableOnDateofSessionTravailTable.resx">
-      <DependentUpon>202010201935298_setDateNullableOnDateofSessionTravailTable.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011171526538_AddTableUniteTableTranhe.resx">
-      <DependentUpon>202011171526538_AddTableUniteTableTranhe.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011171614335_addNumeroTranche.resx">
-      <DependentUpon>202011171614335_addNumeroTranche.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011171638127_removeAutoInc.resx">
-      <DependentUpon>202011171638127_removeAutoInc.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011171649216_AddTbUniteTbTranche.resx">
-      <DependentUpon>202011171649216_AddTbUniteTbTranche.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011182226553_addDateControle.resx">
-      <DependentUpon>202011182226553_addDateControle.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011190046322_NbVuesLivreNbRegistreLivre.resx">
-      <DependentUpon>202011190046322_NbVuesLivreNbRegistreLivre.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011212248256_addIndexRegistreToControleAndCorrection.resx">
-      <DependentUpon>202011212248256_addIndexRegistreToControleAndCorrection.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202011221127566_CorrectionModelsControle.resx">
-      <DependentUpon>202011221127566_CorrectionModelsControle.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

@@ -23,18 +23,32 @@ namespace DOCUMAT.Pages.Inventaire
         // Refresh dgRegistre
         public void RefreshVersement()
         {
-            VersementView versementView = new VersementView();          
-            dgVersement.ItemsSource = cbVersement.ItemsSource = versementView.GetVersViewsByService((int)cbService.SelectedValue);
-            cbVersement.SelectedIndex = 0;
+            try
+            {
+                VersementView versementView = new VersementView();
+                dgVersement.ItemsSource = cbVersement.ItemsSource = versementView.GetVersViewsByService((int)cbService.SelectedValue);
+                cbVersement.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
 
         }
 
         public void RefreshRegistre()
         {
-            //Remplissage de la list de registre
-            RegistreView RegistreView = new RegistreView();
-            RegistreView.Versement = ((VersementView)cbVersement.SelectedItem).Versement;
-            dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE);
+            try
+            {
+                //Remplissage de la list de registre
+                RegistreView RegistreView = new RegistreView();
+                RegistreView.Versement = ((VersementView)cbVersement.SelectedItem).Versement;
+                dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE);
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         public Inventaire(Models.Agent user)
@@ -49,7 +63,7 @@ namespace DOCUMAT.Pages.Inventaire
             dgVersement.ContextMenu = cmVersement;
             ContextMenu cmRegistre = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cmRegistre;
-            MenuItem menuItemVersement = (MenuItem)cmVersement.Items.GetItemAt(3);
+            MenuItem menuItemVersement = (MenuItem)cmVersement.Items.GetItemAt(4);
 
             if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR)
             {
@@ -59,10 +73,6 @@ namespace DOCUMAT.Pages.Inventaire
             {
                 menuItemVersement.IsEnabled = false;
             }
-        }
-
-        private void dgView_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
-        {            
         }
 
         private void cbRegion_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -90,11 +100,6 @@ namespace DOCUMAT.Pages.Inventaire
             }
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void AfficherRegistre_Click(object sender, RoutedEventArgs e)
         {
             if(AfficherRegistre.IsChecked == true)
@@ -107,7 +112,6 @@ namespace DOCUMAT.Pages.Inventaire
                     cbRegion.IsEnabled = false;
                     cbService.IsEnabled = false;
                     cbVersement.IsEnabled = false;
-
                     RefreshRegistre();
                 }
             }
@@ -119,7 +123,6 @@ namespace DOCUMAT.Pages.Inventaire
                 cbRegion.IsEnabled = true;
                 cbService.IsEnabled = true;
                 cbVersement.IsEnabled = true;
-                RefreshVersement();
             }
         }
 
@@ -142,51 +145,65 @@ namespace DOCUMAT.Pages.Inventaire
 
         private void EditVersement_Click(object sender, RoutedEventArgs e)
         {
-            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+            try
             {
-                if (dgVersement.SelectedItems.Count == 1)
+                if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
                 {
-                    this.IsEnabled = false;                
-                    Versement.FormVersement versement = new Versement.FormVersement((ServiceView)cbService.SelectedItem,((VersementView)cbVersement.SelectedItem),this,Utilisateur);
-                    versement.Show();
+                    if (dgVersement.SelectedItems.Count == 1)
+                    {
+                        this.IsEnabled = false;
+                        Versement.FormVersement versement = new Versement.FormVersement((ServiceView)cbService.SelectedItem, ((VersementView)cbVersement.SelectedItem), this, Utilisateur);
+                        versement.Show();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Vos privilèges ne vous permettes pas d'effectuer cette action !", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Vos privilèges ne vous permettes pas d'effectuer cette action !", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ex.ExceptionCatcher();
             }
         }
 
         private void DelVersement_Click(object sender, RoutedEventArgs e)
         {
-            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+            try
             {
-                if (dgVersement.SelectedItem != null)
+                if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
                 {
-                    if(MessageBox.Show("Voulez vous vraiment supprimer ?","QUESTION",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+                    if (dgVersement.SelectedItem != null)
                     {
-                        VersementView versementView1 = new VersementView();
-                        List<int> VersementIds = new List<int>();
-                        foreach (VersementView versementView in dgVersement.SelectedItems)
+                        if (MessageBox.Show("Voulez vous vraiment supprimer ?", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                         {
-                            VersementIds.Add(versementView.Versement.VersementID);
-                            versementView1.context.Versement.Remove(versementView1.context.Versement.FirstOrDefault(v=> v.VersementID == versementView.Versement.VersementID));                       
-                        }
-                        versementView1.context.SaveChanges();
+                            VersementView versementView1 = new VersementView();
+                            List<int> VersementIds = new List<int>();
+                            foreach (VersementView versementView in dgVersement.SelectedItems)
+                            {
+                                VersementIds.Add(versementView.Versement.VersementID);
+                                versementView1.context.Versement.Remove(versementView1.context.Versement.FirstOrDefault(v => v.VersementID == versementView.Versement.VersementID));
+                            }
+                            versementView1.context.SaveChanges();
 
-                        // Enregistrement du traitement de l'agent 
-                        foreach(int id in VersementIds)
-                        {
-                            DocumatContext.AddTraitement(DocumatContext.TbVersement,id,Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION);
+                            // Enregistrement du traitement de l'agent 
+                            foreach (int id in VersementIds)
+                            {
+                                DocumatContext.AddTraitement(DocumatContext.TbVersement, id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION);
+                            }
+                            dgVersement.ItemsSource = cbVersement.ItemsSource = versementView1.GetVersViewsByService((int)cbService.SelectedValue);
+                            versementView1.Dispose();
                         }
-                        dgVersement.ItemsSource = cbVersement.ItemsSource = versementView1.GetVersViewsByService((int)cbService.SelectedValue);
-                        versementView1.Dispose();
                     }
                 }
+                else
+                {
+                    MessageBox.Show("Vos privilèges ne vous permettes pas d'effectuer cette action !", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Vos privilèges ne vous permettes pas d'effectuer cette action !", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ex.ExceptionCatcher();
             }
         }
 
@@ -255,11 +272,6 @@ namespace DOCUMAT.Pages.Inventaire
             e.Row.Item = view;
         }
 
-        private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
             try
@@ -296,16 +308,6 @@ namespace DOCUMAT.Pages.Inventaire
             }
         }
 
-        private void AfficherRegistre_Click_1(object sender, RoutedEventArgs e)
-        {
-               
-        }
-
-        private void btnVersement_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void btnAjouterNouveau_Click(object sender, RoutedEventArgs e)
         {
             if(gridViewPanelRegistre.Visibility == Visibility.Visible)
@@ -318,36 +320,6 @@ namespace DOCUMAT.Pages.Inventaire
             }
         }
 
-        private void OpenDossier_Click(object sender, RoutedEventArgs e)
-        {
-            //if (dgVersement.SelectedItems.Count == 1)
-            //{
-
-            //    VersementView versementView = (VersementView)dgVersement.SelectedItem;
-            //    DirectoryInfo RegistreDossier = new DirectoryInfo(Path.Combine(DossierRacine, versementView.ServiceVersant.CheminDossier));
-            //    OpenFileDialog openFileDialog = new OpenFileDialog();
-            //    var dlg = new CommonOpenFileDialog();
-            //    dlg.Title = "Dossier du Service : " + versementView.ServiceVersant.Nom;
-            //    dlg.IsFolderPicker = false;
-            //    //dlg.InitialDirectory = currentDirectory;
-            //    dlg.AddToMostRecentlyUsedList = false;
-            //    dlg.AllowNonFileSystemItems = false;
-            //    //dlg.DefaultDirectory = currentDirectory;
-            //    //dlg.FileOk += Dlg_FileOk;
-            //    dlg.EnsureFileExists = true;
-            //    dlg.EnsurePathExists = true;
-            //    dlg.EnsureReadOnly = false;
-            //    dlg.EnsureValidNames = true;
-            //    dlg.Multiselect = true;
-            //    dlg.ShowPlacesList = true;
-            //    dlg.InitialDirectory = RegistreDossier.FullName;
-
-            //    if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
-            //    {
-            //    }
-            //}
-        }
-
         private void voirBordereau_Click(object sender, RoutedEventArgs e)
         {
             if(dgVersement.SelectedItems.Count == 1)
@@ -356,6 +328,31 @@ namespace DOCUMAT.Pages.Inventaire
                 Pages.Image.SimpleViewer simpleViewer = new Image.SimpleViewer(Path.Combine(DossierRacine,versement.cheminBordereau));
                 simpleViewer.Show();
             }
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.HeightChanged)
+            {
+                int StandardHeight = 800;
+                int StandardDgHeight = 450;
+                if (e.NewSize.Height < StandardHeight)
+                {
+                    dgVersement.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height)*2/3);
+                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height)*2/3);
+                }
+                else
+                {
+                    dgVersement.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight)*2/3);
+                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight)*2/3);
+                }
+            }
+        }
+
+        private void AffRegistre_Click(object sender, RoutedEventArgs e)
+        {
+            AfficherRegistre.IsChecked = true;
+            AfficherRegistre_Click(null, null);
         }
     }
 }

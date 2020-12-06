@@ -501,5 +501,22 @@ namespace DOCUMAT.Pages.Scannerisation
                 ex.ExceptionCatcher();
             }
         }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.HeightChanged)
+            {
+                int StandardHeight = 800;
+                int StandardDgHeight = 450;
+                if (e.NewSize.Height < StandardHeight)
+                {
+                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height) * 2 / 3);
+                }
+                else
+                {
+                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight) * 2 / 3);
+                }
+            }
+        }
     }
 }

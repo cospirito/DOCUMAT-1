@@ -44,6 +44,7 @@ namespace DOCUMAT.Models
             TERMINE,
         }
 
+
         // L'odre ne doit pas être changé
         public enum Genre
         {
@@ -83,6 +84,8 @@ namespace DOCUMAT.Models
             CONTROLE_PH3_TERMINE, // REGISTRE
             CORRECTION_PH3_DEBUT, // REGISTRE
             CORRECTION_PH3_TERMINE, // REGISTRE
+            CONTROLE_FINAL_DEBUT, // REGISTRE
+            CONTROLE_FINAL_FIN
         }
 
         // Pour les séquences les statut sont :

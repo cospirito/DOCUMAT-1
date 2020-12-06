@@ -1327,12 +1327,10 @@ namespace DOCUMAT.Pages.Image
 			//on vérifie que tous t'es ajouté dans la BD;
 			List<ImageView> images = CurrentImageView.GetSimpleViewsList(RegistreViewParent.Registre);
 
-			//MessageBox.Show("Images Disk " + fileInfos.Count + " / images Bd : " + images.Count + " / image actuelle : " + currentImage.ToString());
 			if (fileInfos.Count == images.Count)
 			{
 				if ((currentImage + 2) == images.Count)
 				{
-					//MessageBox.Show("Réinitialisation !!!");
 					currentImage = 1;
 				}
 				else if ((currentImage + 2) < images.Count)
@@ -1410,12 +1408,10 @@ namespace DOCUMAT.Pages.Image
 
         private void dgSequence_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-			//e.Handled = true;
         }
 
         private void dgSequence_PreviewKeyUp(object sender, KeyEventArgs e)
         {
-			//e.Handled = true;
         }
 
         private void dgSequence_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
@@ -1654,13 +1650,13 @@ namespace DOCUMAT.Pages.Image
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-			//MessageBox.Show(this.ActualHeight.ToString() + "/" + this.ActualWidth);
 			double MyWindowWidth = 1600;
 			double MyWindowHeight = 900;
 			double dgSMaxHeight = 400;
+			double listViewMaxHeight = dgSMaxHeight/3;
 
 			// Gestion de l'IHM
-			if(this.ActualHeight < MyWindowHeight )
+			if(this.ActualHeight < MyWindowHeight)
             {
 				dgSequence.MaxHeight = dgSMaxHeight - (MyWindowHeight - this.ActualHeight);
             }

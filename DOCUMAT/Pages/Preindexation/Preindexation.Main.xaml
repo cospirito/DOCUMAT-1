@@ -7,10 +7,9 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:src="clr-namespace:DOCUMAT.Converter"
       mc:Ignorable="d"  
-      Height="800" 
-      d:DesignWidth="1280"
       Title="Preindexation"
-      Loaded="Page_Loaded">
+      Loaded="Page_Loaded"
+      SizeChanged="Page_SizeChanged">
     <Page.Resources>
         <src:DateConverter x:Key="DateConverter"/>
         <Style TargetType="DataGridRow">
@@ -115,7 +114,6 @@
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center"
                      Margin="20 20 20 20"
-                     TextChanged="TbRechercher_TextChanged"
                      MinWidth="200"/>
                     <ComboBox x:Name="cbChoixRecherche" 
                         Foreground="White"
@@ -138,16 +136,15 @@
               x:Name="gridViewPanelRegistre"                            
               Visibility="Visible">
                 <DataGrid Name="dgRegistre" 
-                          Margin="20"
+                          Margin="20 20 20 0"
                           AutoGenerateColumns="False" 
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.CanContentScroll="True"
-                          MaxHeight="400"
-                          IsReadOnly="True"    
+                          IsReadOnly="True"   
+                          Height="auto"
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           LoadingRow="dgRegistre_LoadingRow"
-                          SelectionChanged="dgRegistre_SelectionChanged"
                           AreRowDetailsFrozen="False"
                           LoadingRowDetails="dgRegistre_LoadingRowDetails">
                 <DataGrid.Columns>
@@ -264,7 +261,6 @@
                           IsReadOnly="True"
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
-                          MaxHeight="400"
                           LoadingRow="dgFeuillet_LoadingRow"
                           SelectionChanged="dgFeuillet_SelectionChanged"
                           AreRowDetailsFrozen="False"
@@ -382,11 +378,14 @@
                     </Border>
 
                     <!--Formulaire de références-->
-                    <Border BorderBrush="White" BorderThickness="1 0 1 1">
+                    <Border BorderBrush="White" 
+                            BorderThickness="1 0 1 1"
+                            Visibility="Collapsed">
 
                         <StackPanel x:Name="FormulaireReferences"
                                     Visibility="Visible" Width="300">
-                            <StackPanel Background="DarkSlateGray" VerticalAlignment="Center">
+                            <StackPanel Background="DarkSlateGray" 
+                                        VerticalAlignment="Center">
                                 <TextBlock Text="Références des Séquences"
                                             Padding="10"
                                             HorizontalAlignment="Center"
@@ -404,7 +403,6 @@
                                     LoadingRow="dgSequence_LoadingRow"
                                     SelectionChanged="dgSequence_SelectionChanged"
                                     AreRowDetailsFrozen="False"
-                                    MaxHeight="250"
                                     LoadingRowDetails="dgSequence_LoadingRowDetails"
                                     CanUserResizeColumns="False"
                                     SelectionMode="Single"
@@ -451,14 +449,12 @@
                                             Content="Doub."
                                             Foreground="White" 
                                             Margin="10 10 0 10"
-                                            Checked="cbxDoublonOrdre_Checked"
-                                            Unchecked="cbxDoublonOrdre_Unchecked"/>
+                                            Checked="cbxDoublonOrdre_Checked"/>
                                 <CheckBox x:Name="cbxBisOrdre"
                                             Content="Bis"
                                             Foreground="White"
                                             Margin="10 10 0 10"
-                                            Checked="cbxBisOrdre_Checked"
-                                            Unchecked="cbxBisOrdre_Unchecked"/>
+                                            Checked="cbxBisOrdre_Checked"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" 
                                             HorizontalAlignment="Center">

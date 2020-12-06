@@ -449,12 +449,17 @@ namespace DOCUMAT.Pages.Image
 						== MessageBoxResult.Yes)
                     {
 						if (currentImage == -1)
+                        {
 							throw new Exception("Si l'Image de la PAGE DE GARDE est bien scannée, fermez et reouvrez la fenêtre afin de pouvoir enregistrer la page !!!");
+                        }
 					
 						if(currentImage == 0 )
+                        {
 							throw new Exception("Si l'Image de la PAGE D'OUVERTURE est bien scannée, fermez et reouvrez la fenêtre afin de pouvoir enregistrer la page !!!");
+                        }
 
-						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == currentImage.ToString());
+						string NomPage = (currentImage < 10) ? $"0{currentImage}" : currentImage.ToString();
+						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == NomPage);
 						if (file != null)
 						{
 							using (var ct = new DocumatContext())
@@ -493,7 +498,6 @@ namespace DOCUMAT.Pages.Image
 						else
 						{
 							MessageBox.Show("La page est introuvable dans le Dossier de Scan !!!", "ATTENTION", MessageBoxButton.OK, MessageBoxImage.Warning);
-							//throw new Exception("La Page N°" + imageView.Image.NumeroPage + " est introuvable ");
 						}
 					}
 				}
@@ -756,30 +760,6 @@ namespace DOCUMAT.Pages.Image
 				}
 				#endregion
 
-				#region RECUPERATION OU CREATION DES PAGES NUMEROTEES
-				// Modification des Pages Numerotées / Pré-Indexées
-				// Les Pages doivent être scannées de manière à respecter la nomenclature de fichier standard 
-				ImageView imageView1 = new ImageView();
-				string ListPageIntrouvable = "";
-				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
-				foreach (var imageView in imageViews)
-				{
-					if(imageView.Image.NumeroPage != -1 && imageView.Image.NumeroPage != 0)
-                    {
-						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NomPage);
-						if(file == null)
-                        {
-							ListPageIntrouvable = ListPageIntrouvable + imageView.Image.NomPage + " ,";
-                        }
-                    }			
-				}
-
-				if (ListPageIntrouvable != "")
-				{
-					MessageBox.Show("Impossible de retrouver La/les Page(s) de numéro : " + ListPageIntrouvable + " dans le Dossier de Scan", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
-				}
-				#endregion
-
 				// Chargement de la première page/ou de la page en cours
 				using (var ct = new DocumatContext())
 				{
@@ -791,12 +771,12 @@ namespace DOCUMAT.Pages.Image
 
 				// Modification des information d'entête
 				HeaderInfosGetter();
-			}
-			catch (Exception ex)
-			{
-				ex.ExceptionCatcher();
-			}
-		}
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
 
         private void SupprimeSequence_Click(object sender, RoutedEventArgs e)
 		{
@@ -907,10 +887,6 @@ namespace DOCUMAT.Pages.Image
 				dgSequence.IsEnabled = false;
 				editSequence = true;
 			}
-		}
-
-		private void BtnAddSequence_Click(object sender, RoutedEventArgs e)
-		{
 		}
 
 		private void BtnSupprimerSequence_Click(object sender, RoutedEventArgs e)
@@ -1319,10 +1295,12 @@ namespace DOCUMAT.Pages.Image
                         == MessageBoxResult.Yes)
                     {
                         int NumeroPage = CurrentImageView.Image.NumeroPage;
-                        string NomPage = CurrentImageView.Image.NomPage, CheminFichier = CurrentImageView.Image.CheminImage,
-                            TypeFichier = CurrentImageView.Image.Type;
-                        // si le numero de l'image change 
-                        if (CurrentImageView.Image.NumeroPage.ToString() != tbNumeroPage.Text.Trim())
+                        string NomPage = CurrentImageView.Image.NomPage, CheminFichier = CurrentImageView.Image.CheminImage,TypeFichier = CurrentImageView.Image.Type;
+						float TaillePage = CurrentImageView.Image.Taille;
+						DateTime DateScan = CurrentImageView.Image.DateScan;
+
+						// si le numero de l'image change 
+						if (CurrentImageView.Image.NumeroPage.ToString() != tbNumeroPage.Text.Trim())
                         {
                             NumeroPage = Int32.Parse(tbNumeroPage.Text.Trim());
                             if (NumeroPage == -1)
@@ -1367,7 +1345,9 @@ namespace DOCUMAT.Pages.Image
                         {
                             FileInfo file = new FileInfo(FichierImporte);
                             TypeFichier = file.Extension.Remove(0, 1).ToUpper();
-                            string nomFichier = NomPage + file.Extension;
+							TaillePage = file.Length;
+							DateScan = file.CreationTime;
+							string nomFichier = NomPage + file.Extension;
                             CheminFichier = System.IO.Path.Combine(RegistreViewParent.Registre.CheminDossier, nomFichier);
                             if (File.Exists(System.IO.Path.Combine(DossierRacine, CheminFichier)))
                             {
@@ -1379,7 +1359,8 @@ namespace DOCUMAT.Pages.Image
                             }
                             else
                             {
-								if(File.Exists(Path.Combine(DossierRacine,CurrentImageView.Image.CheminImage)))
+								if(!string.IsNullOrEmpty(CurrentImageView.Image.CheminImage) &&
+									File.Exists(Path.Combine(DossierRacine,CurrentImageView.Image.CheminImage)))
                                 {
 									File.Delete(Path.Combine(DossierRacine, CurrentImageView.Image.CheminImage));
                                 }
@@ -1396,6 +1377,8 @@ namespace DOCUMAT.Pages.Image
                                 image.NumeroPage = NumeroPage;
                                 image.CheminImage = CheminFichier;
                                 image.Type = TypeFichier;
+								image.Taille = TaillePage;
+								image.DateScan = DateScan;
 								image.DebutSequence = Int32.Parse(tbNumeroDebutSequence.Text);
 								image.FinSequence = Int32.Parse(tbFinSequence.Text);
 								image.DateDebutSequence = DateTime.Parse(tbDateDebSequence.Text);
@@ -1555,7 +1538,7 @@ namespace DOCUMAT.Pages.Image
 					// enregistrement du traitement 
 					DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreViewParent.Registre.RegistreID,MainParent.Utilisateur.AgentID,(int)Enumeration.TypeTraitement.MODIFICATION,"IMPORTATION IMAGE : " + ListeFileImport);
 					ActualiserArborescence();
-					MessageBox.Show( filesInfos.Count + " Image(s) : " + ListeFileImport + " ont/a été importée(s) avec success !!!","IMPORTATION EFFECTUEE",MessageBoxButton.OK,MessageBoxImage.Information);
+					MessageBox.Show(filesInfos.Count + " Image(s) : " + ListeFileImport + " ont/a été importée(s) avec success !!!","IMPORTATION EFFECTUEE",MessageBoxButton.OK,MessageBoxImage.Information);
 				}
 			}
 			catch (Exception ex)

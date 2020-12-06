@@ -6,9 +6,7 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:local="clr-namespace:DOCUMAT.Pages.Controle"
       xmlns:src="clr-namespace:DOCUMAT.Converter"
-      mc:Ignorable="d"        
-      MinHeight="700"
-      MinWidth="1024"
+      mc:Ignorable="d"       
       Loaded="Page_Loaded"
       SizeChanged="Page_SizeChanged"
       Title="Controle">

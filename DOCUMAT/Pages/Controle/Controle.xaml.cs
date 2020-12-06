@@ -369,19 +369,18 @@ namespace DOCUMAT.Pages.Controle
 
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            //MessageBox.Show("size changed !!! : " + this.ActualHeight);
-            double MyWindowWidth = 1600;
-            double MyWindowHeight = 900;
-            double dgSMaxHeight = 400;
-
-            // Gestion de l'IHM
-            if (this.ActualHeight < MyWindowHeight)
+            if (e.HeightChanged)
             {
-                dgRegistre.MaxHeight = dgSMaxHeight - ((MyWindowHeight - this.ActualHeight)/2);
-            }
-            else
-            {
-                dgRegistre.MaxHeight = dgSMaxHeight + ((MyWindowHeight - this.ActualHeight)/2);
+                int StandardHeight = 800;
+                int StandardDgHeight = 450;
+                if (e.NewSize.Height < StandardHeight)
+                {
+                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height) * 2 / 3);
+                }
+                else
+                {
+                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight) * 2 / 3);
+                }
             }
         }
 

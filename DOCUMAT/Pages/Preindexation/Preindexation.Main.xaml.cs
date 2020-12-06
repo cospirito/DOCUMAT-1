@@ -548,15 +548,14 @@ namespace DOCUMAT.Pages.Preindexation
                         DocumatContext.AddTraitement(DocumatContext.TbRegistre, reg.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE_TERMINEE);
                     }
 
-                    dgFeuillet.Visibility = Visibility.Collapsed;
-                    TbRechercher_TextChanged(null,null);
                     PanelFeuillet.Visibility = Visibility.Collapsed;
                     dgRegistre.Visibility = Visibility.Visible;
+                    PanelRecherche.Visibility = Visibility.Visible;
                     QrCodeImage.Source = null;
                     AfficherFeuillets.IsChecked = false;
                     MarquerPreindexer.IsChecked = false;
                     MarquerPreindexer.Visibility = Visibility.Collapsed;
-
+                    RefreshRegistre();
                     // Affichage de l'impression du code barre
                     Impression.BordereauRegistre PageImp = new Impression.BordereauRegistre(registre);
                     PageImp.Show();
@@ -571,14 +570,8 @@ namespace DOCUMAT.Pages.Preindexation
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             RefreshRegistre();
-
             ContextMenu Cm = (ContextMenu)FindResource("cmFeuillet");
             dgRegistre.ContextMenu = Cm;
-        }
-
-        private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-           
         }
 
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
@@ -644,10 +637,6 @@ namespace DOCUMAT.Pages.Preindexation
             this.AfficherFeuillets_Click(sender, e);
         }
 
-        private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
-        {
-        }
-
         private void RefreshRegistre()
         {
             try
@@ -669,30 +658,16 @@ namespace DOCUMAT.Pages.Preindexation
             RefreshRegistre();
         }
 
-        private void BtnEditSequence_Click(object sender, RoutedEventArgs e)
-        {
-        }
-
         private void cbxBisOrdre_Checked(object sender, RoutedEventArgs e)
         {
             cbxDoublonOrdre.IsChecked = false;
             tbNombreReferences.Focus();
         }
 
-        private void cbxBisOrdre_Unchecked(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private void cbxDoublonOrdre_Checked(object sender, RoutedEventArgs e)
         {
             cbxBisOrdre.IsChecked = false;
             tbNombreReferences.Focus();
-        }
-
-        private void cbxDoublonOrdre_Unchecked(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void tbNombreReferences_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
@@ -723,7 +698,6 @@ namespace DOCUMAT.Pages.Preindexation
 
                     switch (cbChoixRecherche.SelectedIndex)
                     {
-
                         case 0:
                             // Récupération des registre par code registre                            
                             dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
@@ -780,6 +754,25 @@ namespace DOCUMAT.Pages.Preindexation
             catch (Exception ex)
             {
                 ex.ExceptionCatcher();
+            } 
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.HeightChanged)
+            {
+                int StandardHeight = 800;
+                int StandardDgHeight = 450;
+                if (e.NewSize.Height < StandardHeight)
+                {
+                    dgFeuillet.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height));
+                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height)*2/3);
+                }
+                else
+                {
+                    dgFeuillet.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight));
+                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight)*2/3);
+                }
             }
         }
     }

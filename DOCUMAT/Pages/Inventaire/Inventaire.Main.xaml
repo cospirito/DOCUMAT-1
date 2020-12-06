@@ -6,10 +6,8 @@
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       xmlns:src="clr-namespace:DOCUMAT.Converter"
       mc:Ignorable="d" 
-      MinHeight="800"
-      d:DesignWidth="1280"
       Title="Inventaire"
-      Loaded="Page_Loaded">
+      SizeChanged="Page_SizeChanged">
 
     <Page.Resources>
         <src:DateConverter x:Key="DateConverter"/>
@@ -34,6 +32,10 @@
                       Name="EditVersement"
                       Icon="{materialDesign:PackIcon Kind=Edit}" 
                       Click="EditVersement_Click"/>
+            <MenuItem Header="Afficher les Registres"
+                      Name="AffRegistres"
+                      Icon="{materialDesign:PackIcon Kind=TableEye}" 
+                      Click="AffRegistre_Click"/>
             <MenuItem Header="Voir le Bordereau" 
                       Name="voirBordereau"
                       Icon="{materialDesign:PackIcon Kind=ImageAlbum}"  
@@ -52,10 +54,6 @@
                       Name="EditRegistre"
                       Icon="{materialDesign:PackIcon Kind=Edit}"
                       Click="EditRegistre_Click" />
-            <!--<MenuItem Header="Imprimer le QrCode"   
-                      Name="ImprimerQrCode"
-                      Icon="{materialDesign:PackIcon Kind=Printer}"
-                      Click="ImprimerQrCode_Click"/>-->
             <MenuItem Header="Supprimer"
                       Name="DelRegistre"
                       Icon="{materialDesign:PackIcon Kind=Remove}"
@@ -112,8 +110,15 @@
         </StackPanel>
 
         <!--Zone de donnée-->
-        <StackPanel Grid.Row="1" Margin="0 0 0 20">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <Grid Grid.Row="1" Margin="0 0 0 10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Center"
+                        Grid.Row="0">
                 <TextBlock x:Name="titreGrid" Text="LISTE DES VERSEMENTS"
                                Foreground="White"                           
                                FontSize="24"
@@ -135,21 +140,17 @@
                 </Button>
             </StackPanel>
             <!--GridView des Versements-->
-            <Grid Margin="20" x:Name="gridViewPanelVersement" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="187*"/>
-                    <ColumnDefinition Width="123*"/>
-                </Grid.ColumnDefinitions>
+            <Grid Margin="20 20 20 0" 
+                  x:Name="gridViewPanelVersement" 
+                  Grid.Row="1">
                 <DataGrid Name="dgVersement" 
                           AutoGenerateColumns="False" 
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
-                          IsReadOnly="True" 
-                          MaxHeight="400"              
-                          Margin="0,-2,0,2"                          
-                          LoadingRowDetails="dgView_LoadingRowDetails"
+                          IsReadOnly="True"              
+                          Margin="0,-2,0,2"               
                           AreRowDetailsFrozen="False"
-                          SelectionChanged="dgVersement_SelectionChanged" Grid.ColumnSpan="2">
+                          SelectionChanged="dgVersement_SelectionChanged">
                     <DataGrid.Resources>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
@@ -171,8 +172,9 @@
             </Grid>
 
             <!--Grid View des Registres -->
-            <Grid Margin="20" x:Name="gridViewPanelRegistre"
-                  Visibility="Collapsed">
+            <Grid Margin="20 20 20 0" x:Name="gridViewPanelRegistre"
+                  Visibility="Collapsed"
+                  Grid.Row="1">
                 <DataGrid Name="dgRegistre" 
                           AutoGenerateColumns="False" 
                           VerticalScrollBarVisibility="Auto"
@@ -180,10 +182,7 @@
                           IsReadOnly="True"
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
-                          MaxHeight="400"
                           LoadingRow="dgRegistre_LoadingRow"
-                          SelectionChanged="dgRegistre_SelectionChanged"
-                          AreRowDetailsFrozen="False"
                           LoadingRowDetails="dgRegistre_LoadingRowDetails">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
@@ -272,6 +271,6 @@
                     </DataGrid.RowDetailsTemplate>
                 </DataGrid>
             </Grid>
-        </StackPanel>
+        </Grid>
     </Grid>
 </Page>

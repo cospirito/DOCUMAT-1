@@ -6,11 +6,10 @@
       xmlns:local="clr-namespace:DOCUMAT.Pages.Correction"
       xmlns:src="clr-namespace:DOCUMAT.Converter"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-      mc:Ignorable="d"       
-      Height="600"       
-      d:DesignWidth="900"
+      mc:Ignorable="d"     
       Loaded="Page_Loaded"
-      Title="Correction">
+      Title="Correction"
+      SizeChanged="Page_SizeChanged">
     <Page.Resources>
         <src:DateConverter x:Key="DateConverter"/>
         <Style TargetType="DataGridRow">
@@ -147,14 +146,13 @@
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"/>
                     <!--Grid View des Registres -->
-                    <Grid Margin="20" x:Name="gridViewPanelRegistre">
+                    <Grid Margin="20 20 20 0" x:Name="gridViewPanelRegistre">
                         <StackPanel Grid.Column="1">
                             <DataGrid Name="dgRegistre" 
                             AutoGenerateColumns="False" 
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
                             IsReadOnly="True"
-                            MaxHeight="400"
                             RowDetailsVisibilityMode="VisibleWhenSelected" 
                             Margin="0,-2,0,2"
                             LoadingRow="dgRegistre_LoadingRow"

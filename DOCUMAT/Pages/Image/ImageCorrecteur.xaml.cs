@@ -701,10 +701,13 @@ namespace DOCUMAT.Pages.Image
 
 					// Chargement de la visionneuse
 					if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
+                    {
 						viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
+                    }
 					else
+                    {
 						throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
-
+                    }
 					#endregion
 
 					#region RECUPERATION DES SEQUENCES DE L'IMAGE
@@ -720,7 +723,7 @@ namespace DOCUMAT.Pages.Image
 					dgSequence.Visibility = Visibility.Visible;
 					dgSequenceIndex.Visibility = Visibility.Collapsed;
 					if(sequenceViews.Count() > 0)
-					{
+					{  
 						dgSequence.ItemsSource = sequenceViews;					
 						dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
 						tbNumeroOrdreSequence.IsEnabled = false;
@@ -744,7 +747,7 @@ namespace DOCUMAT.Pages.Image
 					}
 					#endregion
 
-					#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE				
+					#region ADAPTATION DE L 'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE				
 					btnValiderImageImporte.Foreground = Brushes.White;
 					btnImporterImage.Tag = "";
 					//On vide les références
@@ -762,6 +765,7 @@ namespace DOCUMAT.Pages.Image
 								&& c.PhaseControle == 1 && c.StatutControle == 0) != null)
 							{
 								//Affichage des images validées 
+								PanelIndexRegistre.Visibility = Visibility.Collapsed;
 								PanelCorrectionEnCours.Visibility = Visibility.Collapsed;
 								PanelCorrectionEffectue.Visibility = Visibility.Visible;
 								PanelBoutonCorrection.Visibility = Visibility.Collapsed;
@@ -853,8 +857,9 @@ namespace DOCUMAT.Pages.Image
 						ActualiseDataCorriger();
 					}
 					else if(imageView1.Image.StatutActuel == (int)Enumeration.Image.CREEE)
-					{					
+					{
 						//Affichage des images validées 
+						PanelIndexRegistre.Visibility = Visibility.Collapsed;
 						PanelCorrectionEnCours.Visibility = Visibility.Visible;
 						PanelCorrectionEffectue.Visibility = Visibility.Collapsed;
 						PanelRejetImage.Visibility = Visibility.Collapsed;
@@ -876,6 +881,7 @@ namespace DOCUMAT.Pages.Image
 					else if(imageView1.Image.StatutActuel == (int)Enumeration.Image.PHASE2)
 					{
 						//Affichage des images validées 
+						PanelIndexRegistre.Visibility = Visibility.Collapsed;
 						PanelCorrectionEnCours.Visibility = Visibility.Collapsed;
 						PanelCorrectionEffectue.Visibility = Visibility.Visible;
 						ImgCorrecte.Visibility = Visibility.Visible;
@@ -1148,10 +1154,13 @@ namespace DOCUMAT.Pages.Image
                 else
 				{
 					#region CAS DES SEQUENCES EXISTANTES A CORRIGER
+					int NbRefs = 0;
 					tbNumeroOrdreSequence.Text = sequenceView.Sequence.NUmeroOdre.ToString();
 					tbDateSequence.Text = sequenceView.strDate;
 					tbReference.Text = "";
 					References.Clear();
+
+					Int32.TryParse(sequenceView.NbRefsManquant, out NbRefs);
 
 					if(sequenceView.ASupprimer)
 					{					
@@ -1166,7 +1175,8 @@ namespace DOCUMAT.Pages.Image
 						cbxDoublonOrdre.IsEnabled = false;
 					}
 					else if(!sequenceView.OrdreFaux && !sequenceView.DateFausse
-							&& string.IsNullOrEmpty(sequenceView.ListReferenceFausse))
+							&& string.IsNullOrEmpty(sequenceView.ListReferenceFausse)
+							&& NbRefs == 0)
 					{
 						BtnAddSequence.IsEnabled = false;
 						BtnModifierSequence.IsEnabled = false;
@@ -1179,7 +1189,8 @@ namespace DOCUMAT.Pages.Image
 						cbxDoublonOrdre.IsEnabled = false;
 					}
 					else
-					{
+
+					{ 
 						if(sequenceView.OrdreFaux)
 						{
 							tbNumeroOrdreSequence.IsEnabled = true;
@@ -1202,7 +1213,7 @@ namespace DOCUMAT.Pages.Image
 							tbDateSequence.IsEnabled = false;
                         }
 
-						if(!string.IsNullOrEmpty(sequenceView.ListReferenceFausse))
+						if(NbRefs > 0 || !string.IsNullOrEmpty(sequenceView.ListReferenceFausse))
                         {
 							tbReference.IsEnabled = true;
                         }
@@ -1275,12 +1286,13 @@ namespace DOCUMAT.Pages.Image
 							if (!sequenceView.strReferences.Equals("manquant"))
 							{
 								#region CAS DE MODIFICATION DES INDEX D'UNE SEQUENCE EXISTANTE
-								using (var ct = new DocumatContext())
+								using (var ct = new DocumatContext()) 
 								{
 									int NewOrdre = sequenceView.Sequence.NUmeroOdre;
 									string NewDate = sequenceView.Sequence.DateSequence.ToShortDateString()
 										, NewRefs = sequenceView.Sequence.References
-										, isSpecial = sequenceView.Sequence.isSpeciale;
+										, isSpecial = sequenceView.Sequence.isSpeciale
+										, Refs_Corriger = sequenceView.Demande_Correction.RefRejetees_idx;
 									if (sequenceView.OrdreFaux && !string.IsNullOrWhiteSpace(tbNumeroOrdreSequence.Text))
 									{
 										if (cbxBisOrdre.IsChecked == true)
@@ -1320,37 +1332,80 @@ namespace DOCUMAT.Pages.Image
 										NewDate = tbDateSequence.Text;
 									}
 
-									if (!string.IsNullOrEmpty(sequenceView.ListReferenceFausse))
+									int RefsManquant = 0;
+									Int32.TryParse(sequenceView.NbRefsManquant, out RefsManquant);
+									if (!string.IsNullOrEmpty(sequenceView.ListReferenceFausse) || RefsManquant > 0)
 									{
-										NewRefs = "";
-										string[] refsfausse = sequenceView.ListReferenceFausse.Split(',');
-										int nbrefat = refsfausse.Where(r => !string.IsNullOrWhiteSpace(r)).Count();
-										if (nbrefat != References.Count)
-										{
-											throw new Exception("Le nombre de référence à corriger est de : " + nbrefat);
-										}
+										int nbrefat = 0;
+										int nbrefFausse = 0;
+										Refs_Corriger = "";
+										if (!string.IsNullOrEmpty(sequenceView.ListReferenceFausse))
+                                        {
+											NewRefs = "";
+											string[] refsfausse = sequenceView.ListReferenceFausse.Split(',');
+											nbrefFausse = refsfausse.Where(r => !string.IsNullOrWhiteSpace(r)).Count();
 
-										foreach (var ref1 in sequenceView.Sequence.References.Split(','))
-										{
-											if (!refsfausse.Any(rf => rf.Equals(ref1)) && string.IsNullOrWhiteSpace(ref1))
+											foreach (var ref1 in sequenceView.Sequence.References.Split(','))
 											{
-												NewRefs += ref1 + ",";
+												if (!refsfausse.Any(rf => rf.Equals(ref1)) && !string.IsNullOrWhiteSpace(ref1))
+												{
+													NewRefs += ref1 + ",";
+												}
 											}
 										}
+										nbrefat = nbrefFausse + RefsManquant;
+
+
+										if(RefsManquant > 0)
+										{
+											if(References.Count > nbrefat)
+                                            {
+												throw new Exception("Le nombre de référence à corriger doit être Inférieur ou égale à : " + nbrefat);
+                                            }
+											else if(References.Count < RefsManquant)
+											{
+												throw new Exception("Le nombre de référence à corriger doit être supérieur ou égale au Manquant déclarer");
+											}
+										}
+										else
+                                        {
+											if(References.Count > nbrefFausse)
+                                            {
+												throw new Exception("Le nombre de référence à corriger doit être Inférieur ou égale à : " + nbrefFausse);
+											}
+                                        }
+
+										// Vérification de NewRefs
+										if(!string.IsNullOrWhiteSpace(NewRefs) && nbrefFausse == 0){ NewRefs += NewRefs + ","; }
 
 										foreach (var ref1 in References)
 										{
-											if (!NewRefs.Split(',').Any(rf => rf.Equals(ref1.Value)) && !string.IsNullOrWhiteSpace(ref1.Value))
+											if(!NewRefs.Split(',').Any(rf => rf.Equals(ref1.Value)) && !string.IsNullOrWhiteSpace(ref1.Value))
 											{
 												NewRefs += ref1.Value + ",";
+												Refs_Corriger += ref1.Value + ",";
 											}
 											else
 											{
 												throw new Exception("La référence : " + ref1.Value + ", existe déja !!!");
 											}
 										}
-										NewRefs = NewRefs.Remove(NewRefs.Length - 1);
+
+										if(!string.IsNullOrWhiteSpace(NewRefs))
+                                        {
+											NewRefs = NewRefs.Remove(NewRefs.Length - 1);
+                                        }
 									}
+
+									if(string.IsNullOrWhiteSpace(NewRefs))
+                                    {
+										if(MessageBox.Show("Attention Aucune Référence n'a été définit, Les Références rejétées serons supprimées, " +
+														"Confirmer La modification  !!!","Confirmer Modification",MessageBoxButton.YesNo,MessageBoxImage.Question)
+												== MessageBoxResult.No)
+                                        {
+											throw new Exception("Modification Annulée !!");
+                                        }
+                                    }
 
 									//Modification de la ligne de séquence
 									Models.Sequence UpSequence = ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID);
@@ -1376,7 +1431,7 @@ namespace DOCUMAT.Pages.Image
 										OrdreSequence_idx = sequenceView.Demande_Correction.OrdreSequence_idx,
 										DateSequence_idx = sequenceView.Demande_Correction.DateSequence_idx,
 										RefSequence_idx = sequenceView.Demande_Correction.RefSequence_idx,
-										RefRejetees_idx = sequenceView.Demande_Correction.RefRejetees_idx,
+										RefRejetees_idx = Refs_Corriger,
 										ASupprimer = null,
 
 										DateCorrection = DateTime.Now,

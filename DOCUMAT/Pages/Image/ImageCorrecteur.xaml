@@ -353,8 +353,7 @@
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
-                                        <!--<DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />-->
-                                        <!--<DataGridCheckBoxColumn Header="A Supprimer" Binding= "{Binding CheckBoxBooleanValue}"/>-->
+                                        <DataGridTextColumn IsReadOnly="False" Header="Refs. Manq." Width="100" Binding="{Binding NbRefsManquant}" />
                                     </DataGrid.Columns>
                                     <DataGrid.RowDetailsTemplate>
                                         <DataTemplate>
@@ -372,7 +371,11 @@
                                                   Click="cbxReadOnly_Click"/>
                                                 <StackPanel x:Name="ListeReferences"
                                                     Margin="5">
-                                                    <ListBox ItemsSource="{Binding TheList}">
+                                                    <ListBox ItemsSource="{Binding TheList}"
+                                                             ScrollViewer.CanContentScroll="True"
+                                                             ScrollViewer.VerticalScrollBarVisibility="auto"
+                                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                             MaxHeight="170">
                                                         <ListBox.ItemTemplate>
                                                             <DataTemplate>
                                                                 <CheckBox Name="CheckBoxZone" Content="{Binding TheText}"

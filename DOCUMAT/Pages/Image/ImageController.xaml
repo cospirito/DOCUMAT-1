@@ -338,8 +338,7 @@
                             HorizontalScrollBarVisibility="Auto"
                             ScrollViewer.CanContentScroll="True"                            
                             CanUserSortColumns="False"                               
-                            SelectionMode="Single"                            
-                            IsReadOnly="True"
+                            SelectionMode="Single"
                             VerticalAlignment="Top"
                             MaxHeight="400"
                             RowDetailsVisibilityMode="VisibleWhenSelected"                                                 
@@ -350,9 +349,11 @@
                             PreviewKeyDown="dgSequence_PreviewKeyUp"
                             KeyUp="dgSequence_KeyUp"
                             KeyDown="dgSequence_KeyUp"
+                            CanUserAddRows="False"
                             ScrollBar.Scroll="dgSequence_Scroll"
                             GotKeyboardFocus="dgSequence_GotKeyboardFocus"
-                            LoadingRowDetails="dgSequence_LoadingRowDetails">
+                            LoadingRowDetails="dgSequence_LoadingRowDetails"
+                            RowEditEnding="dgSequence_RowEditEnding">
                             <DataGrid.Columns>
                                 <DataGridTextColumn IsReadOnly="True" Header="N° Ordre" Binding="{Binding strOrdre}" />
                                 <DataGridTextColumn IsReadOnly="True" Header="Date " Binding="{Binding strDate}" />
@@ -366,8 +367,9 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <!--<DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />-->
-                                <!--<DataGridCheckBoxColumn Header="A Supprimer" Binding= "{Binding CheckBoxBooleanValue}"/>-->
+                                <DataGridTextColumn IsReadOnly="False" Header="Refs. Manq." 
+                                                    Width="100" Binding="{Binding NbRefsManquant}" 
+                                                    />
                             </DataGrid.Columns>
                             <DataGrid.RowDetailsTemplate>
                                 <DataTemplate>

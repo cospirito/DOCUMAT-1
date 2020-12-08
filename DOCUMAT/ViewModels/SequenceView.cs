@@ -18,38 +18,17 @@ namespace DOCUMAT.ViewModels
         public string strReferences { get; set; }
         public int NbRefIndex { get; set; }
         public bool isNbRefs_equal {get; set;}
-        //public Dictionary<String, CheckBox> ListeRefecrences = new Dictionary<String, CheckBox>();
 
         // Propriété pour la récupération des données lors du check, concernant le contrôle
         public bool Ordre_Is_Check { get; set; }
         public bool Date_Is_Check { get; set; }
         public bool References_Is_Check { get; set; }
         public bool ASupprimer_Is_Check { get; set; }
+        public String NbRefsManquant { get; set; }
         public Dictionary<String, String> ListeRefecrences_check = new Dictionary<String, String>();
         public List<String> RefsList = new List<String>();
 
         public ObservableCollection<BoolStringClass> TheList { get; set; }
-        public class BoolStringClass
-        {
-            public string TheText { get; set; }
-            public bool TheValue { get; set; }
-        }
-
-        //public void CreateCheckBoxList()
-        //{
-        //    TheList = new ObservableCollection<BoolStringClass>();
-        //    TheList.Add(new BoolStringClass { TheText = "EAST", TheValue = 1 });
-        //    TheList.Add(new BoolStringClass { TheText = "WEST", TheValue = 2 });
-        //    TheList.Add(new BoolStringClass { TheText = "NORTH", TheValue = 3 });
-        //    TheList.Add(new BoolStringClass { TheText = "SOUTH", TheValue = 4 });
-        //    //this.DataContext = this;
-        //}
-
-        public SequenceView()
-        {
-            //CreateCheckBoxList();
-        }
-
 
         // Propriété de récupération lors de la correction
         public string ListReferenceFausse { get; set; }
@@ -63,6 +42,12 @@ namespace DOCUMAT.ViewModels
 
         // Propriété indiquant si le parent est manquant : En phase de contrôle 2
         public bool Is_ImageManquant { get; set; }
+
+        public class BoolStringClass
+        {
+            public string TheText { get; set; }
+            public bool TheValue { get; set; }
+        }
 
         public void Add()
         {
@@ -232,13 +217,6 @@ namespace DOCUMAT.ViewModels
                 {
                     if (!string.IsNullOrWhiteSpace(reference))
                     {
-                        //sequenceView.ListeRefecrences.Add(reference, new CheckBox()
-                        //{
-                        //    Name = "ref" + i++,
-                        //    Content = reference,
-                        //    Foreground = Brushes.White,
-                        //    Background = Brushes.Red
-                        //});
                         sequenceView.RefsList.Add(reference);
                         sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = false });
                     }
@@ -265,70 +243,78 @@ namespace DOCUMAT.ViewModels
                             else
                             {
                                 #region SEQUENCE NON CORRIGEE 
-                            sequenceView.Demande_Correction = correction;
-                            sequenceView.En_Correction = true;
-                            if(correction.ASupprimer == 1)
-                            {
-                                sequenceView.ASupprimer = true;
-                            }
-                            else
-                            {
-                                sequenceView.ASupprimer = false;
-                            }
-
-                            if (correction.OrdreSequence_idx == 1)
-                            {
-                                sequenceView.OrdreFaux = true;
-                            }
-                            else
-                            {
-                                sequenceView.OrdreFaux = false;
-                            }
-                            if (correction.DateSequence_idx == 1)
-                            {
-                                sequenceView.DateFausse = true;                                
-                            }
-                            else
-                            {
-                                sequenceView.DateFausse = false;
-                            }
-
-                            if(correction.RefSequence_idx == 1)
-                            {
-                                sequenceView.TheList.Clear();
-                                foreach (var reference in ListReferences)
+                                sequenceView.Demande_Correction = correction;
+                                sequenceView.En_Correction = true;
+                                if(correction.ASupprimer == 1)
                                 {
-                                    if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
+                                    sequenceView.ASupprimer = true;
+                                }
+                                else
+                                {
+                                    sequenceView.ASupprimer = false;
+                                }
+
+                                if (correction.OrdreSequence_idx == 1)
+                                {
+                                    sequenceView.OrdreFaux = true;
+                                }
+                                else
+                                {
+                                    sequenceView.OrdreFaux = false;
+                                }
+                                if (correction.DateSequence_idx == 1)
+                                {
+                                    sequenceView.DateFausse = true;                                
+                                }
+                                else
+                                {
+                                    sequenceView.DateFausse = false;
+                                }
+
+                                if(correction.RefSequence_idx == 1)
+                                {
+                                    sequenceView.TheList.Clear();
+                                    foreach (var reference in ListReferences)
                                     {
-                                        //CheckBox check = new CheckBox();
-                                        //sequenceView.ListeRefecrences.TryGetValue(reference, out check);
-                                        //check.Background = Brushes.Red;
-                                        //check.IsChecked = true;
-                                        sequenceView.ListReferenceFausse += reference + ",";
-                                        sequenceView.References_Is_Check = true;
-                                        sequenceView.RefsList.Add(reference);
-                                        sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = true });
+                                        if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
+                                        {
+                                            sequenceView.ListReferenceFausse += reference + ",";
+                                            sequenceView.References_Is_Check = true;
+                                            sequenceView.RefsList.Add(reference);
+                                            sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = true });
+                                        }
+                                    }
+
+                                    // Sequences Manquants
+                                    // Récupération du controle
+                                    Controle controle = ct.Controle.FirstOrDefault(c=>c.ImageID == sequenceView.Sequence.ImageID && c.SequenceID == sequenceView.Sequence.SequenceID
+                                                        && c.StatutControle == 1 && c.PhaseControle == 1 && c.RefSequence_idx == 1);
+                                    if(controle != null)
+                                    {
+                                        // Calcule des Manquants
+                                        int RefsManq = controle.RefRejetees_idx.Split(',').Where(st=>st.Contains("/manq")).Count();
+                                        sequenceView.NbRefsManquant = RefsManq.ToString();
                                     }
                                 }
-                            }
-                            #endregion
+                                #endregion
                             }
                         }
                     }                
                 }
                 #endregion
 
-                #region CAS D'UN CONTROLE PHASE 2
+                #region CAS D'UN CONTROLE PHASE 3
                 if(sequence.PhaseActuelle == 2)
                 {
                     //sequenceView.En_Correction = false;
                     using (var ct = new DocumatContext())
-                    {
-                        correction = ct.Correction.FirstOrDefault(c => c.StatutCorrection == 0 && c.PhaseCorrection == 1
+                    {              
+                        correction = ct.Correction.FirstOrDefault(c => c.StatutCorrection == 0 && c.PhaseCorrection == 3
                                                             && c.SequenceID == sequence.SequenceID);
-                        if (correction != null)
+
+                        if(correction != null)
                         {
-                            #region SEQUENCE CORRIGEE A CONTROLER
+                            #region SEQUENCE CORRIGEE A CONTROLER PHASE 3
                             //sequenceView.Demande_Correction = correction;
                             //sequenceView.En_Correction = true;
                             sequenceView.ASupprimer = true;
@@ -343,32 +329,76 @@ namespace DOCUMAT.ViewModels
                             }
                             if (correction.DateSequence_idx == 1)
                             {
-                                sequenceView.DateFausse = true;                                
+                                sequenceView.DateFausse = true;
                             }
                             else
                             {
                                 sequenceView.DateFausse = false;
                             }
+                            if (correction.RefSequence_idx == 1)
+                            {
+                                sequenceView.TheList.Clear();
+                                foreach (var reference in ListReferences)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
+                                    {
+                                        sequenceView.ListReferenceFausse += reference + ",";
+                                        sequenceView.References_Is_Check = false;
+                                        sequenceView.RefsList.Add(reference);
+                                        sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = false });
+                                    }
+                                }
+                            }
+                            #endregion
+                        }
+                        else
+                        {
+                            correction = ct.Correction.FirstOrDefault(c => c.StatutCorrection == 0 && c.PhaseCorrection == 1
+                                                                && c.SequenceID == sequence.SequenceID);
+                            if (correction != null)
+                            {
+                                #region SEQUENCE CORRIGEE A CONTROLER PHASE 1
+                                //sequenceView.Demande_Correction = correction;
+                                //sequenceView.En_Correction = true;
+                                sequenceView.ASupprimer = true;
 
-                            //if(correction.RefSequence_idx == 1)
-                            //{
-                            //    sequenceView.TheList.Clear();
-                            //    foreach (var reference in ListReferences)
-                            //    {
-                            //        if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
-                            //        {
-                            //            //CheckBox check = new CheckBox();
-                            //            //sequenceView.ListeRefecrences.TryGetValue(reference, out check);
-                            //            //check.Background = Brushes.Red;
-                            //            //check.IsChecked = true;
-                            //            sequenceView.ListReferenceFausse += reference + ",";
-                            //            sequenceView.References_Is_Check = true;
-                            //            sequenceView.RefsList.Add(reference);
-                            //            sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = true });
-                            //        }
-                            //    }
-                            //}
-                            #endregion                            
+                                if (correction.OrdreSequence_idx == 1)
+                                {
+                                    sequenceView.OrdreFaux = true;
+                                }
+                                else
+                                {
+                                    sequenceView.OrdreFaux = false;
+                                }
+                                if (correction.DateSequence_idx == 1)
+                                {
+                                    sequenceView.DateFausse = true;
+                                }
+                                else
+                                {
+                                    sequenceView.DateFausse = false;
+                                }
+                                if (correction.RefSequence_idx == 1)
+                                {
+                                    sequenceView.TheList.Clear();
+                                    // Calcule des Références Manquants
+                                    int RefsManq = correction.RefRejetees_idx.Split(',').Where(st => st.Contains("/manq")).Count();
+                                    sequenceView.NbRefsManquant = RefsManq.ToString();
+                                    int NbRefsTotal = 0;
+                                    foreach (var reference in ListReferences)
+                                    {
+                                        NbRefsTotal = NbRefsTotal + 1;
+                                        if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
+                                        {
+                                            sequenceView.ListReferenceFausse += reference + ",";
+                                            sequenceView.References_Is_Check = false;
+                                            sequenceView.RefsList.Add(reference);
+                                            sequenceView.TheList.Add(new BoolStringClass() { TheText = reference, TheValue = false });
+                                        }
+                                    }
+                                }
+                                #endregion
+                            }
                         }
                     }       
                 }
@@ -428,10 +458,6 @@ namespace DOCUMAT.ViewModels
                                     {
                                         if (!string.IsNullOrWhiteSpace(reference) && correction.RefRejetees_idx.Contains(reference))
                                         {
-                                            //CheckBox check = new CheckBox();
-                                            //sequenceView.ListeRefecrences.TryGetValue(reference, out check);
-                                            //check.Background = Brushes.Red;
-                                            //check.IsChecked = true;
                                             sequenceView.ListReferenceFausse += reference + ",";
                                             sequenceView.References_Is_Check = true;
                                             sequenceView.RefsList.Add(reference);
@@ -444,6 +470,8 @@ namespace DOCUMAT.ViewModels
                         }
                     }
                 }
+
+                
                 #endregion
 
                 sequenceViews.Add(sequenceView);

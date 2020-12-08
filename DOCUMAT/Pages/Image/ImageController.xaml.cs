@@ -809,279 +809,300 @@ namespace DOCUMAT.Pages.Image
 
 		private void BtnTerminerImage_Click(object sender, RoutedEventArgs e)
 		{
-			if(MessageBox.Show("Voulez vous terminer le contrôle de cette Image ?","Terminer Le Contrôle ?",MessageBoxButton.YesNo,MessageBoxImage.Question)
-				== MessageBoxResult.Yes)
+            try
             {
-				//Enregistrement des données dans la base de données !!!
-				SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
-				//Booléen d'identification de rejet sur un index
-				bool Image_Index_is_reject = false;
+                if (MessageBox.Show("Voulez vous terminer le contrôle de cette Image ?", "Terminer Le Contrôle ?", MessageBoxButton.YesNo, MessageBoxImage.Question)
+						== MessageBoxResult.Yes)
+                {
+                    //Booléen d'identification de rejet sur un index
+                    bool Image_Index_is_reject = false;
 
-				// Vérification des Index des Séquences de l'Images courante
-				#region VERIFICATION ET GESTION DES INDEXES DE SEQUENCES
-				foreach (var seq in ListeSequences)
-				{
-					#region VERIFICATION DES INDEXES DE LA SEQUENCE EN COURS
-					int ch_Ordre = 0, ch_Date = 0, ch_Reference = 0, ch_A_Supprimer = 0, Statut_sequence = 0;
-					string listRef = null;
-					bool Index_is_reject = false;
+                    // Vérification des Index des Séquences de l'Images courante
+                    #region VERIFICATION ET GESTION DES INDEXES DE SEQUENCES
+                    foreach (var seq in ListeSequences)
+                    {
+                        #region VERIFICATION DES INDEXES DE LA SEQUENCE EN COURS
+                        int ch_Ordre = 0, ch_Date = 0, ch_Reference = 0, ch_A_Supprimer = 0, Statut_sequence = 0;
+                        string listRef = null;
+                        bool Index_is_reject = false;
 
-					// Cas où le Numéro d'ordre est rejeté
-					if (seq.Value.Ordre_Is_Check)
-					{
-						ch_Ordre = 1;
-						Index_is_reject = true;
-						Image_Index_is_reject = true;
-					}
+                        // Cas où le Numéro d'ordre est rejeté
+                        if (seq.Value.Ordre_Is_Check)
+                        {
+                            ch_Ordre = 1;
+                            Index_is_reject = true;
+                            Image_Index_is_reject = true;
+                        }
 
-					// Cas où la date est rejeté
-					if (seq.Value.Date_Is_Check)
-					{
-						ch_Date = 1;
-						Index_is_reject = true;
-						Image_Index_is_reject = true;
-					}
+                        // Cas où la date est rejeté
+                        if (seq.Value.Date_Is_Check)
+                        {
+                            ch_Date = 1;
+                            Index_is_reject = true;
+                            Image_Index_is_reject = true;
+                        }
 
-					// Cas où la référence est rejeté
-					if (seq.Value.References_Is_Check)
-					{
-						foreach (var refEl in seq.Value.ListeRefecrences_check)
+                        // Cas où la référence est rejeté
+                        if (seq.Value.References_Is_Check)
+                        {
+                            foreach (var refEl in seq.Value.ListeRefecrences_check)
+                            {
+                                listRef += refEl.Value + ", ";
+                            }
+                            ch_Reference = 1;
+                            Index_is_reject = true;
+                            Image_Index_is_reject = true;
+                        }
+
+						// Cas où, il y'a des Réferences Manquantes
+						int NbRefsManquant = 0;
+						if (Int32.TryParse(seq.Value.NbRefsManquant, out NbRefsManquant) && NbRefsManquant > 0)
 						{
-							listRef += refEl.Value + ", ";
-						}
-						ch_Reference = 1;
-						Index_is_reject = true;
-						Image_Index_is_reject = true;
-					}
+							// Ajout des Manquants sur un Format de Références  :
+							// 1/manq, 2/manq, 3/manq ...
 
-					// Cas où la séquence est à Supprimer
-					if (seq.Value.ASupprimer_Is_Check)
-					{
-						ch_A_Supprimer = 1;
-						Index_is_reject = true;
-						Image_Index_is_reject = true;
-					}
-
-					// Détermination du Statut de la séquence 
-					if (Index_is_reject)
-					{
-						Statut_sequence = 1;
-					}
-					#endregion
-
-					using (var ct = new DocumatContext())
-					{
-						// On crée les controles de séquence rejété 
-						#region AJOUT D'UN CONTROLE DE SEQUENCE
-						Models.Controle controle = new Models.Controle()
-						{
-							RegistreId = RegistreViewParent.Registre.RegistreID,
-							ImageID = seq.Value.Sequence.ImageID,
-							SequenceID = seq.Value.Sequence.SequenceID,
-
-							//Indexes Image mis à null
-							NumeroPageImage_idx = null,
-							NomPageImage_idx = null,
-							RejetImage_idx = null,
-							MotifRejetImage_idx = null,
-
-							//Indexes de la séquence de l'image
-							OrdreSequence_idx = ch_Ordre,
-							DateSequence_idx = ch_Date,
-							RefSequence_idx = ch_Reference,
-							ASupprimer = ch_A_Supprimer,
-							RefRejetees_idx = listRef,
-
-							DateControle = DateTime.Now,
-							DateCreation = DateTime.Now,
-							DateModif = DateTime.Now,
-							PhaseControle = 1,
-							StatutControle = Statut_sequence,
-						};
-						ct.Controle.Add(controle);
-						#endregion
-
-						//On crée la correction de controle                         
-						#region AJOUT D'UNE CORRECTION AFIN QUE SEQUENCE PARTE EN CORRECTION 1
-						if (Index_is_reject)
-						{
-							Models.Correction correction = new Models.Correction()
+							for (int i = 1; i < (NbRefsManquant + 1); i++)
 							{
-								RegistreId = RegistreViewParent.Registre.RegistreID,
-								ImageID = seq.Value.Sequence.ImageID,
-								SequenceID = seq.Value.Sequence.SequenceID,
-
-								//Indexes Image mis à null
-								NumeroPageImage_idx = null,
-								NomPageImage_idx = null,
-								RejetImage_idx = null,
-								MotifRejetImage_idx = null,
-
-								//Indexes de la séquence de l'image
-								OrdreSequence_idx = ch_Ordre,
-								DateSequence_idx = ch_Date,
-								RefSequence_idx = ch_Reference,
-								ASupprimer = ch_A_Supprimer,
-								RefRejetees_idx = listRef,
-
-								DateCorrection = DateTime.Now,
-								DateCreation = DateTime.Now,
-								DateModif = DateTime.Now,
-								PhaseCorrection = 1,
-								StatutCorrection = Statut_sequence,
-							};
-							ct.Correction.Add(correction);
-						}
-						#endregion
-
-						//Changement de la phase de la séquence
-						Models.Sequence sequence1 = ct.Sequence.FirstOrDefault(s => s.SequenceID == seq.Value.Sequence.SequenceID);
-						sequence1.PhaseActuelle = 1;
-						// Ajout dans la base de données
-						ct.SaveChanges();
-					}
-				}
-				#endregion
-
-				#region VERIFICATION DES MANQUANTS DE l'IMAGE
-				// Déclaration et Gestion des Manques de Séquence
-				// Création des séquences Manquantes
-				string[] strManquants = tbManqueSequences.Text.Split(',');
-				foreach (var mq in strManquants)
-				{
-					int numOrdre = 0;
-					if (Int32.TryParse(mq, out numOrdre))
-					{
-						using (var ct = new DocumatContext())
-						{
-							Models.ManquantSequence manquantSequence = new ManquantSequence()
-							{
-								IdImage = CurrentImageView.Image.ImageID,
-								IdSequence = null,
-								NumeroOrdre = numOrdre,
-								statutManquant = 1,
-								DateDeclareManquant = DateTime.Now,
-								DateCreation = DateTime.Now,
-								DateModif = DateTime.Now,
-							};
-							ct.ManquantSequences.Add(manquantSequence);
-							ct.SaveChanges();
+								listRef += $"{i}/manq, ";
+							}
+							ch_Reference = 1;
+							Index_is_reject = true;
 							Image_Index_is_reject = true;
 						}
-					}
-				}
-				#endregion
 
-				#region VERFIFICATION DE L'IMAGE 
-				// Enregistrement de l'image !!! 
-				int RejetImage = 0, ASupprimer = 0, StatutImage = 0;
-				string MotifRejet = "";
-				if (cbxRejetImage.IsChecked == true)
-				{
-					RejetImage = 1;
-					MotifRejet = cbRejetImage.Text;
-					Image_Index_is_reject = true;
-				}
+						// Cas où la séquence est à Supprimer
+						if (seq.Value.ASupprimer_Is_Check)
+                        {
+                            ch_A_Supprimer = 1;
+                            Index_is_reject = true;
+                            Image_Index_is_reject = true;
+                        }
 
-				if (cbxSupprimerImage.IsChecked == true)
-				{
-					ASupprimer = 1;
-					Image_Index_is_reject = true;
-				}
+                        // Détermination du Statut de la séquence 
+                        if (Index_is_reject)
+                        {
+                            Statut_sequence = 1;
+                        }
+						#endregion
 
-				if (Image_Index_is_reject)
-				{
-					StatutImage = 1;
-				}
+						using (var ct = new DocumatContext())
+                        {
+                            // On crée les controles de séquence rejété 
+                            #region AJOUT D'UN CONTROLE DE SEQUENCE
+                            Models.Controle controle = new Models.Controle()
+                            {
+                                RegistreId = RegistreViewParent.Registre.RegistreID,
+                                ImageID = seq.Value.Sequence.ImageID,
+                                SequenceID = seq.Value.Sequence.SequenceID,
 
-				using (var ct = new DocumatContext())
-				{
-					// Création d'un controle d'image avec un statut StatutImage
-					Models.Controle controle = new Models.Controle()
-					{
-						RegistreId = RegistreViewParent.Registre.RegistreID,
-						ImageID = CurrentImageView.Image.ImageID,
-						SequenceID = null,
+                                //Indexes Image mis à null
+                                NumeroPageImage_idx = null,
+                                NomPageImage_idx = null,
+                                RejetImage_idx = null,
+                                MotifRejetImage_idx = null,
 
-						//Indexes Image mis à null
-						RejetImage_idx = RejetImage,
-						MotifRejetImage_idx = MotifRejet,
-						ASupprimer = ASupprimer,
+                                //Indexes de la séquence de l'image
+                                OrdreSequence_idx = ch_Ordre,
+                                DateSequence_idx = ch_Date,
+                                RefSequence_idx = ch_Reference,
+                                ASupprimer = ch_A_Supprimer,
+                                RefRejetees_idx = listRef,
 
-						//Indexes de la séquence de l'image
-						OrdreSequence_idx = null,
-						DateSequence_idx = null,
-						RefSequence_idx = null,
-						RefRejetees_idx = null,
+                                DateControle = DateTime.Now,
+                                DateCreation = DateTime.Now,
+                                DateModif = DateTime.Now,
+                                PhaseControle = 1,
+                                StatutControle = Statut_sequence,
+                            };
+                            ct.Controle.Add(controle);
+                            #endregion
 
-						DateControle = DateTime.Now,
-						DateCreation = DateTime.Now,
-						DateModif = DateTime.Now,
-						PhaseControle = 1,
-						StatutControle = StatutImage,
-					};
-					ct.Controle.Add(controle);
+                            //On crée la correction de controle                         
+                            #region AJOUT D'UNE CORRECTION AFIN QUE SEQUENCE PARTE EN CORRECTION 1
+                            if (Index_is_reject)
+                            {
+                                Models.Correction correction = new Models.Correction()
+                                {
+                                    RegistreId = RegistreViewParent.Registre.RegistreID,
+                                    ImageID = seq.Value.Sequence.ImageID,
+                                    SequenceID = seq.Value.Sequence.SequenceID,
 
-					if (Image_Index_is_reject)
-					{
-						// Création d'une Correction pour l'image rejetée
-						Models.Correction correction = new Models.Correction()
-						{
-							RegistreId = RegistreViewParent.Registre.RegistreID,
-							ImageID = CurrentImageView.Image.ImageID,
-							SequenceID = null,
+                                    //Indexes Image mis à null
+                                    NumeroPageImage_idx = null,
+                                    NomPageImage_idx = null,
+                                    RejetImage_idx = null,
+                                    MotifRejetImage_idx = null,
 
-							//Indexes Image mis à null
-							RejetImage_idx = RejetImage,
-							MotifRejetImage_idx = MotifRejet,
-							ASupprimer = ASupprimer,
+                                    //Indexes de la séquence de l'image
+                                    OrdreSequence_idx = ch_Ordre,
+                                    DateSequence_idx = ch_Date,
+                                    RefSequence_idx = ch_Reference,
+                                    ASupprimer = ch_A_Supprimer,
+                                    RefRejetees_idx = listRef,
 
-							//Indexes de la séquence de l'image
-							OrdreSequence_idx = null,
-							DateSequence_idx = null,
-							RefSequence_idx = null,
-							RefRejetees_idx = null,
+                                    DateCorrection = DateTime.Now,
+                                    DateCreation = DateTime.Now,
+                                    DateModif = DateTime.Now,
+                                    PhaseCorrection = 1,
+                                    StatutCorrection = Statut_sequence,
+                                };
+                                ct.Correction.Add(correction);
+                            }
+                            #endregion
 
-							DateCorrection = DateTime.Now,
-							DateCreation = DateTime.Now,
-							DateModif = DateTime.Now,
-							PhaseCorrection = 1,
-							StatutCorrection = StatutImage,
-						};
-						ct.Correction.Add(correction);
-					}
+                            //Changement de la phase de la séquence
+                            Models.Sequence sequence1 = ct.Sequence.FirstOrDefault(s => s.SequenceID == seq.Value.Sequence.SequenceID);
+                            sequence1.PhaseActuelle = 1;
+                            // Ajout dans la base de données
+                            ct.SaveChanges();
+                        }
+                    }
+                    #endregion
 
-					// Changement du Statut du de L'image
-					Models.StatutImage statutActuel = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID && s.Code == (int)Enumeration.Image.INDEXEE);
-					statutActuel.DateModif = DateTime.Now;
-					statutActuel.DateFin = DateTime.Now;
+                    #region VERIFICATION DES MANQUANTS DE l'IMAGE
+                    // Déclaration et Gestion des Manques de Séquence
+                    // Création des séquences Manquantes
+                    string[] strManquants = tbManqueSequences.Text.Split(',');
+                    foreach (var mq in strManquants)
+                    {
+                        int numOrdre = 0;
+                        if (Int32.TryParse(mq, out numOrdre))
+                        {
+                            using (var ct = new DocumatContext())
+                            {
+                                Models.ManquantSequence manquantSequence = new ManquantSequence()
+                                {
+                                    IdImage = CurrentImageView.Image.ImageID,
+                                    IdSequence = null,
+                                    NumeroOrdre = numOrdre,
+                                    statutManquant = 1,
+                                    DateDeclareManquant = DateTime.Now,
+                                    DateCreation = DateTime.Now,
+                                    DateModif = DateTime.Now,
+                                };
+                                ct.ManquantSequences.Add(manquantSequence);
+                                ct.SaveChanges();
+                                Image_Index_is_reject = true;
+                            }
+                        }
+                    }
+                    #endregion
 
-					Models.StatutImage NouvauStatut = new StatutImage()
-					{
-						ImageID = CurrentImageView.Image.ImageID,
-						Code = (int)Enumeration.Image.PHASE1,
-						DateDebut = DateTime.Now,
-						DateCreation = DateTime.Now,
-						DateModif = DateTime.Now,
-					};
-					ct.StatutImage.Add(NouvauStatut);
+                    #region VERFIFICATION DE L'IMAGE 
+                    // Enregistrement de l'image !!! 
+                    int RejetImage = 0, ASupprimer = 0, StatutImage = 0;
+                    string MotifRejet = "";
+                    if (cbxRejetImage.IsChecked == true)
+                    {
+                        RejetImage = 1;
+                        MotifRejet = cbRejetImage.Text;
+                        Image_Index_is_reject = true;
+                    }
 
-					// Changement du statut actuel de l'image
-					Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
-					image.StatutActuel = (int)Enumeration.Image.PHASE1;
-					ct.SaveChanges();
+                    if (cbxSupprimerImage.IsChecked == true)
+                    {
+                        ASupprimer = 1;
+                        Image_Index_is_reject = true;
+                    }
 
-					//Enregistrement de la tâche
-					DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CONTROLE PH1 : CONTROLE DE L'IMAGE : " + image.NumeroPage + " DU REGISTRE ID N° " + RegistreViewParent.Registre.RegistreID);
+                    if (Image_Index_is_reject)
+                    {
+                        StatutImage = 1;
+                    }
 
-					//Actualisation de l'aborescence
-					HeaderInfosGetter();
+                    using (var ct = new DocumatContext())
+                    {
+                        // Création d'un controle d'image avec un statut StatutImage
+                        Models.Controle controle = new Models.Controle()
+                        {
+                            RegistreId = RegistreViewParent.Registre.RegistreID,
+                            ImageID = CurrentImageView.Image.ImageID,
+                            SequenceID = null,
 
-					// Charger l'élément suivant 
-					this.btnSuivant_Click(sender, e);
-				}
-				#endregion
-			}
+                            //Indexes Image mis à null
+                            RejetImage_idx = RejetImage,
+                            MotifRejetImage_idx = MotifRejet,
+                            ASupprimer = ASupprimer,
+
+                            //Indexes de la séquence de l'image
+                            OrdreSequence_idx = null,
+                            DateSequence_idx = null,
+                            RefSequence_idx = null,
+                            RefRejetees_idx = null,
+
+                            DateControle = DateTime.Now,
+                            DateCreation = DateTime.Now,
+                            DateModif = DateTime.Now,
+                            PhaseControle = 1,
+                            StatutControle = StatutImage,
+                        };
+                        ct.Controle.Add(controle);
+
+                        if (Image_Index_is_reject)
+                        {
+                            // Création d'une Correction pour l'image rejetée
+                            Models.Correction correction = new Models.Correction()
+                            {
+                                RegistreId = RegistreViewParent.Registre.RegistreID,
+                                ImageID = CurrentImageView.Image.ImageID,
+                                SequenceID = null,
+
+                                //Indexes Image mis à null
+                                RejetImage_idx = RejetImage,
+                                MotifRejetImage_idx = MotifRejet,
+                                ASupprimer = ASupprimer,
+
+                                //Indexes de la séquence de l'image
+                                OrdreSequence_idx = null,
+                                DateSequence_idx = null,
+                                RefSequence_idx = null,
+                                RefRejetees_idx = null,
+
+                                DateCorrection = DateTime.Now,
+                                DateCreation = DateTime.Now,
+                                DateModif = DateTime.Now,
+                                PhaseCorrection = 1,
+                                StatutCorrection = StatutImage,
+                            };
+                            ct.Correction.Add(correction);
+                        }
+
+                        // Changement du Statut du de L'image
+                        Models.StatutImage statutActuel = ct.StatutImage.FirstOrDefault(s => s.ImageID == CurrentImageView.Image.ImageID && s.Code == (int)Enumeration.Image.INDEXEE);
+                        statutActuel.DateModif = DateTime.Now;
+                        statutActuel.DateFin = DateTime.Now;
+
+                        Models.StatutImage NouvauStatut = new StatutImage()
+                        {
+                            ImageID = CurrentImageView.Image.ImageID,
+                            Code = (int)Enumeration.Image.PHASE1,
+                            DateDebut = DateTime.Now,
+                            DateCreation = DateTime.Now,
+                            DateModif = DateTime.Now,
+                        };
+                        ct.StatutImage.Add(NouvauStatut);
+
+                        // Changement du statut actuel de l'image
+                        Models.Image image = ct.Image.FirstOrDefault(i => i.ImageID == CurrentImageView.Image.ImageID);
+                        image.StatutActuel = (int)Enumeration.Image.PHASE1;
+                        ct.SaveChanges();
+
+                        //Enregistrement de la tâche
+                        DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CONTROLE PH1 : CONTROLE DE L'IMAGE : " + image.NumeroPage + " DU REGISTRE ID N° " + RegistreViewParent.Registre.RegistreID);
+
+                        //Actualisation de l'aborescence
+                        HeaderInfosGetter();
+
+                        // Charger l'élément suivant 
+                        this.btnSuivant_Click(sender, e);
+                    }
+                    #endregion
+                }
+            }
+            catch (Exception ex)
+            {
+				ex.ExceptionCatcher();
+            }
 		}
 
         private void CheckBoxReferences_Click(object sender, RoutedEventArgs e)
@@ -1664,6 +1685,33 @@ namespace DOCUMAT.Pages.Image
             {
 				dgSequence.MaxHeight = dgSMaxHeight + (MyWindowHeight - this.ActualHeight);
 			}
+		}
+
+        private void dgSequence_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+			//if (dgSequence.SelectedItem != null)
+			//{
+			//	SequenceView sequenceView = dgSequence.SelectedItem as SequenceView;
+			//	int NbRefs = 0;
+			//	if(Int32.TryParse(sequenceView.NbRefsManquant,out NbRefs) && NbRefs > 0)
+   //             {
+			//		SequenceView newseq = new SequenceView();
+			//		ListeSequences.TryGetValue(sequenceView.Sequence.SequenceID, out newseq);
+			//		ListeSequences.Remove(sequenceView.Sequence.SequenceID);
+			//		ListeSequences.Add(sequenceView.Sequence.SequenceID, newseq);
+			//	}
+			//	else
+			//	{
+			//		SequenceView newseq = new SequenceView();
+			//		ListeSequences.TryGetValue(sequenceView.Sequence.SequenceID, out newseq);
+			//		ListeSequences.Remove(sequenceView.Sequence.SequenceID);
+			//		ListeSequences.Add(sequenceView.Sequence.SequenceID, newseq);
+			//	}
+			//}
+			//else
+			//{
+			//	return;
+			//}
 		}
     }
 }

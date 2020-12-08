@@ -1139,148 +1139,158 @@ namespace DOCUMAT.Pages.Image
 				{
 					if (CurrentImageView.Image.StatutActuel == (int)Enumeration.Image.PHASE3)
 					{
-						SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
-
-						#region CAS DE MODIFICATION DES INDEX D'UNE SEQUENCE EXISTANTE
-						using (var ct = new DocumatContext())
+						if (MessageBox.Show("Confirmez la Modification de la Séquence ?", "Confirmez la Modification", MessageBoxButton.YesNo, MessageBoxImage.Question)
+							== MessageBoxResult.Yes)
 						{
-							int NewOrdre = sequenceView.Sequence.NUmeroOdre;
-							string NewDate = sequenceView.Sequence.DateSequence.ToShortDateString()
-								, NewRefs = sequenceView.Sequence.References
-								, isSpecial = sequenceView.Sequence.isSpeciale;
-
-							if (sequenceView.OrdreFaux)
+							#region CAS DE MODIFICATION DES INDEX D'UNE SEQUENCE EXISTANTE
+							SequenceView sequenceView = (SequenceView)dgSequence.SelectedItem;
+							using (var ct = new DocumatContext())
 							{
-								if (!string.IsNullOrWhiteSpace(tbNumeroOrdreSequence.Text))
+								int NewOrdre = sequenceView.Sequence.NUmeroOdre;
+								string NewDate = sequenceView.Sequence.DateSequence.ToShortDateString()
+									, NewRefs = sequenceView.Sequence.References
+									, isSpecial = sequenceView.Sequence.isSpeciale
+									, Refs_Corriger = sequenceView.Demande_Correction.RefRejetees_idx;
+
+								if (sequenceView.OrdreFaux)
 								{
-									if (cbxBisOrdre.IsChecked == true)
+									if (!string.IsNullOrWhiteSpace(tbNumeroOrdreSequence.Text))
 									{
-										Models.Sequence bisseq = ct.Sequence.Where(s => s.NUmeroOdre == NewOrdre && s.isSpeciale.ToLower().Contains("bis") && s.ImageID == CurrentImageView.Image.ImageID).OrderByDescending(s => s.SequenceID).FirstOrDefault();
-										if (bisseq != null)
+										if (cbxBisOrdre.IsChecked == true)
 										{
-											string isBisNum = bisseq.isSpeciale;
-											isBisNum = isBisNum.Split('_')[1];
-											int bisNum = Int32.Parse(isBisNum);
-											isSpecial = "bis_" + (bisNum + 1);
+											Models.Sequence bisseq = ct.Sequence.Where(s => s.NUmeroOdre == NewOrdre && s.isSpeciale.ToLower().Contains("bis") && s.ImageID == CurrentImageView.Image.ImageID).OrderByDescending(s => s.SequenceID).FirstOrDefault();
+											if (bisseq != null)
+											{
+												string isBisNum = bisseq.isSpeciale;
+												isBisNum = isBisNum.Split('_')[1];
+												int bisNum = Int32.Parse(isBisNum);
+												isSpecial = "bis_" + (bisNum + 1);
+											}
+											else
+											{
+												isSpecial = "bis_1";
+											}
 										}
-										else
+										else if (cbxDoublonOrdre.IsChecked == true)
 										{
-											isSpecial = "bis_1";
+											Models.Sequence doubseq = ct.Sequence.Where(s => s.NUmeroOdre == NewOrdre && s.isSpeciale.ToLower().Contains("doublon") && s.ImageID == CurrentImageView.Image.ImageID).OrderByDescending(s => s.SequenceID).FirstOrDefault();
+											if (doubseq != null)
+											{
+												string isDoubNum = doubseq.isSpeciale;
+												isDoubNum = isDoubNum.Split('_')[1];
+												int DoubNum = Int32.Parse(isDoubNum);
+												isSpecial = "doublon_" + (DoubNum + 1);
+											}
+											else
+											{
+												isSpecial = "doublon_1";
+											}
 										}
-									}
-									else if (cbxDoublonOrdre.IsChecked == true)
-									{
-										Models.Sequence doubseq = ct.Sequence.Where(s => s.NUmeroOdre == NewOrdre && s.isSpeciale.ToLower().Contains("doublon") && s.ImageID == CurrentImageView.Image.ImageID).OrderByDescending(s => s.SequenceID).FirstOrDefault();
-										if (doubseq != null)
-										{
-											string isDoubNum = doubseq.isSpeciale;
-											isDoubNum = isDoubNum.Split('_')[1];
-											int DoubNum = Int32.Parse(isDoubNum);
-											isSpecial = "doublon_" + (DoubNum + 1);
-										}
-										else
-										{
-											isSpecial = "doublon_1";
-										}
-									}
-								}
-								else
-								{
-									throw new Exception("Le numéro d'ordre est incorrecte !!!");
-								}
-							}
-
-							if (sequenceView.DateFausse)
-							{
-								if (!string.IsNullOrWhiteSpace(tbDateSequence.Text))
-                                {
-									NewDate = tbDateSequence.Text;
-                                }
-								else
-                                {
-									throw new Exception("La date de référence est incorrecte !!!");
-                                }
-							}
-
-							if (!string.IsNullOrEmpty(sequenceView.ListReferenceFausse))
-							{
-								NewRefs = "";
-								string[] refsfausse = sequenceView.ListReferenceFausse.Split(',');
-								int nbrefat = refsfausse.Where(r => !string.IsNullOrWhiteSpace(r)).Count();
-								if (nbrefat != References.Count)
-								{
-									throw new Exception("Le nombre de référence à corriger est de : " + nbrefat);
-								}
-
-								foreach (var ref1 in sequenceView.Sequence.References.Split(','))
-								{
-									if (!refsfausse.Any(rf => rf.Equals(ref1)) && string.IsNullOrWhiteSpace(ref1))
-                                    {
-										NewRefs += ref1 + ",";
-                                    }
-								}
-
-								foreach (var ref1 in References)
-								{
-									if (!NewRefs.Split(',').Any(rf => rf.Equals(ref1.Value)) && !string.IsNullOrWhiteSpace(ref1.Value))
-									{
-										NewRefs += ref1.Value + ",";
 									}
 									else
 									{
-										throw new Exception("La référence : " + ref1.Value + ", existe déja !!!");
+										throw new Exception("Le numéro d'ordre est incorrecte !!!");
 									}
 								}
-								NewRefs = NewRefs.Remove(NewRefs.Length - 1);
+
+								if (sequenceView.DateFausse)
+								{
+									if (!string.IsNullOrWhiteSpace(tbDateSequence.Text))
+									{
+										NewDate = tbDateSequence.Text;
+									}
+									else
+									{
+										throw new Exception("La date de référence est incorrecte !!!");
+									}
+								}
+
+								if (!string.IsNullOrEmpty(sequenceView.ListReferenceFausse))
+								{
+									NewRefs = "";
+									Refs_Corriger = "";
+									string[] refsfausse = sequenceView.ListReferenceFausse.Split(',');
+									int nbrefat = refsfausse.Where(r => !string.IsNullOrWhiteSpace(r)).Count();
+									if (References.Count > nbrefat)
+									{
+										throw new Exception("Le nombre de référence à corriger est de : " + nbrefat);
+									}
+
+									foreach (var ref1 in sequenceView.Sequence.References.Split(','))
+									{
+										if (!refsfausse.Any(rf => rf.Equals(ref1)) && string.IsNullOrWhiteSpace(ref1))
+										{
+											NewRefs += ref1 + ",";
+										}
+									}
+
+									foreach (var ref1 in References)
+									{
+										if (!NewRefs.Split(',').Any(rf => rf.Equals(ref1.Value)) && !string.IsNullOrWhiteSpace(ref1.Value))
+										{
+											NewRefs += ref1.Value + ",";
+											Refs_Corriger += ref1.Value + ",";
+										}
+										else
+										{
+											throw new Exception("La référence : " + ref1.Value + ", existe déja !!!");
+										}
+									}
+
+									if (!string.IsNullOrWhiteSpace(NewRefs))
+									{
+										NewRefs = NewRefs.Remove(NewRefs.Length - 1);
+									}
+								}
+
+								//Modification de la ligne de séquence
+								Models.Sequence UpSequence = ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID);
+								UpSequence.NUmeroOdre = NewOrdre;
+								UpSequence.DateSequence = DateTime.Parse(NewDate);
+								UpSequence.References = NewRefs;
+								UpSequence.DateModif = DateTime.Now;
+								UpSequence.isSpeciale = isSpecial;
+								UpSequence.PhaseActuelle = 2;
+
+								//Création du correction Phase 1
+								Models.Correction correction = new Models.Correction()
+								{
+									RegistreId = RegistreViewParent.Registre.RegistreID,
+									ImageID = sequenceView.Sequence.ImageID,
+									SequenceID = sequenceView.Sequence.SequenceID,
+
+									//Indexes Image mis à null
+									RejetImage_idx = null,
+									MotifRejetImage_idx = null,
+
+									//Indexes de la séquence de l'image
+									OrdreSequence_idx = sequenceView.Demande_Correction.OrdreSequence_idx,
+									DateSequence_idx = sequenceView.Demande_Correction.DateSequence_idx,
+									RefSequence_idx = sequenceView.Demande_Correction.RefSequence_idx,
+									RefRejetees_idx = Refs_Corriger,
+									ASupprimer = null,
+
+									DateCorrection = DateTime.Now,
+									DateCreation = DateTime.Now,
+									DateModif = DateTime.Now,
+									PhaseCorrection = 3,
+									StatutCorrection = 0,
+								};
+								ct.Correction.Add(correction);
+								ct.SaveChanges();
+
+								//On vide les références
+								References.Clear();
+								tbListeReferences.Visibility = Visibility.Collapsed;
+								tbListeReferences.Text = "";
+
+								// Enregistrement de L'action Agent
+								DocumatContext.AddTraitement(DocumatContext.TbSequence, UpSequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH2 : MODIFICATION DE LA SEQUENCE ID : " + UpSequence.SequenceID + " DE L'IMAGE ID : " + UpSequence.ImageID);
+
+								ActualiseDataCorriger();
 							}
-
-							//Modification de la ligne de séquence
-							Models.Sequence UpSequence = ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID);
-							UpSequence.NUmeroOdre = NewOrdre;
-							UpSequence.DateSequence = DateTime.Parse(NewDate);
-							UpSequence.References = NewRefs;
-							UpSequence.DateModif = DateTime.Now;
-							UpSequence.isSpeciale = isSpecial;
-							UpSequence.PhaseActuelle = 2;
-
-							//Création du correction Phase 1
-							Models.Correction correction = new Models.Correction()
-							{
-								RegistreId = RegistreViewParent.Registre.RegistreID,
-								ImageID = sequenceView.Sequence.ImageID,
-								SequenceID = sequenceView.Sequence.SequenceID,
-
-								//Indexes Image mis à null
-								RejetImage_idx = null,
-								MotifRejetImage_idx = null,
-
-								//Indexes de la séquence de l'image
-								OrdreSequence_idx = sequenceView.Demande_Correction.OrdreSequence_idx,
-								DateSequence_idx = sequenceView.Demande_Correction.DateSequence_idx,
-								RefSequence_idx = sequenceView.Demande_Correction.RefSequence_idx,
-								RefRejetees_idx = sequenceView.Demande_Correction.RefRejetees_idx,
-								ASupprimer = null,
-
-								DateCorrection = DateTime.Now,
-								DateCreation = DateTime.Now,
-								DateModif = DateTime.Now,
-								PhaseCorrection = 3,
-								StatutCorrection = 0,
-							};
-							ct.Correction.Add(correction);
-							ct.SaveChanges();
-
-							//On vide les références
-							References.Clear();
-							tbListeReferences.Visibility = Visibility.Collapsed;
-							tbListeReferences.Text = "";
-
-							// Enregistrement de L'action Agent
-							DocumatContext.AddTraitement(DocumatContext.TbSequence, UpSequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH2 : MODIFICATION DE LA SEQUENCE ID : " + UpSequence.SequenceID + " DE L'IMAGE ID : " + UpSequence.ImageID);
-
-							ActualiseDataCorriger();
+							#endregion
 						}
-						#endregion
 					}
 				}
 			}

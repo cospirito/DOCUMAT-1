@@ -476,16 +476,16 @@ namespace DOCUMAT.Pages.Image
 							{
 								if (corrections.Any(c => c.StatutCorrection == 0))
 								{
-									if(ct.Controle.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.PhaseControle == 4
+									if(ct.Controle.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.PhaseControle == 4 && c.StatutControle == 1
 														   && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
 														   || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)))
                                     {
-										item.Tag = "valide";
+										item.Tag = "Correct";
 									}
 									else
                                     {
-										item.Tag = "Correct";
-                                    }
+										item.Tag = "valide";
+									}
 								}
 								else
 								{

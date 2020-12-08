@@ -26,7 +26,7 @@ namespace DOCUMAT.Models
         public static string TbManquantSequence = "ManquantSequences";
         public static string TbTraitement = "Traitements";
         public static string TbConfigs = "Configs";
-        public static string TbSessionTravail = "SessionTravail";
+        public static string TbSessionTravail = "SessionTravails";
         public static string TbUnite = "Unites";
         public static string TbTranche = "Tranches";
 

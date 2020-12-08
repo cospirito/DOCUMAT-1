@@ -362,7 +362,11 @@
                                                   Click="cbxDate_Click"/>
                                             <StackPanel x:Name="ListeReferences"
                                                     Margin="5">
-                                                <ListBox ItemsSource="{Binding TheList}">
+                                                <ListBox ItemsSource="{Binding TheList}"
+                                                         ScrollViewer.CanContentScroll="True"
+                                                         ScrollViewer.VerticalScrollBarVisibility="auto"
+                                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                         MaxHeight="170">
                                                     <ListBox.ItemTemplate>
                                                         <DataTemplate>
                                                             <CheckBox Name="CheckBoxZone" Content="{Binding TheText}"

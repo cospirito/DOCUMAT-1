@@ -190,7 +190,16 @@ namespace DOCUMAT.Pages.Image
 															   && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
 															   ||c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1 )))
 										{
-											item.Tag = "instance";
+											if(ct.Correction.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.StatutCorrection == 0 && c.PhaseCorrection == 1
+															   && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
+															   || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)))
+                                            {
+												item.Tag = "Correct";
+                                            }
+                                            else
+                                            {
+												item.Tag = "instance";
+											}
 										}
 										else
 										{

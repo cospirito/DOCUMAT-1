@@ -183,6 +183,16 @@
                 <ColumnDefinition Width="7*"/>
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column ="0" 
+                          Background="White" 
+                          Width="7"
+                          HorizontalAlignment="Right" 
+                          VerticalAlignment="Stretch"/>
+            <GridSplitter Grid.Column ="2" 
+                          Background="White" 
+                          Width="7"
+                          HorizontalAlignment="Left" 
+                          VerticalAlignment="Stretch"/>
 
             <!--Partie dédier à l'aborescence-->
             <Border Grid.Column="0"  
@@ -353,8 +363,6 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <!--<DataGridTextColumn Header="Référence" Binding="{Binding strReferences}" />-->
-                                    <!--<DataGridCheckBoxColumn Header="A Supprimer" Binding= "{Binding CheckBoxBooleanValue}"/>-->
                                 </DataGrid.Columns>
                                 <DataGrid.RowDetailsTemplate>
                                     <DataTemplate>
@@ -376,7 +384,7 @@
                                                          ScrollViewer.CanContentScroll="True"
                                                          ScrollViewer.VerticalScrollBarVisibility="auto"
                                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                                         MaxHeight="170">
+                                                         MaxHeight="140">
                                                     <ListBox.ItemTemplate>
                                                         <DataTemplate>
                                                             <CheckBox Name="CheckBoxZone" Content="{Binding TheText}"

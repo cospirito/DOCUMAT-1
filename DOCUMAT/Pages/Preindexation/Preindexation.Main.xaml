@@ -24,7 +24,7 @@
             </Style.Triggers>
         </Style>
         <ContextMenu x:Key="cmFeuillet">
-            <MenuItem Header="Préindexer Les Feuillets"
+            <MenuItem Header="Préindexer Le Registre"
                       Name="EditFeuillets"
                       Icon="{materialDesign:PackIcon Kind=ImageEdit}"
                       Click="EditFeuillets_Click"/>
@@ -72,7 +72,7 @@
                                             Foreground="White"/>
                     </Button>
                     <CheckBox x:Name="AfficherFeuillets"
-                      Content="Préindexer les Feuillets"
+                      Content="Préindexer Registre"
                       Foreground="White"
                       Background="White"
                       Click="AfficherFeuillets_Click"
@@ -157,7 +157,6 @@
                     <DataGridTextColumn Header="pages enregistrées" Binding="{Binding NombreImageCompte}" />
                     <DataGridTextColumn Header="Type de registre" Binding="{Binding Registre.Type}" />
                     <DataGridTextColumn Header="Date Création" Binding="{Binding Registre.DateCreation, Converter={StaticResource DateConverter}}" />
-                    <DataGridTextColumn Header="Agent Traitant" Binding="{Binding AgentTraitant.Noms}" />
                 </DataGrid.Columns>
                 <DataGrid.Resources>
                     <Style TargetType="DataGridRow">
@@ -185,12 +184,8 @@
                                        Width="70"
                                        Stretch="UniformToFill"
                                        Margin="10" />
-                            <StackPanel Orientation="Vertical" Margin="10,10,10,10">
-                                <!--<StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="Agent Versant : " FontWeight="Bold" Grid.Row="2" />
-                                        <TextBlock Text="{Binding AgentVersant.Noms}" Grid.Column="1" Grid.Row="2" />
-                                    </StackPanel>-->
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Vertical" Margin="10,10,10,10">
+                                    <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Numéro de Versement : " FontWeight="Bold" Grid.Row="2" />
                                     <TextBlock Text="{Binding Versement.NumeroVers}" Grid.Column="1" Grid.Row="2" />
                                 </StackPanel>
@@ -269,12 +264,11 @@
                           CanUserSortColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
-                            <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />
+                            <DataGridTextColumn Header="QRCode" Binding="{Binding Registre.QrCode}" />
                             <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Registre.Numero}" />
-                            <DataGridTextColumn Header="Numéro de Feuillet" Binding="{Binding Image.NumeroPage}" />
+                            <DataGridTextColumn Header="Numéro de Page" Binding="{Binding Image.NumeroPage}" />
                             <DataGridTextColumn Header="N° Ordre Debut" Binding="{Binding Image.DebutSequence}" />
                             <DataGridTextColumn Header="N° Ordre Fin" Binding="{Binding Image.FinSequence}" />
-                            <!--<DataGridTextColumn Header="Multi-Références" Binding="{Binding NombreMulti}" />-->
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -291,7 +285,7 @@
                             <materialDesign:PackIcon Width="20" Height="20" Kind="RemoveCircle" 
                                                      VerticalAlignment="Center"/>
                             <TextBlock VerticalAlignment="Center"
-                                       Margin="10 0"> SUPPRIMER LE DERNIER FEUILLET</TextBlock>
+                                       Margin="10 0"> SUPPRIMER LA DERNIERE PAGE</TextBlock>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -302,14 +296,14 @@
                             MaxHeight="477"
                             VerticalAlignment="Top"
                             Margin="30 0 0 0">
-                    <Border BorderBrush="White" 
+                        <Border BorderBrush="White" 
                       BorderThickness="1 0 1 1"
-                      materialDesign:ScrollBarAssist.ButtonsVisibility="Visible"
-                      >
-                        <StackPanel Width="300">
-                            <StackPanel Background="DarkSlateGray" VerticalAlignment="Center">
+                      materialDesign:ScrollBarAssist.ButtonsVisibility="Visible">
+                            <StackPanel Width="300">
+                            <StackPanel Background="DarkSlateGray" 
+                                        VerticalAlignment="Center">
                                 <TextBlock x:Name="titreFormFeuillet" 
-                                        Text="Feuilllet"
+                                        Text="PAGE"
                                         Foreground="white"                           
                                         FontSize="20"
                                         Padding="10"
@@ -318,43 +312,43 @@
                             </StackPanel>
 
                             <TextBox x:Name="tbNumeroFeuillet" 
-                        Foreground="White"
-                        IsEnabled="False"
-                        CharacterCasing="Upper"
-                        InputScope="Number"
-                        Typography.NumeralAlignment="Proportional"
-                        materialDesign:HintAssist.Hint="NUMERO DU FEUILLET"
-                        materialDesign:HintAssist.HelperText="NUMERO DE FEUILLET"
-                        Margin="10"
-                        TextChanged="tbNumeroFeuillet_TextChanged"/>
+                                Foreground="White"
+                                IsEnabled="False"
+                                CharacterCasing="Upper"
+                                InputScope="Number"
+                                Typography.NumeralAlignment="Proportional"
+                                materialDesign:HintAssist.Hint="NUMERO DE PAGE"
+                                materialDesign:HintAssist.HelperText="NUMERO DE PAGE"
+                                Margin="10"
+                                TextChanged="tbNumeroFeuillet_TextChanged"/>
 
                             <TextBox x:Name="tbNumeroOrdreDebut" 
-                        Foreground="White"
-                        CharacterCasing="Upper"
-                        InputScope="Number"
-                        Typography.NumeralAlignment="Proportional"
-                        materialDesign:HintAssist.Hint="NUMERO D'ORDRE DEBUT"
-                        materialDesign:HintAssist.HelperText="NUMERO D'ORDRE DEBUT"
-                        Margin="10"
-                        TextChanged="tbNumeroOrdreDebut_TextChanged"/>
+                                Foreground="White"
+                                CharacterCasing="Upper"
+                                InputScope="Number"
+                                Typography.NumeralAlignment="Proportional"
+                                materialDesign:HintAssist.Hint="NUMERO D'ORDRE DEBUT"
+                                materialDesign:HintAssist.HelperText="NUMERO D'ORDRE DEBUT"
+                                Margin="10"
+                                TextChanged="tbNumeroOrdreDebut_TextChanged"/>
 
                             <TextBox x:Name="tbNumeroOrdreFin" 
-                        Foreground="White"
-                        CharacterCasing="Upper"
-                        InputScope="Number"
-                        Typography.NumeralAlignment="Proportional"
-                        materialDesign:HintAssist.Hint="NUMERO D'ORDRE FIN"
-                        materialDesign:HintAssist.HelperText="NUMERO D'ORDRE FIN"
-                        Margin="10"
-                        TextChanged="tbNumeroOrdreFin_TextChanged"/>
+                                Foreground="White"
+                                CharacterCasing="Upper"
+                                InputScope="Number"
+                                Typography.NumeralAlignment="Proportional"
+                                materialDesign:HintAssist.Hint="NUMERO D'ORDRE FIN"
+                                materialDesign:HintAssist.HelperText="NUMERO D'ORDRE FIN"
+                                Margin="10"
+                                TextChanged="tbNumeroOrdreFin_TextChanged"/>
 
                             <DatePicker 
-                            Margin="10"
-                            x:Name="dtDateSequence"
-                            materialDesign:HintAssist.Hint="DATE PREMIERE SEQUENCE"
-                            materialDesign:HintAssist.HelperText="DATE PREMIERE SEQUENCE"
-                            Foreground="White"
-                            />
+                                Margin="10"
+                                x:Name="dtDateSequence"
+                                materialDesign:HintAssist.Hint="DATE PREMIERE SEQUENCE"
+                                materialDesign:HintAssist.HelperText="DATE PREMIERE SEQUENCE"
+                                Foreground="White"
+                                />
                             <StackPanel Orientation="Horizontal" 
                                 HorizontalAlignment="Center">
                                 <Button 

@@ -293,16 +293,11 @@ namespace DOCUMAT.Pages.Preindexation
                         if (imageView.Image.DebutSequence > imageView.Image.FinSequence)
                             throw new Exception("Le numéro d'ordre de début doit être inférieur au numéro d'ordre de fin");
 
-                        //imageView.Image.NumeroPageDeclare = 0;
                         imageView.Image.RegistreID = registre.RegistreID;
-                        //imageView.Image.CheminImage = "Defaut";
                         imageView.Image.DateCreation = DateTime.Now;
                         imageView.Image.DateModif = DateTime.Now;
                         imageView.Image.DateScan = DateTime.Now;
-                        imageView.Image.DateDebutSequence = dtDateSequence.SelectedDate.Value;
-                        //imageView.Image.StatutActuel = 0;
-                        //imageView.Image.Taille = "0"; // Doit être changer en type numéric
-                        //imageView.Image.Type = "Defaut";                
+                        imageView.Image.DateDebutSequence = dtDateSequence.SelectedDate.Value;             
                         LastImage = imageView.AddPreIndex();
 
                         //Ajout de la liste des séquences à multiréférences
@@ -342,6 +337,7 @@ namespace DOCUMAT.Pages.Preindexation
                         tbNumeroOrdreSequence.Text = "";
                         tbNombreReferences.Text = "";
 
+                        // Doublé le Nombre de Page pour tout le processus 
                         if (registre.NombrePage == imageView.GetSimpleViewsList(registre).Count)
                         {
                             btnSaveFeuillet.IsEnabled = false;
@@ -418,10 +414,6 @@ namespace DOCUMAT.Pages.Preindexation
                 dgSequence.ScrollIntoView(sequence);
                 dgSequence.Items.Remove(sequence);
                 tbNumeroOrdreSequence.Focus();
-                //foreach (Models.Sequence sequence in dgSequence.SelectedItems)
-                //{
-                //}
-                //dgSequence.ItemsSource = Sequences;
             }
         }
          
@@ -436,7 +428,7 @@ namespace DOCUMAT.Pages.Preindexation
             {
                 int numeroOrdreSequence = 0, NombreReference = 0;
                 int NombreReferences = 0;
-                if (Int32.TryParse(tbNumeroOrdreSequence.Text, out numeroOrdreSequence)  && Int32.TryParse(tbNombreReferences.Text, out NombreReferences))
+                if (Int32.TryParse(tbNumeroOrdreSequence.Text, out numeroOrdreSequence) && Int32.TryParse(tbNombreReferences.Text, out NombreReferences))
                 {
                     int imageID = 0;                    
                     if (Int32.TryParse(tbNombreReferences.Text,out NombreReference) && NombreReference > 0)
@@ -643,9 +635,15 @@ namespace DOCUMAT.Pages.Preindexation
             {
                 // Récupération des registre par code registre
                 RegistreView RegistreView = new RegistreView();
-                List<RegistreView> registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, false).Where(r=>r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
-                registreViews.AddRange(RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, true).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList());
-                dgRegistre.ItemsSource = registreViews;
+                List<RegistreView> registreViews = RegistreView.GetViewsList().Where(r=>r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
+                List<Traitement> traitementsCreer = RegistreView.context.Traitement.Where(tr => tr.TableSelect.ToLower() == DocumatContext.TbRegistre.ToLower() && tr.TypeTraitement == (int)Enumeration.TypeTraitement.CREATION
+                && tr.AgentID == Utilisateur.AgentID).ToList();
+
+                var jointure = from r in registreViews
+                               join t in traitementsCreer on r.Registre.RegistreID equals t.TableID
+                               select r;
+
+                dgRegistre.ItemsSource = jointure;
             }
             catch (Exception ex)
             {
@@ -693,14 +691,19 @@ namespace DOCUMAT.Pages.Preindexation
                 if (TbRechercher.Text != "")
                 {
                     RegistreView RegistreView = new RegistreView();
-                    List<RegistreView> registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, false).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
-                    registreViews.AddRange(RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.PREINDEXATION_REGISTRE, true).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList());
+                    // Récupération des registre par code registre  
+                    List<RegistreView> registreViews = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
+                    List<Traitement> traitementsCreer = RegistreView.context.Traitement.Where(tr => tr.TableSelect.ToLower() == DocumatContext.TbRegistre.ToLower() && tr.TypeTraitement == (int)Enumeration.TypeTraitement.CREATION
+                    && tr.AgentID == Utilisateur.AgentID).ToList();
+
+                    var registreViewList = from r in registreViews
+                                   join t in traitementsCreer on r.Registre.RegistreID equals t.TableID
+                                   select r;
 
                     switch (cbChoixRecherche.SelectedIndex)
                     {
-                        case 0:
-                            // Récupération des registre par code registre                            
-                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                        case 0:                           
+                            dgRegistre.ItemsSource = registreViewList.Where(r=>r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
                             break;
                         case 1:
                             // Récupération des registre par service
@@ -708,7 +711,7 @@ namespace DOCUMAT.Pages.Preindexation
                             List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
                             List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
 
-                            var jointure1 = from r in registreViews
+                            var jointure1 = from r in registreViewList
                                             join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
                                             from v in table1.ToList()
                                             join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
@@ -719,13 +722,13 @@ namespace DOCUMAT.Pages.Preindexation
                             dgRegistre.ItemsSource = jointure1;
                             break;
                         case 2:
-                            // Récupération des registre par service
+                            // Récupération des registre par Region
                             List<Models.Region> Region2 = RegistreView.context.Region.ToList();
                             List<Models.Service> Services2 = RegistreView.context.Service.ToList();
                             List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
                             List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
 
-                            var jointure2 = from r in registreViews
+                            var jointure2 = from r in registreViewList
                                             join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
                                             from v in table1.ToList()
                                             join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
@@ -738,8 +741,8 @@ namespace DOCUMAT.Pages.Preindexation
                             dgRegistre.ItemsSource = jointure2;
                             break;
                         case 3:
-                            // Récupération des registre par code registre                            
-                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            // Récupération des registre par code Numero Volume                            
+                            dgRegistre.ItemsSource = registreViewList.Where(r => r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper()));
                             break;
                         default:
                             RefreshRegistre();

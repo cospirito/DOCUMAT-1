@@ -64,14 +64,25 @@ namespace DOCUMAT.Pages.Inventaire
             ContextMenu cmRegistre = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cmRegistre;
             MenuItem menuItemVersement = (MenuItem)cmVersement.Items.GetItemAt(4);
+            MenuItem menuItemRegistre = (MenuItem)cmRegistre.Items.GetItemAt(2);
 
-            if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR)
+            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR)
             {
                 menuItemVersement.IsEnabled = true;
+                menuItemRegistre.IsEnabled = true;
             }
             else
             {
-                menuItemVersement.IsEnabled = false;
+                if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                {
+                    menuItemVersement.IsEnabled = false;
+                    menuItemRegistre.IsEnabled = true;
+                }
+                else
+                {
+                    menuItemVersement.IsEnabled = false;
+                    menuItemRegistre.IsEnabled = false;
+                }
             }
         }
 

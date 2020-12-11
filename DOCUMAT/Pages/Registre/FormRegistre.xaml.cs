@@ -201,11 +201,27 @@ namespace DOCUMAT.Pages.Registre
         {
             try
             {
-                if(MessageBox.Show("Le champs Type de registre ne pourra plus être modifié utlérieurement, voulez-vous enregistrer ce registre ?","ATTENTION",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if(MessageBox.Show("Les champs \"Type de registre\" et \"Numéro Volume\" ne pourront plus être modifié utlérieurement, voulez-vous enregistrer ce registre ?","ATTENTION",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     //Création du Dossier de registre dans le dossier de service                       
                     RegistreView registreView = new RegistreView();
-                    /*registreView.Registre.CheminDossier = DossierRegistre;*/ //devra être changer après l'ajout
+
+                    // Vérification du nombre de Registre de Type 'R3 ou R4' enregistrée
+                    if (((ComboBoxItem)cbTypeRegistre.SelectedItem).Content.ToString() == "R3")
+                    {
+                        if(VersementViewParent.Versement.NombreRegistreR3 < (registreView.context.Registre.Where(r=>r.VersementID == VersementViewParent.Versement.VersementID && r.Type == "R3").Count() + 1 ))
+                        {
+                            throw new Exception("Le nombre de Registre R3 doit être doit être de " + VersementViewParent.Versement.NombreRegistreR3);
+                        }
+                    }
+                    else
+                    {
+                        if (VersementViewParent.Versement.NombreRegistreR4 < (registreView.context.Registre.Where(r => r.VersementID == VersementViewParent.Versement.VersementID && r.Type == "R4").Count() + 1))
+                        {
+                            throw new Exception("Le nombre de Registre R4 doit être doit être de " + VersementViewParent.Versement.NombreRegistreR4);
+                        }
+                    }
+
                     registreView.Registre.DateCreation = DateTime.Now;
                     registreView.Registre.DateModif = DateTime.Now;
                     registreView.Registre.DateDepotDebut = dtDepotDebut.SelectedDate.Value;

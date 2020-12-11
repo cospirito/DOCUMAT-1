@@ -1,6 +1,7 @@
 ﻿using iText.Kernel.Pdf;
 using System;
 using System.Configuration;
+using System.Drawing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,46 +28,7 @@ namespace DOCUMAT.Impression
 
         public BordereauRegistre(Models.Registre registre):this()
         {
-            try
-            {
-                Registre = registre;
-
-                // Chargement du formulaire du code barre
-                string[] cheminServices = registre.CheminDossier.Split(new char[2] { '/', '\\' });
-                string CheminService = cheminServices[1] + "/" + cheminServices[2];
-                Zen.Barcode.Code128BarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.Code128WithChecksum;
-                BarCodeRegistre.Source = ConvertDrawingImageToWPFImage(qrcode.Draw(registre.QrCode, 50)).Source;
-                BarCodeChemin.Source = ConvertDrawingImageToWPFImage(qrcode.Draw(CheminService, 50)).Source;
-
-                // Remplissage des informations sur le Registre
-                txtTitreRegistre.Text = "REGISTRE N° : " + registre.Numero;
-                txtCodeRegistre.Text = registre.QrCode;
-                txtRegion.Text = registre.Versement.Livraison.Service.Region.Nom.ToString();
-                txtService.Text = registre.Versement.Livraison.Service.Nom.ToString();
-                txtType.Text = registre.Type;
-                txtNumeroDebutDepot.Text = registre.NumeroDepotDebut.ToString();
-                txtNumeroFinDepot.Text = registre.NumeroDepotFin.ToString();
-                txtNbPageReelle.Text = registre.NombrePage + " / " + registre.NombrePageDeclaree;
-                txtDateDebutDepot.Text = registre.DateDepotDebut.ToShortDateString();
-                txtDateFinDepot.Text = registre.DateDepotFin.ToShortDateString();
-                txtCheminDossierScan.Text = CheminService;
-
-                if (File.Exists(System.IO.Path.Combine(DossierRacine, Registre.CheminDossier, $"Bordereau{registre.QrCode}.xps")))
-                {
-                    File.Delete(System.IO.Path.Combine(DossierRacine, Registre.CheminDossier, $"Bordereau{registre.QrCode}.xps"));
-                }
-                var xpsDocument = new XpsDocument(System.IO.Path.Combine(DossierRacine, Registre.CheminDossier, $"Bordereau{registre.QrCode}.xps"), FileAccess.ReadWrite);
-                XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(xpsDocument);
-                writer.Write(((IDocumentPaginatorSource)FD).DocumentPaginator);
-                Document = xpsDocument.GetFixedDocumentSequence();
-                xpsDocument.Close();
-
-                PreviewD.Document = Document;
-            }
-            catch (Exception ex)
-            {
-                ex.ExceptionCatcher();
-            }
+            Registre = registre;           
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -90,9 +52,69 @@ namespace DOCUMAT.Impression
             img.Source = WpfBitmap;
             img.Width = 400;
             img.Height = 400;
-            img.Stretch = System.Windows.Media.Stretch.Fill;
+            img.Stretch = System.Windows.Media.Stretch.None;
             return img;
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Chargement du formulaire du code barre
+                string[] cheminServices = Registre.CheminDossier.Split(new char[2] { '/', '\\' });
+                string CheminService = cheminServices[1] + "/" + cheminServices[2];
+
+                Zen.Barcode.Code128BarcodeDraw barcode = Zen.Barcode.BarcodeDrawFactory.Code128WithChecksum;
+                Zen.Barcode.Code128BarcodeDraw barcodeChemin = Zen.Barcode.BarcodeDrawFactory.Code128WithChecksum;
+                var barcodeImage = barcode.Draw(Registre.QrCode, 50);
+                var barcodeCheminImage = barcodeChemin.Draw(CheminService, 50);
+                string barcodeCheminImageString = (Path.Combine(DossierRacine, Registre.CheminDossier, "CodeBarRegistreChemin.bmp"));
+                string barcodeImageString = (Path.Combine(DossierRacine, Registre.CheminDossier, "CodeBarRegistre.bmp"));
+
+                if (!File.Exists(barcodeImageString))
+                {
+                    barcodeImage.Save(barcodeImageString, System.Drawing.Imaging.ImageFormat.Bmp);
+                }
+
+                if (!File.Exists(barcodeCheminImageString))
+                {
+                    barcodeCheminImage.Save(barcodeCheminImageString, System.Drawing.Imaging.ImageFormat.Bmp);
+                }
+                BarCodeRegistre.Source = new BitmapImage(new Uri(barcodeImageString), new System.Net.Cache.RequestCachePolicy());
+                BarCodeChemin.Source = new BitmapImage(new Uri(barcodeCheminImageString), new System.Net.Cache.RequestCachePolicy());
+
+                // Remplissage des informations sur le Registre
+                txtTitreRegistre.Text = "REGISTRE N° : " + Registre.Numero;
+                txtCodeRegistre.Text = Registre.QrCode;
+                txtRegion.Text = Registre.Versement.Livraison.Service.Region.Nom.ToString();
+                txtService.Text = Registre.Versement.Livraison.Service.Nom.ToString();
+                txtType.Text = Registre.Type;
+                txtNumeroDebutDepot.Text = Registre.NumeroDepotDebut.ToString();
+                txtNumeroFinDepot.Text = Registre.NumeroDepotFin.ToString();
+                txtNbPageReelle.Text = Registre.NombrePage + " / " + Registre.NombrePageDeclaree;
+                txtDateDebutDepot.Text = Registre.DateDepotDebut.ToShortDateString();
+                txtDateFinDepot.Text = Registre.DateDepotFin.ToShortDateString();
+                txtCheminDossierScan.Text = CheminService;
+
+                string BordereauRegistre = System.IO.Path.Combine(DossierRacine, Registre.CheminDossier, $"Bordereau{Registre.QrCode}.xps");
+                var xpsDocument = new XpsDocument(BordereauRegistre, FileAccess.ReadWrite);
+
+                try
+                {
+                    XpsDocumentWriter writer = XpsDocument.CreateXpsDocumentWriter(xpsDocument);
+                    writer.Write(((IDocumentPaginatorSource)FD).DocumentPaginator);
+                }
+                catch (Exception ein) { };
+
+                Document = xpsDocument.GetFixedDocumentSequence();
+                xpsDocument.Close();
+                PreviewD.Document = Document;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                this.Close();
+            }
+        }
     }
 }

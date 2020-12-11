@@ -7,10 +7,11 @@
         mc:Ignorable="d"
         Title="Bordereau Registre" 
         Height="600" 
-        Width="800"
-        Background="SteelBlue">
+        Width="600"
+        ResizeMode="NoResize"
+        Background="SteelBlue"
+        Loaded="Window_Loaded">
     <Window.Resources>
-
         <Style x:Key="{x:Type DocumentViewer}" TargetType="{x:Type DocumentViewer}">
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}" />
             <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
@@ -68,13 +69,6 @@
                                             ToolTip="Adapter à la Largeur">
                                         <materialDesign:PackIcon Kind="FitToPage" Width="25" Height="25"/>
                                     </Button>
-                                    <Button Command="DocumentViewer.FitToMaxPagesAcrossCommand"
-                                            CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
-                                            Foreground="SteelBlue"
-                                            CommandParameter="1"
-                                            ToolTip="Page entière">
-                                        <materialDesign:PackIcon Kind="StretchToPage" Width="25" Height="25"/>
-                                    </Button>
                                 </ToolBar>
 
                                 <ScrollViewer Grid.Row="1"
@@ -107,79 +101,79 @@
         </Grid.ColumnDefinitions>
         <FlowDocumentScrollViewer Grid.Row="0" Visibility="Collapsed">
             <FlowDocument x:Name="FD" TextAlignment="Left"
-                          ColumnWidth="500">
+                          LineHeight="5">
                 <Paragraph TextAlignment="Left">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/images/ancfcclogo.png"
                                VerticalAlignment="Center"
-                                       Height="150"/>
-                        <TextBlock FontSize="30" 
+                                       Height="70"/>
+                        <TextBlock FontSize="17" 
                                     VerticalAlignment="Center" 
                                     Name="txtTitreRegistre"
                                     FontWeight="ExtraBold"
                                     TextWrapping="Wrap"
-                                    MaxWidth="600"
+                                    MaxWidth="200"
                                     TextDecorations="underline"
                                     TextAlignment="Center"> REGISTRE N° 000</TextBlock>
                     </StackPanel>
                 </Paragraph>
                 
-                <Paragraph Margin="20">
+                <Paragraph Margin="15">
                     Code Registre :
-                    <TextBlock FontWeight="Bold" x:Name="txtCodeRegistre"/>
+                    <TextBlock FontWeight="Bold" 
+                               x:Name="txtCodeRegistre"/>
                 </Paragraph>
-                <Paragraph Margin="20">
+                <Paragraph Margin="15">
                     Région  :
                     <TextBlock FontWeight="Bold" x:Name="txtRegion"/>
                 </Paragraph>
-                <Paragraph Margin="20">
+                <Paragraph Margin="15">
                     Service :
                     <TextBlock FontWeight="Bold" x:Name="txtService"/>
                 </Paragraph>
-                <Paragraph Margin="20">
+                <Paragraph Margin="15">
                     Type :
-                    <TextBlock FontWeight="Bold" x:Name="txtType"/>
-                </Paragraph>
-                <Paragraph Margin="20">
-                    Numéro Dépôt début :
-                    <TextBlock FontWeight="Bold" x:Name="txtNumeroDebutDepot"/>
-                </Paragraph>
-                <Paragraph Margin="20">
-                    Date Dépôt début :
-                    <TextBlock FontWeight="Bold" x:Name="txtDateDebutDepot"/>
-                </Paragraph>
-                <Paragraph Margin="20">
-                    Numéro Dépôt Fin :
-                    <TextBlock FontWeight="Bold" x:Name="txtNumeroFinDepot"/>
-                </Paragraph>
-                <Paragraph Margin="20">
-                    Date Dépôt Fin :
-                    <TextBlock FontWeight="Bold" x:Name="txtDateFinDepot"/>
-                </Paragraph>
-                <Paragraph Margin="20">
-                    Nombre de Page :
+                    <TextBlock FontWeight="Bold" x:Name="txtType"/> / 
+                    Page :
                     <TextBlock FontWeight="Bold" x:Name="txtNbPageReelle"/>
                 </Paragraph>
-                <Paragraph Margin="20">
+                <Paragraph Margin="15">
+                    N° Dépôt début :
+                    <TextBlock FontWeight="Bold" x:Name="txtNumeroDebutDepot"/> /                    
+                    Date :
+                    <TextBlock FontWeight="Bold" x:Name="txtDateDebutDepot"/>
+                </Paragraph>
+                <Paragraph Margin="15">
+                    Numéro Dépôt Fin :
+                    <TextBlock FontWeight="Bold" x:Name="txtNumeroFinDepot"/>
+                    Date :
+                    <TextBlock FontWeight="Bold" x:Name="txtDateFinDepot"/>
+                </Paragraph>
+                <Paragraph Margin="15">
                     Chemin Dossier de Scan :
                     <TextBlock FontWeight="Bold" x:Name="txtCheminDossierScan"/>
                 </Paragraph>
-                <Paragraph Margin="0 70 0 40" TextAlignment="Center">
+                <Paragraph Margin="15 15 0 0" >
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                        <Image Margin="0" x:Name="BarCodeRegistre" Height="50" VerticalAlignment="Center" Source="/Images/ancfcclogo.png"></Image>
-                        <TextBlock TextDecorations="underline" VerticalAlignment="Center" FontSize="10" FontStyle="Italic" FontFamily="Agency Fb"> code registre </TextBlock>
+                        <Image Margin="0" x:Name="BarCodeRegistre" Height="50"></Image>
+                        <TextBlock TextDecorations="underline"  FontSize="10" FontStyle="Italic" FontFamily="Agency Fb"> code registre </TextBlock>
                     </StackPanel>
                 </Paragraph>
-                <Paragraph Margin="0 20 0 0" TextAlignment="Center"> 
+                <Paragraph Margin="15 30 0 0"> 
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                        <Image Margin="0" x:Name="BarCodeChemin" Height="50" VerticalAlignment="Center" Source="/Images/ancfcclogo.png"></Image>
-                        <TextBlock TextDecorations="underline" VerticalAlignment="Center" FontSize="10" FontStyle="Italic" FontFamily="Agency Fb"> dossier scan</TextBlock> 
+                        <Image Margin="0" x:Name="BarCodeChemin" Height="50" ></Image>
+                        <TextBlock TextDecorations="underline" FontSize="10" FontStyle="Italic" FontFamily="Agency Fb"> dossier scan</TextBlock> 
                     </StackPanel>
                 </Paragraph>
             </FlowDocument>
         </FlowDocumentScrollViewer>
 
-        <DocumentViewer Grid.Column="1" x:Name="PreviewD">
+        <DocumentViewer Grid.Column="1" 
+                        x:Name="PreviewD"
+                        Visibility="Visible" 
+                        ScrollViewer.CanContentScroll="False"
+                        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                        ScrollViewer.VerticalScrollBarVisibility="Hidden">
         </DocumentViewer>
     </Grid>
 </Window>

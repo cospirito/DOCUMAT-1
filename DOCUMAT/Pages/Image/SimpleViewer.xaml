@@ -3,14 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DOCUMAT.Pages.Image" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:DOCUMAT.Pages.Image" 
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:tool="clr-namespace:DOCUMAT"
         mc:Ignorable="d"
-        Title="Visionneuse Image" 
+        Title="Visionneuse de Document" 
         Height="450" 
         Width="800"
         WindowState="Maximized"
         Background="SteelBlue"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        SizeChanged="Window_SizeChanged">
     <Window.Resources>
         <Style x:Key="{x:Type DocumentViewer}" TargetType="{x:Type DocumentViewer}">
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}" />
@@ -106,6 +110,10 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
+        <WindowsFormsHost x:Name="PdfViewerPanel" 
+                          Grid.Row="0">
+            <tool:UserControl1 x:Name="PdfViewer"/>
+        </WindowsFormsHost>
         <DocumentViewer Grid.Column="0" x:Name="PreviewD">
         </DocumentViewer>
     </Grid>

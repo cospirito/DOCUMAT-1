@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DOCUMAT.Converter"          
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:id="http://schemas.microsoft.com/expression/2010/drawing"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:id="http://schemas.microsoft.com/expression/2010/drawing" xmlns:tool="clr-namespace:DOCUMAT"
         mc:Ignorable="d"
         Title="Supervision d'Indexation" 
         WindowState="Maximized"
@@ -275,7 +275,8 @@
             <!--Partie dédier à l'aborescence-->
             <Border Grid.Column="0"
                     BorderBrush="White" 
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    Margin="0 0 7 0">
                 <TreeView x:Name="FolderView"
                               Foreground="White"
                               Margin="0 0 0 30">
@@ -308,17 +309,24 @@
                     BorderThickness="2" 
                     BorderBrush="white" 
                     Margin="0"
-                    x:Name="borderDocument">
-                <DocumentViewer Name="DocumentViewer"                                 
-                                Background="SteelBlue"
-                                BorderThickness="0" 
-                                Margin="0" />
+                    x:Name="borderDocument"
+                    SizeChanged="borderDocument_SizeChanged">
+                <StackPanel>
+                    <WindowsFormsHost x:Name="PdfViewerPanel" >
+                        <tool:UserControl1 x:Name="PdfViewer"/>
+                    </WindowsFormsHost>
+                    <DocumentViewer Name="DocumentViewer"                                     
+                                    Background="SteelBlue"
+                                    BorderThickness="0" Margin="0">
+                    </DocumentViewer>
+                </StackPanel>
             </Border>
 
             <!--Partie dédiée a Séquence d'Image-->
             <Border Grid.Column="2"
                     BorderBrush="White"
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    Margin="7 0 0 0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="35"></RowDefinition>

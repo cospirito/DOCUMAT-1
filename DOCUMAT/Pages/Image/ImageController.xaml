@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DOCUMAT.Converter"                       
         xmlns:id="http://schemas.microsoft.com/expression/2010/drawing" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:WpfToolkit="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
+        xmlns:WpfToolkit="http://schemas.microsoft.com/netfx/2009/xaml/presentation" xmlns:tool="clr-namespace:DOCUMAT"
         mc:Ignorable="d"
         WindowState="Maximized"
         Title="Controle Phase 1"
@@ -214,7 +214,8 @@
             <!--Partie dédier à l'aborescence-->
             <Border Grid.Column="0" 
                     BorderBrush="White" 
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    Margin="0 0 7 0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
@@ -266,18 +267,25 @@
             <!--Partie d'dier à la visionneuse d'image-->
             <Border Grid.Column="1"  
                     BorderThickness="2" 
-                    BorderBrush="white" >
-                <DocumentViewer Name="DocumentViewer"                                  
+                    BorderBrush="white"                     
+                    x:Name="borderDocument"
+                    SizeChanged="borderDocument_SizeChanged">
+                <StackPanel>
+                    <WindowsFormsHost x:Name="PdfViewerPanel" >
+                        <tool:UserControl1 x:Name="PdfViewer"/>
+                    </WindowsFormsHost>
+                    <DocumentViewer Name="DocumentViewer"                                     
                                     Background="SteelBlue"
-                                    BorderThickness="0" Margin="0" 
-                                    >
-                </DocumentViewer>
+                                    BorderThickness="0" Margin="0">
+                    </DocumentViewer>
+                </StackPanel>
             </Border>
 
             <!--Partie dédiée a Séquence d'Image-->
             <Border Grid.Column="2" 
                     BorderBrush="White" 
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    Margin="7 0 0 0">
                 <StackPanel>
                     <Grid x:Name="PanelControleEnCours">
                         <Grid.RowDefinitions>

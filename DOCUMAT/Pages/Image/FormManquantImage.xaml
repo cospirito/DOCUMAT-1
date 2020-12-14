@@ -21,13 +21,18 @@
             <StackPanel Orientation="Horizontal" 
                         VerticalAlignment="Center"
                         Margin="0 10">
+                <materialDesign:PackIcon
+                    Kind="Numeric1CircleOutline"
+                    Width="20"
+                    Height="30"
+                    Foreground="White"/>
                 <TextBlock 
                     Foreground="White"
                     FontWeight="Bold"
                     FontFamily="Agency Fb"
                     FontSize="17"
                     VerticalAlignment="Center">
-                    Page N° :
+                    - Page N° :
                 </TextBlock>
                 <TextBox x:Name="tbNumeroImageManquant"                           
                         Foreground="White"
@@ -37,22 +42,22 @@
                         Margin="10 0 0 0"
                         VerticalAlignment="Center"
                         TextChanged="tbNumeroImageManquant_TextChanged"/>
-                <materialDesign:PackIcon
-                    Kind="EditOutline"
-                    Width="20"
-                    Height="30"
-                    Foreground="White"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" 
                         VerticalAlignment="Center"
                         Margin="0 10">
+                <materialDesign:PackIcon
+                    Kind="Numeric2Circle"
+                    Width="20"
+                    Height="30"
+                    Foreground="White"/>
                 <TextBlock 
                     Foreground="White"
                     FontFamily="Agency Fb"
                     FontWeight="Bold"
                     FontSize="17"                         
                     VerticalAlignment="Center">
-                    Debut Sequence N° :
+                    - Debut Sequence N° :
                 </TextBlock>
                 <TextBox x:Name="tbDebutSequenceManquant"                           
                         Foreground="White"
@@ -62,22 +67,22 @@
                         Margin="10 0 0 0"
                         VerticalAlignment="Center"
                         TextChanged="tbDebutSequenceManquant_TextChanged"/>
-                <materialDesign:PackIcon
-                    Kind="EditOutline"
-                    Width="20"
-                    Height="30"
-                    Foreground="White"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" 
                         VerticalAlignment="Center"
                         Margin="0 10">
+                <materialDesign:PackIcon
+                    Kind="Numeric3CircleOutline"
+                    Width="20"
+                    Height="30"
+                    Foreground="White"/>
                 <TextBlock 
                     Foreground="White"
                     FontFamily="Agency Fb"
                     FontWeight="Bold"
                     FontSize="17"                                             
                     VerticalAlignment="Center">
-                    Fin Sequence N° :
+                    - Fin Sequence N° :
                 </TextBlock>
                 <TextBox x:Name="tbFinSequenceManquant"                           
                         Foreground="White"
@@ -87,22 +92,22 @@
                         Margin="10 0 0 0"
                         VerticalAlignment="Center"
                         TextChanged="tbFinSequenceManquant_TextChanged"/>
-                <materialDesign:PackIcon
-                    Kind="EditOutline"
-                    Width="20"
-                    Height="30"
-                    Foreground="White"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" 
                         VerticalAlignment="Center"
                         Margin="0 10">
+                <materialDesign:PackIcon
+                    Kind="Numeric4Circle"
+                    Width="20"
+                    Height="30"
+                    Foreground="White"/>
                 <TextBlock 
                     Foreground="White"
                     FontFamily="Agency Fb"
                     FontWeight="Bold"
                     FontSize="17"                                             
                     VerticalAlignment="Center">
-                    Date Debut Seq. :
+                    - Date Debut Seq. :
                 </TextBlock>
                 <DatePicker x:Name="dtDateSequenceManquant"
                              Foreground="White"
@@ -110,11 +115,6 @@
                              FontFamily="Agency Fb"
                              FontSize="17"                                                     
                              Margin="10 0 0 0"/>
-                <materialDesign:PackIcon
-                    Kind="EditOutline"
-                    Width="20"
-                    Height="30"
-                    Foreground="White"/>
             </StackPanel>
             
             <StackPanel Orientation="Horizontal"

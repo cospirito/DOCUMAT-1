@@ -64,24 +64,50 @@ namespace DOCUMAT.Pages.Image
 			/// </summary>
 			/// <param name="ImagePath"> Chemin de l'image à afficher </param>
 			private void viewImage(string ImagePath)
-			{
-				System.Windows.Controls.Image Image;
-				FixedDocument FixedDocument;
-				FixedPage FixedPage;
-				PageContent PageContent;
+			{				
+				FileInfo fileInfo = new FileInfo(ImagePath);
+				try
+				{
+					if(fileInfo.Exists)
+					{
+						if(fileInfo.Extension.ToUpper() == ".PDF")
+						{
+							PdfViewerPanel.Visibility = Visibility.Visible;
+							DocumentViewer.Visibility = Visibility.Collapsed;
+							PdfViewer.axAcroPDF1.LoadFile(ImagePath);
+						}
+						else
+						{
+							DocumentViewer.Visibility = Visibility.Visible;
+							PdfViewerPanel.Visibility = Visibility.Collapsed;
+							System.Windows.Controls.Image Image;
+							FixedDocument FixedDocument;
+							FixedPage FixedPage;
+							PageContent PageContent;
 
-				ImageSource img = BitmapFrame.Create(new Uri(ImagePath), BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
-				Image = new System.Windows.Controls.Image();
-				Image.Source = img;
-				FixedPage = new FixedPage();
-				FixedPage.Height = img.Height;
-				FixedPage.Width = img.Width;
-				FixedPage.Children.Add(Image);
-				PageContent = new PageContent();
-				PageContent.Child = FixedPage;
-				FixedDocument = new FixedDocument();
-				FixedDocument.Pages.Add(PageContent);
-				DocumentViewer.Document = FixedDocument;
+							ImageSource img = BitmapFrame.Create(new Uri(ImagePath), BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
+							Image = new System.Windows.Controls.Image();
+							Image.Source = img;
+							FixedPage = new FixedPage();
+							FixedPage.Height = img.Height;
+							FixedPage.Width = img.Width;
+							FixedPage.Children.Add(Image);
+							PageContent = new PageContent();
+							PageContent.Child = FixedPage;
+							FixedDocument = new FixedDocument();
+							FixedDocument.Pages.Add(PageContent);
+							DocumentViewer.Document = FixedDocument;
+						}
+					}
+					else
+					{
+						MessageBox.Show("Fichier Introuvable !!!","Fichier Introuvable",MessageBoxButton.OK, MessageBoxImage.Warning);
+					}
+				}
+				catch (Exception ex)
+				{
+					ex.ExceptionCatcher();
+				}
 			}
 
 			/// <summary>
@@ -1770,16 +1796,22 @@ namespace DOCUMAT.Pages.Image
             double MyWindowHeight = 900;
             double dgSMaxHeight = 300;
 
-            // Gestion de l'IHM
-            if (this.ActualHeight < MyWindowHeight)
+			// Gestion de l'IHM
+			if (this.ActualHeight < MyWindowHeight)
             {
                 dgSequence.MaxHeight = dgSMaxHeight - (MyWindowHeight - this.ActualHeight);
             }
             else
             {
                 dgSequence.MaxHeight = dgSMaxHeight + (MyWindowHeight - this.ActualHeight);
-            }
-        }
+			}
+
+			// Mettre à Jour la taille de la visionneuse
+			DocumentViewer.Height = borderDocument.ActualHeight;
+			PdfViewer.axAcroPDF1.Height = (int)borderDocument.ActualHeight;
+			PdfViewerPanel.Width = borderDocument.ActualWidth;
+			PdfViewer.axAcroPDF1.Width = (int)borderDocument.ActualWidth;
+		}
 
         private void BtnGenererAutoRefs_Click(object sender, RoutedEventArgs e)
         {
@@ -1829,5 +1861,12 @@ namespace DOCUMAT.Pages.Image
                 }
 			}
 		}
+
+        private void GridSplitter_SizeChanged(object sender, SizeChangedEventArgs e)
+		{
+            // Mettre à Jour la taille de la visionneuse
+            PdfViewerPanel.Width = borderDocument.ActualWidth;
+            PdfViewer.axAcroPDF1.Width = (int)PdfViewerPanel.Width;
+        }
     }
 }

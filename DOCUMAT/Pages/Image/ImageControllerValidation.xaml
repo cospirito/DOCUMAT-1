@@ -6,7 +6,7 @@
         xmlns:local1="clr-namespace:DOCUMAT.Converter"
         xmlns:local="clr-namespace:DOCUMAT.Converter"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
-        xmlns:id="http://schemas.microsoft.com/expression/2010/drawing"
+        xmlns:id="http://schemas.microsoft.com/expression/2010/drawing" xmlns:tool="clr-namespace:DOCUMAT"
         mc:Ignorable="d"
         Title="Controle Validation"    
         WindowState="Maximized"
@@ -201,7 +201,8 @@
             <!--Partie dédier à l'aborescence-->
             <Border Grid.Column="0" 
                     BorderBrush="White" 
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    Margin="0 0 7 0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
@@ -255,19 +256,24 @@
                     BorderThickness="2" 
                     BorderBrush="white" 
                     Margin="0"
-                    x:Name="borderDocument">
-                <DocumentViewer Name="DocumentViewer"                                  
+                    x:Name="borderDocument"
+                    SizeChanged="borderDocument_SizeChanged">
+                <StackPanel>
+                    <WindowsFormsHost x:Name="PdfViewerPanel" >
+                        <tool:UserControl1 x:Name="PdfViewer"/>
+                    </WindowsFormsHost>
+                    <DocumentViewer Name="DocumentViewer"                                     
                                     Background="SteelBlue"
-                                    BorderThickness="0" Margin="0" 
-                                    >
-                </DocumentViewer>
+                                    BorderThickness="0" Margin="0">
+                    </DocumentViewer>
+                </StackPanel>
             </Border>
 
             <!--Partie dédiée a Séquence d'Image-->
             <Border Grid.Column="2" 
                     BorderBrush="White" 
                     BorderThickness="1" 
-                    Margin="0">
+                    Margin="7 0 0 0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="35"></RowDefinition>

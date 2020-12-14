@@ -1,5 +1,4 @@
-﻿using DOCUMAT.Migrations;
-using DOCUMAT.Models;
+﻿using DOCUMAT.Models;
 using DOCUMAT.ViewModels;
 using Microsoft.Win32;
 using System;
@@ -9,7 +8,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Markup;
 
 namespace DOCUMAT.Pages.Versement
@@ -217,7 +215,7 @@ namespace DOCUMAT.Pages.Versement
                     MessageBox.Show("Veuillez sélectionner le bordereau de Versement !!!", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
                     OpenFileDialog open = new OpenFileDialog();
                     //open.Filter = "JPEG|*.jpg|PNG|*.png|TIF|*.tif";
-                    open.Filter = "Fichier image |*.jpg;*.png;*.tif";
+                    open.Filter = "Fichier PDF |*.pdf";
                     open.Multiselect = false;
 
                     if (open.ShowDialog() == true)
@@ -245,7 +243,9 @@ namespace DOCUMAT.Pages.Versement
 
                         // Vérification de l'unicité du numero de versement 
                         if (versementView.context.Versement.Any(v => v.NumeroVers == numeroVers && v.LivraisonID == (int)cbLivraison.SelectedValue))
+                        {
                             throw new Exception("Ce numero de versement est déja utilisé !!!");
+                        }
 
                         DossierService = nomDossierRacine + @"/" + ServiceViewParent.Service.CheminDossier;
                         if (!Directory.Exists(DossierService))
@@ -266,7 +266,7 @@ namespace DOCUMAT.Pages.Versement
                         }
 
                         // Copy du bordereau dans le dossier du service
-                        string newFile = "BORDEREAU_" + ServiceViewParent.Service.Nom + "_L" + cbLivraison.Text + "_V" + numeroVers + ".jpg";
+                        string newFile = "BORDEREAU_" + ServiceViewParent.Service.Nom + "_L" + cbLivraison.Text + "_V" + numeroVers + ".pdf";
                         string newFilePath = DossierService + @"\" + newFile;
                         if(File.Exists(newFilePath))
                         {

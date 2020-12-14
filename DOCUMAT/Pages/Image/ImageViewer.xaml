@@ -7,6 +7,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DOCUMAT.Converter"  
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"            
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        xmlns:tool="clr-namespace:DOCUMAT"
         mc:Ignorable="d"
         Title="Indexation" 
         WindowState="Maximized"
@@ -20,7 +22,6 @@
         GotFocus="Window_GotFocus"
         Background="SteelBlue" 
         SizeChanged="Window_SizeChanged">
-
     <Window.Resources>
         <local:StringToImageSourceConverter x:Key="ImageConverter"/>
         <local:DateConverter x:Key="DateConverter"/>
@@ -189,7 +190,7 @@
             <GridSplitter Grid.Column ="0" 
                           Background="White" 
                           Width="7"
-                          HorizontalAlignment="Right" 
+                          HorizontalAlignment="Right"                          
                           VerticalAlignment="Stretch"/>
             <GridSplitter Grid.Column ="2" 
                           Background="White" 
@@ -199,7 +200,9 @@
             <!--Partie dédier à l'aborescence-->
             <Border Grid.Column="0" 
                     BorderBrush="White" 
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    Margin="0 0 7 0"
+                    SizeChanged="GridSplitter_SizeChanged">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
@@ -254,18 +257,25 @@
                     BorderThickness="2" 
                     BorderBrush="white" 
                     Margin="0"
-                    x:Name="borderDocument">
-                <DocumentViewer Name="DocumentViewer"                                  
+                    x:Name="borderDocument"
+                    SizeChanged="GridSplitter_SizeChanged">
+                <StackPanel>
+                    <WindowsFormsHost x:Name="PdfViewerPanel" >
+                        <tool:UserControl1 x:Name="PdfViewer"/>
+                    </WindowsFormsHost>
+                    <DocumentViewer Name="DocumentViewer"                                     
                                     Background="SteelBlue"
-                                    BorderThickness="0" Margin="0" 
-                                    >
-                </DocumentViewer>
+                                    BorderThickness="0" Margin="0">
+                    </DocumentViewer>
+                </StackPanel>
             </Border>
 
             <!--Partie dédiée a Séquence d'Image-->
             <Border Grid.Column="2"
                     BorderBrush="White"
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    Margin="7 0 0 0"
+                    SizeChanged="GridSplitter_SizeChanged">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="35"></RowDefinition>

@@ -17,6 +17,7 @@ namespace DOCUMAT.Models
         public string Code { get; set; }
         [Required(ErrorMessage = "Le champ Nom du service est requis")]
         public string Nom { get; set; }
+        public string NomComplet { get; set; }
         public string Description { get; set; }
         public string NomChefDeService { get; set; }
         public string PrenomChefDeService { get; set; }

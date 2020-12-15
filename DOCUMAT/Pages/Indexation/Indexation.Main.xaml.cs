@@ -53,7 +53,7 @@ namespace DOCUMAT.Pages.Indexation
             InitializeComponent();
         }
 
-        public Indexation(Models.Agent user ):this()
+        public Indexation(Models.Agent user):this()
         {
             Utilisateur = user;
         }

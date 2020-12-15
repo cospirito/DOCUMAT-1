@@ -297,8 +297,8 @@
                             VerticalAlignment="Top"
                             Margin="30 0 0 0">
                         <Border BorderBrush="White" 
-                      BorderThickness="1 0 1 1"
-                      materialDesign:ScrollBarAssist.ButtonsVisibility="Visible">
+                                BorderThickness="1 0 1 1"
+                                materialDesign:ScrollBarAssist.ButtonsVisibility="Visible">
                             <StackPanel Width="300">
                             <StackPanel Background="DarkSlateGray" 
                                         VerticalAlignment="Center">
@@ -361,10 +361,11 @@
                                     <StackPanel Orientation="Horizontal" 
                                     VerticalAlignment="Center" 
                                     HorizontalAlignment="Center">
-                                        <materialDesign:PackIcon Width="20" Height="20" Kind="CheckAll" 
+                                        <materialDesign:PackIcon 
+                                                     Width="20" Height="20" Kind="CheckAll" 
                                                      VerticalAlignment="Center"/>
                                         <TextBlock VerticalAlignment="Center"
-                                       Margin="10 0"> ENREGISTRER</TextBlock>
+                                       Margin="10 0"> ENREGISTRER </TextBlock>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>

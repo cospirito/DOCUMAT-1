@@ -29,19 +29,19 @@ namespace DOCUMAT.Pages.Dispatching
                 if (cbChoixStatut.SelectedIndex == 0)
                 {
                     RegistreView registreView = new RegistreView();
-                    dgRegistre.ItemsSource = registreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
+                    dgRegistre.ItemsSource = RegistreView.GetRowOrder(registreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true, (int)Enumeration.Registre.SCANNE).ToList());
                 }
                 else if (cbChoixStatut.SelectedIndex == 1)
                 {
                     //Remplissage de la list de registre
                     RegistreView registreView = new RegistreView();
-                    dgRegistre.ItemsSource = registreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, false).Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
+                    dgRegistre.ItemsSource = RegistreView.GetRowOrder(registreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, false, (int)Enumeration.Registre.SCANNE).ToList());
                 }
                 else
                 {
                     //Remplissage de la list de registre
                     RegistreView registreView = new RegistreView();
-                    dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE);
+                    dgRegistre.ItemsSource = RegistreView.GetRowOrder(registreView.GetViewsListByStatus((int)Enumeration.Registre.SCANNE).ToList());
                 }
             }
             catch (Exception ex)
@@ -67,11 +67,6 @@ namespace DOCUMAT.Pages.Dispatching
         
         private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            //Définition de la colonne des numéros d'odre
-            // En plus il faut que EnableRowVirtualization="False"
-            RegistreView view = (RegistreView)e.Row.Item;
-            view.NumeroOrdre = e.Row.GetIndex() + 1;
-            e.Row.Item = view;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -256,27 +251,33 @@ namespace DOCUMAT.Pages.Dispatching
                 if (TbRechercher.Text != "")
                 {
                     RegistreView RegistreView = new RegistreView();
-                    List<RegistreView> registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true).ToList();
+                    List<RegistreView> registreViews = RegistreView.GetRowOrder(RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true, (int)Enumeration.Registre.SCANNE).ToList());
 
                     if (cbChoixStatut.SelectedIndex == 0)
-                        registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true).ToList();
+                    {
+                        registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, true, (int)Enumeration.Registre.SCANNE).ToList();
+                    }
                     else if (cbChoixStatut.SelectedIndex == 1)
-                        registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, false).ToList();
+                    {
+                        registreViews = RegistreView.GetViewsListByTraite((int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, false, (int)Enumeration.Registre.SCANNE).ToList();
+                    }
                     else
-                        registreViews = RegistreView.GetViewsList().ToList();
+                    {
+                        registreViews = RegistreView.GetViewsListByStatus((int)Enumeration.Registre.SCANNE).ToList();
+                    }
 
                     switch (cbChoixRecherche.SelectedIndex)
                     {
                         case 0:
                             // Récupération des registre par code registre
-                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE && r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            dgRegistre.ItemsSource = RegistreView.GetRowOrder(registreViews.Where(r => r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList());
                             break;
                         case 1:
                             // Récupération des registre par service
                             List<Models.Service> Services1 = RegistreView.context.Service.ToList();
                             List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
                             List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
-                            List<RegistreView> registreViews1 = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
+                            List<RegistreView> registreViews1 = registreViews.ToList();
 
                             var jointure1 = from r in registreViews1
                                             join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
@@ -286,7 +287,7 @@ namespace DOCUMAT.Pages.Dispatching
                                             join s in Services1 on l.ServiceID equals s.ServiceID
                                             where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
                                             select r;
-                            dgRegistre.ItemsSource = jointure1;
+                            dgRegistre.ItemsSource = RegistreView.GetRowOrder(jointure1.ToList());
                             break;
                         case 2:
                             // Récupération des registre par service
@@ -294,7 +295,7 @@ namespace DOCUMAT.Pages.Dispatching
                             List<Models.Service> Services2 = RegistreView.context.Service.ToList();
                             List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
                             List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
-                            List<RegistreView> registreViews2 = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
+                            List<RegistreView> registreViews2 = registreViews.ToList();
 
                             var jointure2 = from r in registreViews2
                                             join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
@@ -306,11 +307,11 @@ namespace DOCUMAT.Pages.Dispatching
                                             join rg in Region2 on s.RegionID equals rg.RegionID
                                             where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
                                             select r;
-                            dgRegistre.ItemsSource = jointure2;
+                            dgRegistre.ItemsSource = RegistreView.GetRowOrder(jointure2.ToList());
                             break;
                         case 3:
                             // Récupération des registre par code registre
-                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE && r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            dgRegistre.ItemsSource = RegistreView.GetRowOrder(registreViews.Where(r => r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList());
                             break;
                         default:
                             RefreshRegistre();

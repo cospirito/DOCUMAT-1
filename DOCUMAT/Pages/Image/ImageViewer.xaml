@@ -548,6 +548,7 @@
                                                       materialDesign:HintAssist.Hint="MOTIF D'INSTANCE">
                                         <ComboBoxItem Content="Image Illisible" IsSelected="true"/>
                                         <ComboBoxItem Content="Ecriture Illisible"/>
+                                        <ComboBoxItem Content="Mauvaise Image"/>
                                         <ComboBoxItem Content="Autre (à préciser)"/>
                                     </ComboBox>
                                     <TextBox x:Name="tbObservationInstance"                                                                                                                           

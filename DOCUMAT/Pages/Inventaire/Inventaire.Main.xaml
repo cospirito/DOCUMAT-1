@@ -54,6 +54,14 @@
                       Name="EditRegistre"
                       Icon="{materialDesign:PackIcon Kind=Edit}"
                       Click="EditRegistre_Click" />
+            <MenuItem Header="Ouvrir le Dossier de Scan"   
+                      Name="OuvrirDossierScan"
+                      Icon="{materialDesign:PackIcon Kind=FolderOpen}"
+                      Click="OuvrirDossierScan_Click"/>
+            <MenuItem Header="Imprimer le Code Barre"   
+                      Name="ImprimerQrCode"
+                      Icon="{materialDesign:PackIcon Kind=Printer}"
+                      Click="ImprimerQrCode_Click"/>
             <MenuItem Header="Supprimer"
                       Name="DelRegistre"
                       Icon="{materialDesign:PackIcon Kind=Remove}"
@@ -76,31 +84,31 @@
                 Foreground="White"
                 materialDesign:HintAssist.Hint="REGION"
                 materialDesign:HintAssist.HelperText="REGION"                                                                                                      
-                SelectedIndex="0"
                 DisplayMemberPath="Region.Nom"
                 SelectedValuePath="Region.RegionID"
                 SelectionChanged="cbRegion_SelectionChanged"
-                Margin="20"/>
+                Margin="20">
+            </ComboBox>
 
             <ComboBox x:Name="cbService" 
                         Foreground="White"
-                        SelectedIndex="0"
                         materialDesign:HintAssist.Hint="SERVICE VERSANT"
                         materialDesign:HintAssist.HelperText="SERVICE VERSANT"                                                                                                      
-                        DisplayMemberPath="Service.Nom"
+                        DisplayMemberPath="Service.NomComplet"
                         SelectedValuePath="Service.ServiceID"
                         SelectionChanged="cbService_SelectionChanged"
-                        Margin="20"/>
+                        Margin="20">
+            </ComboBox>
 
             <ComboBox x:Name="cbVersement" 
                         Foreground="White"
-                        SelectedIndex="0"
                         materialDesign:HintAssist.Hint="NUMERO DE VERSEMENT"
                         materialDesign:HintAssist.HelperText="NUMERO DE VERSEMENT"                                                                                                      
                         DisplayMemberPath="Versement.NumeroVers"
                         SelectedValuePath="Versement.VersementID"
                         SelectionChanged="cbVersement_SelectionChanged"
-                        Margin="20"/>
+                        Margin="20">
+            </ComboBox>
 
             <CheckBox x:Name="AfficherRegistre"
                       Content="Afficher les Registres"
@@ -139,6 +147,7 @@
                     </StackPanel>
                 </Button>
             </StackPanel>
+            
             <!--GridView des Versements-->
             <Grid Margin="20 20 20 0" 
                   x:Name="gridViewPanelVersement" 
@@ -190,7 +199,7 @@
                         <DataGridTextColumn Header="Numéro Versement" Binding="{Binding Versement.NumeroVers}" />
                         <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />
                         <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Registre.Numero}" />
-                        <DataGridTextColumn Header="Service Versant" Binding="{Binding  ServiceVersant.Nom}" />
+                        <DataGridTextColumn Header="Service Versant" Binding="{Binding  ServiceVersant.NomComplet}" />
                         <DataGridTextColumn Header="Region" Binding="{Binding  ServiceVersant.Region.Nom}" />
                         <DataGridTextColumn Header="pages attendues " Binding="{Binding Registre.NombrePage}" />
                         <DataGridTextColumn Header="pages scannées" Binding="{Binding NombreImageScan}" />

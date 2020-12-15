@@ -146,7 +146,7 @@
                         <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
                         <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />
                         <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Registre.Numero}" />
-                        <DataGridTextColumn Header="Service versant" Binding="{Binding  ServiceVersant.Nom}" />
+                        <DataGridTextColumn Header="Service versant" Binding="{Binding  ServiceVersant.NomComplet}" />
                         <DataGridTextColumn Header="Region" Binding="{Binding  ServiceVersant.Region.Nom}" />
                         <DataGridTextColumn Header="pages attendues " Binding="{Binding Registre.NombrePage}" />
                         <DataGridTextColumn Header="pages scannées " Binding="{Binding NombreImageScan}" />

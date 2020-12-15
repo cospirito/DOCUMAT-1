@@ -238,6 +238,9 @@ namespace DOCUMAT
             DispatchingCorrection = new Pages.Dispatching.DispatchingCorrection(Utilisateur);
             this.ContenuAdd.Navigate(Accueil);
 
+            // Désactivation de la Préindexation
+            BtnPREINDEXATION.IsEnabled = false;
+
             // Définition du Timer de maintient de session 
             Timer = new System.Timers.Timer() { AutoReset = true, Interval = 1 * 60 * 1000 };
             Timer.Elapsed += Timer_Elapsed;

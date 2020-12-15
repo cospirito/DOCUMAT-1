@@ -121,6 +121,8 @@
                 <Paragraph Margin="15">
                     Code Registre :
                     <TextBlock FontWeight="Bold" 
+                               TextWrapping="Wrap"
+                               MaxWidth="200"
                                x:Name="txtCodeRegistre"/>
                 </Paragraph>
                 <Paragraph Margin="15">
@@ -133,7 +135,9 @@
                 </Paragraph>
                 <Paragraph Margin="15">
                     Type :
-                    <TextBlock FontWeight="Bold" x:Name="txtType"/> / 
+                    <TextBlock FontWeight="Bold" x:Name="txtType"/>
+                </Paragraph>
+                <Paragraph Margin="15">
                     Page :
                     <TextBlock FontWeight="Bold" x:Name="txtNbPageReelle"/>
                 </Paragraph>
@@ -144,13 +148,13 @@
                     <TextBlock FontWeight="Bold" x:Name="txtDateDebutDepot"/>
                 </Paragraph>
                 <Paragraph Margin="15">
-                    Numéro Dépôt Fin :
+                    N° Dépôt Fin :
                     <TextBlock FontWeight="Bold" x:Name="txtNumeroFinDepot"/>
                     Date :
                     <TextBlock FontWeight="Bold" x:Name="txtDateFinDepot"/>
                 </Paragraph>
                 <Paragraph Margin="15">
-                    Chemin Dossier de Scan :
+                    Chemin Scan :
                     <TextBlock FontWeight="Bold" x:Name="txtCheminDossierScan"/>
                 </Paragraph>
                 <Paragraph Margin="15 15 0 0" >

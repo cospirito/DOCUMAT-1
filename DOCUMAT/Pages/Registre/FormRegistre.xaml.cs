@@ -43,7 +43,7 @@ namespace DOCUMAT.Pages.Registre
             tbNumeroVolume.Text = registreView.Registre.Numero.ToString();
             tbObservation.Text = registreView.Registre.Observation;
             Livraison livraison = versementView.context.Livraison.FirstOrDefault(l => l.LivraisonID == versementView.Versement.LivraisonID);
-            tbService.Text = versementView.context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).Nom;
+            tbService.Text = versementView.context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).NomComplet;
             tbVersement.Text = versementView.Versement.NumeroVers.ToString();
             dtDepotDebut.SelectedDate = RegistreViewParent.Registre.DateDepotDebut;
             dtDepotFin.SelectedDate = RegistreViewParent.Registre.DateDepotFin;
@@ -64,7 +64,7 @@ namespace DOCUMAT.Pages.Registre
             WindowsParent = parent;
             Utilisateur = parent.Utilisateur;
             Livraison livraison = versementView.context.Livraison.FirstOrDefault(l=>l.LivraisonID == versementView.Versement.LivraisonID);
-            tbService.Text = versementView.context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).Nom;
+            tbService.Text = versementView.context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).NomComplet;
             tbVersement.Text = versementView.Versement.NumeroVers.ToString();
             dtDepotDebut.SelectedDate = dtDepotFin.SelectedDate = DateTime.Now;           
         }
@@ -263,12 +263,17 @@ namespace DOCUMAT.Pages.Registre
                     // Enregistrement du traitement de l'agent 
                     DocumatContext.AddTraitement(DocumatContext.TbRegistre,registreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
 
-                    MessageBox.Show("Registre Ajouté !!!", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
                     if(WindowsParent != null)
                     {
                         WindowsParent.RefreshRegistre();
                     }
                     this.Close();
+                    MessageBox.Show("Registre Ajouté !!!", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    //Impression du Code Barre
+                    // Affichage de l'impression du code barre
+                    Impression.BordereauRegistre bordereauRegistre = new Impression.BordereauRegistre(registreView.Registre);
+                    bordereauRegistre.Show();
                 }
             }
             catch (Exception ex)

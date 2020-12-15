@@ -85,9 +85,13 @@ namespace DOCUMAT.ViewModels
             List<VersementView> versementViews = GetViewsList();
             VersementView versementView = versementViews.FirstOrDefault(v => v.Versement.VersementID == Id);
             if (versementView != null)
+            {
                 return versementView;
+            }
             else
+            {
                 throw new Exception("Aucun élément trouvé dans la table service n'a l'identifiant mentionné !!!");
+            }
         }
 
         public List<VersementView> GetViewsList()

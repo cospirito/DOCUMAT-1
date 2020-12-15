@@ -61,6 +61,9 @@ namespace DOCUMAT.Pages.Parametre
                         configuration.ConnectionStrings.ConnectionStrings["DOCUMAT"].ConnectionString = tbCheminDB.Text; 
                         configuration.Save();                        
                         ConfigurationManager.RefreshSection("appSettings");
+                        MessageBox.Show("Veuillez redémarrer L'application pour Appliquer les Modifications", "Modification Effectuée !!!", MessageBoxButton.OK, MessageBoxImage.Information);
+                        System.Windows.Forms.Application.Restart();
+                        System.Windows.Application.Current.Shutdown();
                         this.Close();
                     }
                     catch (System.Exception ex)

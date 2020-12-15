@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
@@ -46,7 +44,6 @@ namespace DOCUMAT
 			}
 
 		}
-
 
 		/// <summary>
 		///  Convertir une image de type System.Drawing.Image en System.Controls.Image

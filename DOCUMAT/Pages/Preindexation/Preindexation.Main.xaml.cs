@@ -120,6 +120,7 @@ namespace DOCUMAT.Pages.Preindexation
                                         dgFeuillet.ItemsSource = imageViews;
                                         if (imageViews.Count() > 0)
                                         {
+                                            dgFeuillet.ScrollIntoView(imageViews.Last());
                                             LastImage = imageViews.OrderByDescending(i => i.Image.ImageID).FirstOrDefault().Image;
                                             tbNumeroFeuillet.Text = (LastImage.NumeroPage + 1) + "";
                                             tbNumeroOrdreDebut.Text = (LastImage.FinSequence + 1).ToString();
@@ -145,6 +146,9 @@ namespace DOCUMAT.Pages.Preindexation
                                         dgRegistre.Visibility = Visibility.Collapsed;
                                         PanelFeuillet.Visibility = Visibility.Visible;
                                         PanelRecherche.Visibility = Visibility.Collapsed;
+
+                                        // Nombre de Page Enregistrée sur Total déclarer 
+                                        titreFormFeuillet.Text = $"PAGE : {imageViews.Count()}/{registre.NombrePage}";
                                     }
                                     else
                                     {
@@ -336,6 +340,8 @@ namespace DOCUMAT.Pages.Preindexation
                         tbNumeroOrdreFin.Text = "";
                         tbNumeroOrdreSequence.Text = "";
                         tbNombreReferences.Text = "";
+                        // Nombre de Page Enregistrée sur Total déclarer 
+                        titreFormFeuillet.Text = $"PAGE : {imageViews.Count()}/{registre.NombrePage}";
 
                         // Doublé le Nombre de Page pour tout le processus 
                         if (registre.NombrePage == imageView.GetSimpleViewsList(registre).Count)
@@ -393,7 +399,10 @@ namespace DOCUMAT.Pages.Preindexation
                         tbNumeroOrdreDebut.Text = (LastImage.FinSequence + 1).ToString();
                     }
 
-                    if(registre.NombrePage != imageViews.Count())
+                    // Nombre de Page Enregistrée sur Total déclarer 
+                    titreFormFeuillet.Text = $"PAGE : {imageViews.Count()}/{registre.NombrePage}";
+
+                    if (registre.NombrePage != imageViews.Count())
                     {
                         MarquerPreindexer.Visibility = Visibility.Collapsed;
                         btnSaveFeuillet.IsEnabled = true;

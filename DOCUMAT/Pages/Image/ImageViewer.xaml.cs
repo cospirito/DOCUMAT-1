@@ -193,14 +193,14 @@ namespace DOCUMAT.Pages.Image
 					int numeroPage = 0;
 					if (currentImage == -1)
 					{						
-						if (item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower() == "PAGE DE GARDE".ToLower())
+						if (item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower())
 						{
 							item.FontWeight = FontWeights.Bold;
 						}
 					}
 					else if (currentImage == 0)
 					{						
-						if (item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower() == "PAGE D'OUVERTURE".ToLower())
+						if (item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
 						{
 							item.FontWeight = FontWeights.Bold;
 						}
@@ -259,14 +259,14 @@ namespace DOCUMAT.Pages.Image
 
 					if(imageView1.Image.NumeroPage == -1)
 					{
-						tbxNomPage.Text = "PAGE DE GARDE";
+						tbxNomPage.Text = ConfigurationManager.AppSettings["Nom_Page_Garde"];
 						tbxNumeroPage.Text = "";
 						tbxDebSeq.Text = "";
 						tbxFinSeq.Text = "";
 					}
 					else if(imageView1.Image.NumeroPage == 0)
 					{
-						tbxNomPage.Text = "PAGE D'OUVERTURE";
+						tbxNomPage.Text = ConfigurationManager.AppSettings["Nom_Page_Ouverture"];
 						tbxNumeroPage.Text = "";
 						tbxDebSeq.Text = "";
 						tbxFinSeq.Text = "";
@@ -471,7 +471,7 @@ namespace DOCUMAT.Pages.Image
 					currentImage = -1;
 					imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == -1);
 
-					tbxNomPage.Text = "PAGE DE GARDE";
+					tbxNomPage.Text = ConfigurationManager.AppSettings["Nom_Page_Garde"];
 					tbxNumeroPage.Text = "";
 					tbNumeroOrdreSequence.Text = "";
 					tbDateSequence.Text = "";
@@ -487,7 +487,7 @@ namespace DOCUMAT.Pages.Image
 					currentImage = 0;
 					imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == 0);				
 
-					tbxNomPage.Text = "PAGE D'OUVERTURE";
+					tbxNomPage.Text = ConfigurationManager.AppSettings["Nom_Page_Ouverture"];
 					tbxNumeroPage.Text = "";
 					tbNumeroOrdreSequence.Text = "";
 					tbDateSequence.Text = "";
@@ -528,7 +528,7 @@ namespace DOCUMAT.Pages.Image
                 {
 					fileInfos1.Add(new FileInfo(file));
                 }
-				fileInfos1 = fileInfos1.Where(f => f.Extension.ToLower() == ".tif" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".png").ToList();
+				fileInfos1 = fileInfos1.Where(f => f.Extension.ToLower() == ".tif" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".pdf").ToList();
 
 				// Si le nombre de Page Scannée est différent du nombre de page attendu, signal
 				// Le Plus Trois est composée : de la page de garde + la page d'ouverture 
@@ -536,7 +536,8 @@ namespace DOCUMAT.Pages.Image
                 {
 					MessageBox.Show("Attention le nombre de Page Scannée est différents du nombre de page attendu : " +
 									"\n Nombre pages scannées: " + fileInfos1.Count() +
-									"\n Nombre pages attendues : " + (RegistreViewParent.Registre.NombrePage + 2),"AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Asterisk) ;
+									"\n Nombre pages attendues : " + (RegistreViewParent.Registre.NombrePage + 2) +
+									"\n Contacter le Superviseur Pour régler le Problème","AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Asterisk) ;
                 }
 
 				// Affichage et configuration de la TreeView
@@ -600,8 +601,8 @@ namespace DOCUMAT.Pages.Image
 				//var fileSorted = files.OrderBy(f => f.ToLower());
 				foreach (var file in fileSorted)
 				{
-					if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE DE GARDE".ToLower()
-						&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != "PAGE D'OUVERTURE".ToLower())
+					if (GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != ConfigurationManager.AppSettings["Nom_Page_Garde"].ToLower()
+						&& GetFileFolderName(file.Value).Remove(GetFileFolderName(file.Value).Length - 4).ToLower() != ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToLower())
 					{
 						var fileTree = new TreeViewItem();
 						fileTree.Header = GetFileFolderName(file.Value);
@@ -625,7 +626,7 @@ namespace DOCUMAT.Pages.Image
 					{
 						Models.Image pageGarde = new Models.Image();
 						pageGarde.NumeroPage = -1;
-						pageGarde.NomPage = "PAGE DE GARDE";
+						pageGarde.NomPage = ConfigurationManager.AppSettings["Nom_Page_Garde"];
 						var file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == pageGarde.NomPage);
 
 						//On vérifie que le fichier existe 
@@ -663,7 +664,7 @@ namespace DOCUMAT.Pages.Image
 					{
 						Models.Image pageOuverture = new Models.Image();
 						pageOuverture.NumeroPage = 0;
-						pageOuverture.NomPage = "PAGE D'OUVERTURE";
+						pageOuverture.NomPage = ConfigurationManager.AppSettings["Nom_Page_Ouverture"];
 						var file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == pageOuverture.NomPage);
 
 						//On vérifie que le fichier existe 
@@ -1417,10 +1418,14 @@ namespace DOCUMAT.Pages.Image
 					case 1 :
 						typeInstance = "Ecriture Illisible";
 						break;
+					case 2:
+						typeInstance = "Mauvaise Image";
+						break;
 					default:
 						typeInstance = "Autre";
 						break;
 				}
+
 
 				using(var ct = new DocumatContext())
 				{
@@ -1516,7 +1521,7 @@ namespace DOCUMAT.Pages.Image
 
 		private void tbDateSequence_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
 		{
-			if (e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.Add)
+			if (e.Key == System.Windows.Input.Key.Up)
 			{
 				DateTime date;
 				if (DateTime.TryParse(tbDateSequence.Text, out date))
@@ -1524,7 +1529,7 @@ namespace DOCUMAT.Pages.Image
 					tbDateSequence.Text = date.AddDays(1).ToShortDateString();
 				}
 			}
-			else if (e.Key == System.Windows.Input.Key.Down || e.Key == System.Windows.Input.Key.Subtract)
+			else if (e.Key == System.Windows.Input.Key.Down)
 			{				
 				DateTime date;
 				if (DateTime.TryParse(tbDateSequence.Text, out date))
@@ -1646,7 +1651,7 @@ namespace DOCUMAT.Pages.Image
 					tbDateSequence.Focus();
 				}
 			}
-			else if(e.Key == System.Windows.Input.Key.Up || e.Key == System.Windows.Input.Key.Add)
+			else if(e.Key == System.Windows.Input.Key.Up)
 			{
 				Regex regC = new Regex("^[0-9]{1,}/[\\w*]{1,}$");			
 				if (regC.IsMatch(tbReference.Text))
@@ -1670,7 +1675,7 @@ namespace DOCUMAT.Pages.Image
 					}
 				}
 			}
-			else if(e.Key == System.Windows.Input.Key.Down || e.Key == System.Windows.Input.Key.Subtract)
+			else if(e.Key == System.Windows.Input.Key.Down)
 			{
 				tbListeReferences.Text = "";
 				tbListeReferences.ToolTip =  "";

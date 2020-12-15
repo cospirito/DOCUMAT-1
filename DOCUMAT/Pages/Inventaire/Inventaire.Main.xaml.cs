@@ -1,6 +1,8 @@
 ﻿using DOCUMAT.Models;
 using DOCUMAT.Pages.Registre;
 using DOCUMAT.ViewModels;
+using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -27,7 +29,7 @@ namespace DOCUMAT.Pages.Inventaire
             {
                 VersementView versementView = new VersementView();
                 dgVersement.ItemsSource = cbVersement.ItemsSource = versementView.GetVersViewsByService((int)cbService.SelectedValue);
-                cbVersement.SelectedIndex = 0;
+                //cbVersement.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
@@ -43,7 +45,7 @@ namespace DOCUMAT.Pages.Inventaire
                 //Remplissage de la list de registre
                 RegistreView RegistreView = new RegistreView();
                 RegistreView.Versement = ((VersementView)cbVersement.SelectedItem).Versement;
-                dgRegistre.ItemsSource = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE);
+                dgRegistre.ItemsSource = RegistreView.GetRowOrder(RegistreView.GetViewsListByStatus((int)Enumeration.Registre.CREE).ToList());
             }
             catch (Exception ex)
             {
@@ -64,7 +66,7 @@ namespace DOCUMAT.Pages.Inventaire
             ContextMenu cmRegistre = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cmRegistre;
             MenuItem menuItemVersement = (MenuItem)cmVersement.Items.GetItemAt(4);
-            MenuItem menuItemRegistre = (MenuItem)cmRegistre.Items.GetItemAt(2);
+            MenuItem menuItemRegistre = (MenuItem)cmRegistre.Items.GetItemAt(4);
 
             if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR)
             {
@@ -88,11 +90,11 @@ namespace DOCUMAT.Pages.Inventaire
 
         private void cbRegion_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.Count != 0 )
+            if(e.AddedItems.Count != 0)
             {
                 ServiceView serviceView = new ServiceView();
                 cbService.ItemsSource = serviceView.GetViewsList((int)cbRegion.SelectedValue);
-                cbService.SelectedIndex = 0;
+                //cbService.SelectedIndex = 0;
             }           
         }
 
@@ -102,7 +104,7 @@ namespace DOCUMAT.Pages.Inventaire
             {
                 VersementView versementView = new VersementView();
                 dgVersement.ItemsSource = cbVersement.ItemsSource = versementView.GetVersViewsByService((int)cbService.SelectedValue);
-                cbVersement.SelectedIndex = 0;
+                //cbVersement.SelectedIndex = 0;
             }
             else
             {
@@ -364,6 +366,71 @@ namespace DOCUMAT.Pages.Inventaire
         {
             AfficherRegistre.IsChecked = true;
             AfficherRegistre_Click(null, null);
+        }
+
+        private void ImprimerQrCode_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (dgRegistre.SelectedItems.Count == 1)
+                {
+                    if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                    {
+                        // Affichage de l'impression du code barre
+                        Impression.BordereauRegistre bordereauRegistre = new Impression.BordereauRegistre(((RegistreView)dgRegistre.SelectedItem).Registre);
+                        bordereauRegistre.Show();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Vous n'avez pas les privilège nécèssaire pour effectuér cette opération !!!","AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
+        private void OuvrirDossierScan_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (dgRegistre.SelectedItems.Count == 1)
+                {
+                    if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                    {
+                        RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
+                        DirectoryInfo RegistreDossier = new DirectoryInfo(Path.Combine(DossierRacine, registreView.Registre.CheminDossier));
+                        OpenFileDialog openFileDialog = new OpenFileDialog();
+                        var dlg = new CommonOpenFileDialog();
+                        dlg.Title = "Dossier de Scan du Registre : " + registreView.Registre.QrCode;
+                        dlg.IsFolderPicker = false;
+                        //dlg.InitialDirectory = currentDirectory;
+                        dlg.AddToMostRecentlyUsedList = false;
+                        dlg.AllowNonFileSystemItems = false;
+                        //dlg.DefaultDirectory = currentDirectory;
+                        //dlg.FileOk += Dlg_FileOk;
+                        dlg.EnsureFileExists = true;
+                        dlg.EnsurePathExists = true;
+                        dlg.EnsureReadOnly = false;
+                        dlg.EnsureValidNames = true;
+                        dlg.Multiselect = true;
+                        dlg.ShowPlacesList = true;
+                        dlg.InitialDirectory = RegistreDossier.FullName;
+
+                        if (dlg.ShowDialog() == CommonFileDialogResult.Ok) { }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Vous n'avez pas les privilège nécèssaire pour effectuér cette opération !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
     }
 }

@@ -1,12 +1,10 @@
-﻿using iText.Kernel.Pdf;
+﻿using DOCUMAT.Models;
 using System;
 using System.Configuration;
-using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Xps;
 using System.Windows.Xps.Packaging;
@@ -86,17 +84,25 @@ namespace DOCUMAT.Impression
                 // Remplissage des informations sur le Registre
                 txtTitreRegistre.Text = "REGISTRE N° : " + Registre.Numero;
                 txtCodeRegistre.Text = Registre.QrCode;
-                txtRegion.Text = Registre.Versement.Livraison.Service.Region.Nom.ToString();
-                txtService.Text = Registre.Versement.Livraison.Service.Nom.ToString();
+                using(var ct = new DocumatContext())
+                {
+                // Récupération du Service 
+                    var Versement = ct.Versement.FirstOrDefault(v => v.VersementID == Registre.VersementID);
+                    var Livraison = ct.Livraison.FirstOrDefault(l=>l.LivraisonID == Versement.LivraisonID);
+                    var Service = ct.Service.FirstOrDefault(s => s.ServiceID == Livraison.ServiceID);
+                    txtService.Text = Service.NomComplet;
+                    var Region = ct.Region.FirstOrDefault(re => re.RegionID == Service.RegionID);
+                    txtRegion.Text = Region.Nom;
+                }
                 txtType.Text = Registre.Type;
                 txtNumeroDebutDepot.Text = Registre.NumeroDepotDebut.ToString();
                 txtNumeroFinDepot.Text = Registre.NumeroDepotFin.ToString();
-                txtNbPageReelle.Text = Registre.NombrePage + " / " + Registre.NombrePageDeclaree;
+                txtNbPageReelle.Text = Registre.NombrePage + "(pages) / " + Registre.NombrePageDeclaree + "(feuilles)";
                 txtDateDebutDepot.Text = Registre.DateDepotDebut.ToShortDateString();
                 txtDateFinDepot.Text = Registre.DateDepotFin.ToShortDateString();
                 txtCheminDossierScan.Text = CheminService;
 
-                string BordereauRegistre = System.IO.Path.Combine(DossierRacine, Registre.CheminDossier, $"Bordereau{Registre.QrCode}.xps");
+                string BordereauRegistre = System.IO.Path.Combine(DossierRacine,Registre.CheminDossier, $"Bordereau{Registre.QrCode}.xps");
                 var xpsDocument = new XpsDocument(BordereauRegistre, FileAccess.ReadWrite);
 
                 try

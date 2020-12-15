@@ -21,7 +21,7 @@ namespace DOCUMAT.Pages.Scannerisation
     {
         Models.Agent Utilisateur;
         string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
-        string FileLogName = ConfigurationManager.AppSettings["Nom_Log_Scan"];
+        string FileLogName = "";// Sera le Nom du Registre lui même
 
         #region FONCTIONS
         public void RefreshRegistre()
@@ -32,13 +32,13 @@ namespace DOCUMAT.Pages.Scannerisation
                 {
                     //Remplissage de la list de registre
                     RegistreView registreView = new RegistreView();
-                    dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PREINDEXE);
+                    dgRegistre.ItemsSource = RegistreView.GetRowOrder(registreView.GetViewsListByStatus((int)Enumeration.Registre.CREE));
                 }
                 else
                 {
                     //Remplissage de la list de registre
                     RegistreView registreView = new RegistreView();
-                    List<RegistreView> registreViews = registreView.GetViewsListByScanAgent().Where(rgv=>rgv.AgentTraitant.Login.ToLower() == Utilisateur.Login.ToLower()).ToList();
+                    List<RegistreView> registreViews = RegistreView.GetRowOrder(registreView.GetViewsListByScanAgent().Where(rgv=>rgv.AgentTraitant.Login.ToLower() == Utilisateur.Login.ToLower()).ToList());
                     dgRegistre.ItemsSource = registreViews;
                 }
             }
@@ -55,13 +55,26 @@ namespace DOCUMAT.Pages.Scannerisation
             DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(DossierRacine, registreView.Registre.CheminDossier));
             List<FileInfo> filesInfos = directoryInfo.GetFiles().ToList();
             if ((registreView.Registre.NombrePage + 2) == filesInfos.Count(f => f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".jpeg"
-                || f.Extension.ToLower() == ".tif" || f.Extension.ToLower() == ".png"))
+                || f.Extension.ToLower() == ".tif" || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".pdf"))
             {
                 // Vérification que la Page de Garde est Présente 
                 if (filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == ConfigurationManager.AppSettings["Nom_Page_Garde"].ToUpper())
                    == null)
                 {
-                    FileInfo pageInfo = filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == "01".ToUpper());
+                    FileInfo pageInfo = null;
+                    //Recherche de la Page 1
+                    foreach(var file in filesInfos)
+                    {
+                        int NumeroPage = 0;
+                        if(Int32.TryParse(file.Name.Remove(file.Name.Length - file.Extension.Length),out NumeroPage))
+                        {
+                            if(NumeroPage == 1)
+                            {
+                                pageInfo = file;
+                            }
+                        }
+                    }
+
                     if (pageInfo != null)
                     {
                         // Changement du nom -1 en nom de la Page de Garde                                   
@@ -79,7 +92,20 @@ namespace DOCUMAT.Pages.Scannerisation
                 if (filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == ConfigurationManager.AppSettings["Nom_Page_Ouverture"].ToUpper())
                    == null)
                 {
-                    FileInfo pageInfo = filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == "02".ToUpper());
+                    FileInfo pageInfo = null;
+                    //Recherche de la Page 1
+                    foreach (var file in filesInfos)
+                    {
+                        int NumeroPage = 0;
+                        if (Int32.TryParse(file.Name.Remove(file.Name.Length - file.Extension.Length), out NumeroPage))
+                        {
+                            if (NumeroPage == 2)
+                            {
+                                pageInfo = file;
+                            }
+                        }
+                    }
+                    
                     if (pageInfo != null)
                     {
                         // Changement du nom -1 en nom de la Page de Garde                                   
@@ -94,15 +120,40 @@ namespace DOCUMAT.Pages.Scannerisation
                 }
 
                 // Changement des noms des fichiers 
-                // Numéroté les pages de manière consice à partir de 1
+                // Numéroté les pages de manière consice à partir de 1 sachant que le Premier est 3
                 int newNomInt = 1;
                 for (int i = 3; i < filesInfos.Count; i++)
                 {
-                    string newNom = (newNomInt > 9) ? newNomInt.ToString() : $"0{newNomInt}";
+                    string newNom;
+                    if (newNomInt > 9) 
+                    {
+                        if(newNomInt > 99)
+                        {
+                            newNom = $"{newNomInt}";
+                        }
+                        else
+                        {
+                            newNom = $"0{newNomInt}";
+                        }
+                    }
+                    else
+                    {
+                        newNom = $"00{newNomInt}";
+                    }
+                    
                     string nomFile = (i > 9) ? i.ToString() : $"0{i}";
                     foreach (FileInfo fileInfo in filesInfos)
                     {
-                        FileInfo pageInfo = filesInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - f.Extension.Length).ToUpper() == nomFile.ToUpper());
+                        FileInfo pageInfo = null;
+                        int NumeroPage = 0;
+                        if (Int32.TryParse(fileInfo.Name.Remove(fileInfo.Name.Length - fileInfo.Extension.Length), out NumeroPage))
+                        {
+                            if (NumeroPage == i)
+                            {
+                                pageInfo = fileInfo;
+                            }
+                        }
+                        
                         if (pageInfo != null)
                         {
                             if (!File.Exists(Path.Combine(pageInfo.DirectoryName, newNom.ToUpper() + pageInfo.Extension)))
@@ -115,7 +166,8 @@ namespace DOCUMAT.Pages.Scannerisation
                 }
 
                 // Vérification du fichier log de scan 
-                FileInfo logFile = filesInfos.Where(f => f.Name.ToLower() == FileLogName.ToLower()).FirstOrDefault();
+                FileLogName = $"{registreView.Registre.QrCode.ToLower()}.mets";
+                FileInfo logFile = filesInfos.Where(f => f.Name.ToLower() == FileLogName).FirstOrDefault();
                 if (logFile != null)
                 {
                     #region TRAITEMENT DU FICHIER XML DE SCAN 
@@ -130,7 +182,7 @@ namespace DOCUMAT.Pages.Scannerisation
                     XmlNodeList xmlfilesList = xmlDocument.GetElementsByTagName("mets:file");
 
                     // Comparaison entre le Log et la BD
-                    if (xmlfilesList.Count == (registreView.Registre.NombrePage + 2))
+                    if(xmlfilesList.Count == (registreView.Registre.NombrePage + 2))
                     {
                         // Vérification de l'agent de scan 
                         Models.Agent agentScan = registreView.context.Agent.FirstOrDefault(a => a.Login.ToLower() == LoginAgent && a.Affectation == (int)Enumeration.AffectationAgent.SCANNE);
@@ -219,7 +271,7 @@ namespace DOCUMAT.Pages.Scannerisation
                     {
                         //Remplissage de la list de registre
                         RegistreView registreView = new RegistreView();
-                        registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PREINDEXE).ToList();
+                        registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
                     }
                     else
                     {
@@ -249,7 +301,7 @@ namespace DOCUMAT.Pages.Scannerisation
                                             join s in Services1 on l.ServiceID equals s.ServiceID
                                             where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
                                             select r;
-                            dgRegistre.ItemsSource = jointure1;
+                            dgRegistre.ItemsSource = RegistreView.GetRowOrder(jointure1.ToList());
                             break;
                         case 2:
                             // Récupération des registre par service
@@ -269,7 +321,7 @@ namespace DOCUMAT.Pages.Scannerisation
                                             join rg in Region2 on s.RegionID equals rg.RegionID
                                             where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
                                             select r;
-                            dgRegistre.ItemsSource = jointure2;
+                            dgRegistre.ItemsSource = RegistreView.GetRowOrder(jointure2.ToList());
                             break;
                         case 3:
                             // Récupération des registre par code registre
@@ -404,8 +456,8 @@ namespace DOCUMAT.Pages.Scannerisation
                 {
                     RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
                     OpenFileDialog open = new OpenFileDialog();
-                    string extensionLog = FileLogName.Split('.')[1];
-                    open.Filter = "Fichier image et fichier(." + extensionLog + ") |*.jpg;*.png;*.tif;*." + extensionLog + ";";
+                    FileLogName = $"{registreView.Registre.QrCode}.mets";
+                    open.Filter = "Fichiers PDF | *.pdf;*.mets; | Fichiers Images (TIF, PNG, JPG, mets) |*.jpg;*.png;*.tif;*.mets;";
                     open.Multiselect = true;
 
                     if(open.ShowDialog() == true)
@@ -454,10 +506,6 @@ namespace DOCUMAT.Pages.Scannerisation
                 {
                     if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
                     {
-                        // Affichage de l'impression du code barre
-                        //Impression.QrCode PageImp = new Impression.QrCode(((RegistreView)dgRegistre.SelectedItem).Registre);
-                        //PageImp.Show();
-
                         // Affichage de l'impression du code barre
                         Impression.BordereauRegistre bordereauRegistre = new Impression.BordereauRegistre(((RegistreView)dgRegistre.SelectedItem).Registre);
                         bordereauRegistre.Show();

@@ -50,7 +50,7 @@ namespace DOCUMAT.Pages.Versement
             // Remplissage des champs 
             tbNumeroVers.Text = versement.Versement.NumeroVers.ToString();
             dtVers.SelectedDate = versement.Versement.DateVers;
-            tbService.Text = serviceView.Service.Nom;
+            tbService.Text = serviceView.Service.NomComplet;
             tbNomAgentVersant.Text = versement.Versement.NomAgentVersant;
             tbPrenomsAgentVersant.Text = versement.Versement.PrenomsAgentVersant;
             tbNombreR3.Text = versement.Versement.NombreRegistreR3.ToString();
@@ -79,7 +79,7 @@ namespace DOCUMAT.Pages.Versement
             // Chargement des composantes déja connu
             ServiceViewParent = serviceView;
             dtVers.SelectedDate = DateTime.Now;
-            tbService.Text = serviceView.Service.Nom;
+            tbService.Text = serviceView.Service.NomComplet;
             dtLivraison.SelectedDate = DateTime.Now;
             cbLivraison.ItemsSource = serviceView.context.Livraison.Where(l=> l.ServiceID == serviceView.Service.ServiceID).ToList();
             cbLivraison.DisplayMemberPath = "Numero";
@@ -247,7 +247,7 @@ namespace DOCUMAT.Pages.Versement
                             throw new Exception("Ce numero de versement est déja utilisé !!!");
                         }
 
-                        DossierService = nomDossierRacine + @"/" + ServiceViewParent.Service.CheminDossier;
+                        DossierService = nomDossierRacine + @"/" + ServiceViewParent.Service.CheminDossier.Trim();
                         if (!Directory.Exists(DossierService))
                         {
                             Directory.CreateDirectory(DossierService);

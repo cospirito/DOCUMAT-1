@@ -44,71 +44,78 @@ namespace DOCUMAT.ViewModels
 
         public int AddRegistre()
         {
-            //Vérification qu'un numéro de registre identique n'existe pas *
-            if (context.Registre.Any(r => r.Numero == Registre.Numero && r.VersementID == Registre.VersementID))
-                throw new Exception("Un registre ayant le même numéro de volume existe déja !!!");
-
-            Registre.QrCode = "DEFAUT";
-            Registre.CheminDossier = Registre.QrCode;
-            context.Registre.Add(Registre);
-            context.SaveChanges();
-
-            // Procédure d'Ajout du QrCode
-            //recup le code de service 
-            Versement versement = context.Versement.FirstOrDefault(v => v.VersementID == Registre.VersementID );
-            Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == versement.LivraisonID );
-            Service service = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
-
-            //Composition du Code QR ou du Dossier 
-            // -- Numero de Volume du registre + Le code de Service (Renseigner manuellement) + Id du registre nouvellement créer
-            Registre.QrCode = Registre.Numero + service.Code + Registre.RegistreID;
-            Registre.CheminDossier = Registre.QrCode;
-
-
-            //Procédure de création du dossier de scan du registre 
-            string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
-            string DossierService = "";
-            string DossierRegistre = "";
-            if (Registre.Type == "R3")
+            try
             {
-                DossierService = service.CheminDossier + "/R3";
-                DossierRegistre = DossierService + "/" + Registre.QrCode.ToString();                
-            }
-            else
-            {
-                DossierService = service.CheminDossier + "/R4";
-                DossierRegistre = DossierService + "/" + Registre.QrCode.ToString();
-            }
-
-            if (Directory.Exists(DossierRacine + "/" + DossierService))
-            {
-                if(!Directory.Exists(DossierRacine + "/" + DossierRegistre))
+                //Vérification qu'un numéro de registre identique n'existe pas *
+                if (context.Registre.Any(r => r.Numero == Registre.Numero && r.VersementID == Registre.VersementID))
                 {
-                    Directory.CreateDirectory(DossierRacine + "/" + DossierRegistre);
-                    Registre.CheminDossier = DossierRegistre;
+                    throw new Exception("Un registre ayant le même numéro de volume existe déja !!!");
+                }
+
+                Registre.QrCode = "DEFAUT";
+                Registre.CheminDossier = Registre.QrCode;
+                context.Registre.Add(Registre);
+                context.SaveChanges();
+
+                // Procédure d'Ajout du QrCode
+                //recup le code de service 
+                Versement versement = context.Versement.FirstOrDefault(v => v.VersementID == Registre.VersementID);
+                Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == versement.LivraisonID);
+                Service service = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
+
+                //Composition du Code QR ou du Dossier 
+                // -- Numero de Volume du registre + Le code de Service (Renseigner manuellement) + Id du registre nouvellement créer
+                Registre.QrCode = Registre.Numero + service.Code + Registre.RegistreID;
+
+                //Procédure de création du dossier de scan du registre 
+                string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
+                string DossierService = "";
+                string DossierRegistre = "";
+                if (Registre.Type == "R3")
+                {
+                    DossierService = service.CheminDossier + "/R3";
+                    DossierRegistre = DossierService + "/" + Registre.QrCode.ToString();
                 }
                 else
                 {
-                    Registre.CheminDossier = DossierRegistre;
-                    MessageBox.Show("Un Dossier ayant un nom de registre conforme a été trouvé, et pris par défaut","Notification",MessageBoxButton.OK,MessageBoxImage.Information);
+                    DossierService = service.CheminDossier + "/R4";
+                    DossierRegistre = DossierService + "/" + Registre.QrCode.ToString();
                 }
-            }
-            else
-            {
-                MessageBox.Show("Le Dossier du service est introuvable, il a peut être été supprimé, veuillez le créer à nouveau dans la partie service !!!","Notification", MessageBoxButton.OK, MessageBoxImage.Information);
-            }            
 
-            // Création du statut
-            StatutRegistre statutRegistre = new StatutRegistre();
-            statutRegistre.Code = (int)Enumeration.Registre.CREE;
-            statutRegistre.DateCreation = DateTime.Now;
-            statutRegistre.DateDebut = DateTime.Now;
-            statutRegistre.DateFin = DateTime.Now;
-            statutRegistre.DateModif = DateTime.Now;
-            statutRegistre.RegistreID = Registre.RegistreID;
-            context.StatutRegistre.Add(statutRegistre);
-            context.SaveChanges();
-            return Registre.RegistreID;
+                if (Directory.Exists(DossierRacine + "/" + DossierService))
+                {
+                    if (!Directory.Exists(DossierRacine + "/" + DossierRegistre))
+                    {
+                        Directory.CreateDirectory(DossierRacine + "/" + DossierRegistre);
+                        Registre.CheminDossier = DossierRegistre;
+                    }
+                    else
+                    {
+                        Registre.CheminDossier = DossierRegistre;
+                        MessageBox.Show("Un Dossier ayant un nom de registre conforme a été trouvé, et pris par défaut", "Notification", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Le Dossier du service est introuvable, il a peut être été supprimé, veuillez le créer à nouveau dans la partie service !!!", "Notification", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                // Création du statut
+                StatutRegistre statutRegistre = new StatutRegistre();
+                statutRegistre.Code = (int)Enumeration.Registre.CREE;
+                statutRegistre.DateCreation = DateTime.Now;
+                statutRegistre.DateDebut = DateTime.Now;
+                statutRegistre.DateFin = DateTime.Now;
+                statutRegistre.DateModif = DateTime.Now;
+                statutRegistre.RegistreID = Registre.RegistreID;
+                context.StatutRegistre.Add(statutRegistre);
+                context.SaveChanges();
+                return Registre.RegistreID;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public void Dispose()
@@ -121,9 +128,13 @@ namespace DOCUMAT.ViewModels
             Registre = context.Registre.FirstOrDefault(r => r.RegistreID == Id);
 
             if (Registre != null)
+            {
                 return true;
+            }
             else
+            {
                 throw new Exception("Ce registre est introuvable !!!");
+            }
         }
 
         public RegistreView GetViewRegistre(int Id)
@@ -137,25 +148,30 @@ namespace DOCUMAT.ViewModels
             try
             {
                 List<Registre> registres = new List<Registre>();
-                if (Versement != null)               
+                if (Versement != null)
+                {
                     registres = context.Registre.Where(r=>r.VersementID == Versement.VersementID).ToList();
+                }
                 else
+                {
                     registres = context.Registre.ToList();
+                }
 
                 List<RegistreView> RegistreViews = new List<RegistreView>();
 
+                // Numero Ordre des Registres
                 foreach (Registre reg in registres)
                 {
                     RegistreView regV = new RegistreView();
                     regV.Registre = reg;
-                    
+
                     //Récupération du versement du registre  
-                    if(Versement != null)
+                    if (Versement != null)
                     {
-                    // Récupération des informations sur le service 
+                        // Récupération des informations sur le service 
                         regV.Versement = Versement;
                         Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == Versement.LivraisonID);
-                        regV.ServiceVersant = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);                                    
+                        regV.ServiceVersant = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
                     }
                     else
                     {
@@ -181,7 +197,7 @@ namespace DOCUMAT.ViewModels
                         }
                         else
                         {
-                            MessageBox.Show("Le repertoire du Registre de type : \"" + reg.Type + " \", de code : " + reg.QrCode + " ,dont le chemin est \""
+                            MessageBox.Show("Le repertoire du Registre de type : \"" + reg.Type + "\", de code : " + reg.QrCode + " ,dont le chemin est \""
                                                 + reg.CheminDossier + "\" est introuvable","AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Warning);
                             if (MessageBox.Show("Voulez vous suspendre les requêtes de récuparation des autres registre afin de régler le problème ?", "SUSPENDRE", MessageBoxButton.YesNo,MessageBoxImage.Question)
                                 == MessageBoxResult.Yes)
@@ -219,14 +235,107 @@ namespace DOCUMAT.ViewModels
             }
         }
 
-        public List<RegistreView> GetViewsListByTraite(int codeTraite,bool isTraite)
+        public List<RegistreView> GetViewsListByStatus(int CodeStatut)
+        {
+            try
+            {
+                List<Registre> registres = new List<Registre>();
+                if (Versement != null)
+                {
+                    registres = context.Registre.Where(r => r.VersementID == Versement.VersementID && r.StatutActuel == CodeStatut).ToList();
+                }
+                else
+                {
+                    registres = context.Registre.Where(r => r.StatutActuel == CodeStatut).ToList();
+                }
+
+                List<RegistreView> RegistreViews = new List<RegistreView>();
+
+                // Numero Ordre des Registres
+                foreach (Registre reg in registres)
+                {
+                    RegistreView regV = new RegistreView();
+                    regV.Registre = reg;
+
+                    //Récupération du versement du registre  
+                    if (Versement != null)
+                    {
+                        // Récupération des informations sur le service 
+                        regV.Versement = Versement;
+                        Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == Versement.LivraisonID);
+                        regV.ServiceVersant = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
+                    }
+                    else
+                    {
+                        regV.Versement = context.Versement.FirstOrDefault(v => v.VersementID == reg.VersementID);
+                        Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == regV.Versement.LivraisonID);
+                        regV.ServiceVersant = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
+                    }
+
+                    // récupération des images liées au registre dans la Base de Données
+                    regV.NombreImageCompte = context.Image.Where(i => i.RegistreID == regV.Registre.RegistreID).Count();
+
+                    //Nombre de page scanné dans le Dossier du registre
+                    regV.NombreImageScan = 0;
+
+                    try
+                    {
+                        DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                        //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                        if (directoryInfo.Exists)
+                        {
+                            regV.NombreImageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                 || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Le repertoire du Registre de type : \"" + reg.Type + "\", de code : " + reg.QrCode + " ,dont le chemin est \""
+                                                + reg.CheminDossier + "\" est introuvable", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            if (MessageBox.Show("Voulez vous suspendre les requêtes de récuparation des autres registre afin de régler le problème ?", "SUSPENDRE", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                                == MessageBoxResult.Yes)
+                            {
+                                return RegistreViews;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message + "\n Repertoire : " + reg.CheminDossier, "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        if (MessageBox.Show("Voulez vous suspendre les requêtes de récuparation des autres registre afin de régler le problème ?", "SUSPENDRE", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                            == MessageBoxResult.Yes)
+                        {
+                            return RegistreViews;
+                        }
+                    }
+
+                    //Définition du chemin d'accès au dossier
+                    regV.CheminDossier = Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier);
+
+
+                    // Affichage de statut en string
+                    regV.StatutActuel = context.StatutRegistre.FirstOrDefault(s => s.Code == reg.StatutActuel && s.RegistreID == reg.RegistreID);
+                    regV.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), regV.StatutActuel.Code);
+
+                    RegistreViews.Add(regV);
+                }
+                return RegistreViews;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return new List<RegistreView>();
+            }
+        }
+
+
+        public List<RegistreView> GetViewsListByTraite(int codeTraite, bool isTraite,int CodeStatus)
         {
             RegistreView RegistreView1 = new RegistreView();
             List<RegistreView> registreViewIsTraites = new List<RegistreView>();
             List<RegistreView> registreViewNotTraites = new List<RegistreView>();
-            List<RegistreView> RegistreViews =  RegistreView1.GetViewsList().ToList();
+            List<RegistreView> RegistreViews = RegistreView1.GetViewsListByStatus(CodeStatus).ToList();
 
-            foreach(RegistreView registreView in RegistreViews)
+            foreach (RegistreView registreView in RegistreViews)
             {
                 // Si le registre a le traitement demandé par le codeTraite alors on le met dans registreViewIsTraites sinon 
                 // il va dans les registreViewNotTraites
@@ -243,7 +352,7 @@ namespace DOCUMAT.ViewModels
                 }
             }
 
-            if(isTraite)
+            if (isTraite)
             {
                 return registreViewIsTraites;
             }
@@ -256,8 +365,8 @@ namespace DOCUMAT.ViewModels
         public List<RegistreView> GetViewsListByScanAgent()
         {
             RegistreView RegistreView1 = new RegistreView();
-            List<RegistreView> RegistreViews = RegistreView1.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PREINDEXE).ToList();
-            List<RegistreView> regionViewsAgentScan = new List<RegistreView>();
+            List<RegistreView> RegistreViews = RegistreView1.GetViewsListByStatus((int)Enumeration.Registre.CREE).ToList();
+            List<RegistreView> registreViewsAgentScan = new List<RegistreView>();
 
             foreach (var regV in RegistreViews)
             {
@@ -276,12 +385,12 @@ namespace DOCUMAT.ViewModels
                     if (agentScan != null)
                     {
                         regV.AgentTraitant = agentScan;
-                        regionViewsAgentScan.Add(regV);
+                        registreViewsAgentScan.Add(regV);
                     }
                 }
             }
 
-            return regionViewsAgentScan;
+            return registreViewsAgentScan;
         }
 
 
@@ -312,6 +421,18 @@ namespace DOCUMAT.ViewModels
             {
                 throw new Exception("Aucun changement n'a été effectué");
             }
+        }
+
+        public static List<RegistreView> GetRowOrder(List<RegistreView> registreViews)
+        {
+            int numOrder = 1;
+            foreach(var regV in registreViews)
+            {
+                regV.NumeroOrdre = numOrder;
+                numOrder = numOrder + 1;
+            }
+
+            return registreViews;
         }
     }
 }

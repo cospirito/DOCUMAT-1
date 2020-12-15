@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="DOCUMAT.Webview"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DOCUMAT"
+             mc:Ignorable="d">
+    <Grid Margin="0,0,0,0">
+        <WebBrowser 
+            x:Name="WebView"
+            VerticalAlignment="Top" 
+            HorizontalAlignment="Right"
+            MinHeight="500"
+            MinWidth="300"/>
+    </Grid>
+</UserControl>

@@ -1,10 +1,7 @@
 ﻿using DOCUMAT.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DOCUMAT.ViewModels
 {
@@ -43,7 +40,7 @@ namespace DOCUMAT.ViewModels
 
         public int AddLivraison(Livraison livraison)
         {
-            if (!context.Livraison.Any(l => l.Numero == livraison.Numero && l.ServiceID == livraison.ServiceID ))
+            if (!context.Livraison.Any(l => l.Numero == livraison.Numero && l.ServiceID == livraison.ServiceID))
             {
                 context.Livraison.Add(livraison);
                 context.SaveChanges();
@@ -103,7 +100,7 @@ namespace DOCUMAT.ViewModels
             {
                 VersementView versementView = new VersementView();
                 versementView.Versement = versement;
-                versementView.NombreR3 = context.Registre.Where(r=>r.VersementID == versement.VersementID && r.Type == "R3").Count();
+                versementView.NombreR3 = context.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R3").Count();
                 versementView.NombreR4 = context.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R4").Count();
                 versementView.NombreR3EsV = versementView.NombreR3 + "/" + versement.NombreRegistreR3;
                 versementView.NombreR4EsV = versementView.NombreR4 + "/" + versement.NombreRegistreR4;
@@ -116,7 +113,7 @@ namespace DOCUMAT.ViewModels
 
         public List<VersementView> GetVersViewsByService(int IdService)
         {
-            List<Livraison> livraisons = context.Livraison.Where(l => l.ServiceID == IdService).ToList(); 
+            List<Livraison> livraisons = context.Livraison.Where(l => l.ServiceID == IdService).ToList();
             List<VersementView> versementViews = new List<VersementView>();
             List<Versement> versements = new List<Versement>();
             foreach (var livraison in livraisons)
@@ -132,7 +129,7 @@ namespace DOCUMAT.ViewModels
                 versementView.NombreR4 = context.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R4").Count();
                 versementView.NombreR3EsV = versementView.NombreR3 + "/" + versement.NombreRegistreR3;
                 versementView.NombreR4EsV = versementView.NombreR4 + "/" + versement.NombreRegistreR4;
-                versementView.NombreRegistreEsV = (versementView.NombreR3  + versementView.NombreR4) + " / " + (versement.NombreRegistreR3 + versement.NombreRegistreR4);
+                versementView.NombreRegistreEsV = (versementView.NombreR3 + versementView.NombreR4) + " / " + (versement.NombreRegistreR3 + versement.NombreRegistreR4);
                 versementView.NombreRegistre = versementView.NombreR3 + versementView.NombreR4;
                 versementViews.Add(versementView);
             }
@@ -141,11 +138,11 @@ namespace DOCUMAT.ViewModels
 
         public bool Update(Versement UpVersement)
         {
-            if(!context.Versement.Any(v=>v.NumeroVers == UpVersement.NumeroVers && v.LivraisonID == UpVersement.LivraisonID && v.VersementID != UpVersement.VersementID))
+            if (!context.Versement.Any(v => v.NumeroVers == UpVersement.NumeroVers && v.LivraisonID == UpVersement.LivraisonID && v.VersementID != UpVersement.VersementID))
             {
                 Versement.NomAgentVersant = UpVersement.NomAgentVersant;
                 Versement.PrenomsAgentVersant = UpVersement.PrenomsAgentVersant;
-                Versement.DateVers = UpVersement.DateVers;                
+                Versement.DateVers = UpVersement.DateVers;
                 Versement.NumeroVers = UpVersement.NumeroVers;
                 Versement.NombreRegistreR3 = UpVersement.NombreRegistreR3;
                 Versement.NombreRegistreR4 = UpVersement.NombreRegistreR4;
@@ -156,7 +153,7 @@ namespace DOCUMAT.ViewModels
             {
                 throw new Exception("Ce numero de versement est déja utilisé !!!");
             }
-            return true;           
+            return true;
         }
     }
 }

@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DOCUMAT.Pages.Dispatching" 
         xmlns:src="clr-namespace:DOCUMAT.Converter" 
+        xmlns:gif="http://wpfanimatedgif.codeplex.com" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="Dispatching Indexation"         
@@ -15,6 +16,7 @@
         Loaded="Window_Loaded">
     <Window.Resources>
         <src:DateConverter x:Key="DateConverter"/>
+        <src:RowNumberConverter x:Key="RowNumberConverter"/>
         <Style TargetType="DataGridRow">
             <Setter Property="Foreground" Value="White" />
             <Style.Triggers>
@@ -31,13 +33,21 @@
                       x:Name="AttRegistre"                      
                       Icon="{materialDesign:PackIcon Kind=VectorSelection}"
                       Click="AttRegistre_Click"/>
+            <MenuItem Header="Retirer le registre"
+                      x:Name="RetirerRegistre"                      
+                      Icon="{materialDesign:PackIcon Kind=UserRemoveOutline}"
+                      Click="RetirerRegistre_Click"/>
         </ContextMenu>
     </Window.Resources>
 
-    <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
-        <StackPanel 
+    <Grid x:Name="Service_Space" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0"
                     Orientation="Horizontal"
-                    VerticalAlignment="Center"
+                    VerticalAlignment="Center"            
                     Margin="20 20 20 0">
             <Grid >
                 <Grid.ColumnDefinitions>
@@ -47,20 +57,27 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal"
                             Name="panelRecherche">
                     <Button Margin="10" Background="{x:Null}"
-                        BorderBrush="CornflowerBlue"
+                        BorderBrush="White"
+                        BorderThickness="1 0 1 0"
                         ToolTip="Rechercher"
-                        x:Name="BtnRechercher"
+                        x:Name="BtnRefresh"
                         KeyboardNavigation.AcceptsReturn="False"
                         KeyboardNavigation.TabNavigation="None"
                         KeyboardNavigation.ControlTabNavigation="None"
                         KeyboardNavigation.DirectionalNavigation="None"
                         KeyboardNavigation.IsTabStop="True"
-                        Click="BtnRechercher_Click"
-                        >
-                        <materialDesign:PackIcon Kind="Search"
-                                            Width="25"
-                                            Height="25"
-                                            Foreground="White"/>
+                        Click="BtnRefresh_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh"
+                                                Width="25"
+                                                Height="25"
+                                                Foreground="White"/>
+                            <TextBlock> / </TextBlock>
+                            <materialDesign:PackIcon Kind="Download"
+                                                Width="25"
+                                                Height="25"
+                                                Foreground="White"/>
+                        </StackPanel>
                     </Button>
                     <TextBox x:Name="TbRechercher" 
                      materialDesign:HintAssist.Hint="RECHERCHER" 
@@ -104,44 +121,53 @@
                               Foreground="White"
                               FontSize="15"
                               Unchecked="IsSelectionAgent_Unchecked">
-                           Selectionner l'Agent
+                        Selectionner l'Agent
                     </CheckBox>
                 </StackPanel>
             </Grid>
         </StackPanel>
 
         <!--Grid View des Registres -->
-        <Grid Margin="0 30 0 0">
-            <Grid.Effect>
-                <DropShadowEffect ShadowDepth="1" />
-            </Grid.Effect>
+        <Grid Margin="0 20"
+              Grid.Row="1"
+              x:Name="PanelData">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column ="0" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Right"                          
+                          VerticalAlignment="Stretch"/>
             <Border Grid.Column="0" 
                     BorderBrush="White"
-                    BorderThickness="1">
+                    BorderThickness="1"
+                    Margin="0 0 3 0">
                 <DataGrid Name="dgRegistre"                               
-                                  AutoGenerateColumns="False" 
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Auto"
-                                  IsReadOnly="True"
-                                  RowDetailsVisibilityMode="VisibleWhenSelected" 
-                                  Height="500"                                    
-                                  AreRowDetailsFrozen="False"
-                                  LoadingRow="dgRegistre_LoadingRow"
-                                  SelectionChanged="dgRegistre_SelectionChanged"
-                                  Grid.ColumnSpan="2">
+                            AutoGenerateColumns="False" 
+                            VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Auto"
+                            IsReadOnly="True"
+                            RowDetailsVisibilityMode="VisibleWhenSelected"                                                                                    
+                            AreRowDetailsFrozen="False"
+                            SelectionChanged="dgRegistre_SelectionChanged"
+                            Grid.ColumnSpan="2">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
-                        <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />
-                        <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Registre.Numero}" />
-                        <DataGridTextColumn Header="Service versant" Binding="{Binding  ServiceVersant.Nom}" />
-                        <DataGridTextColumn Header="Region" Binding="{Binding  ServiceVersant.Region.Nom}" />
-                        <DataGridTextColumn Header="pages attendues " Binding="{Binding Registre.NombrePage}" />
-                        <DataGridTextColumn Header="pages scannées" Binding="{Binding NombreImageScan}" />
-                        <DataGridTextColumn Header="pages enregistrées" Binding="{Binding NombreImageCompte}" />
+                        <DataGridTextColumn Header="N°" IsReadOnly="True">
+                            <DataGridTextColumn.Binding>
+                                <MultiBinding Converter="{StaticResource RowNumberConverter}">
+                                    <Binding />
+                                    <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}" />
+                                </MultiBinding>
+                            </DataGridTextColumn.Binding>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="QRCode " Binding="{Binding QrCode}" />
+                        <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Numero}" />
+                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
+                        <DataGridTextColumn Header="Service versant" Binding="{Binding  NomComplet}" />
+                        <DataGridTextColumn Header="Region" Binding="{Binding  NomRegion}" />
+                        <DataGridTextColumn Header="Pages Déclarées" Binding="{Binding NombrePage}" />
                     </DataGrid.Columns>
                     <DataGrid.Resources>
                         <Style TargetType="DataGridRow">
@@ -161,28 +187,41 @@
             </Border>
 
             <Border BorderBrush="White" 
-                        BorderThickness="1" 
-                        Grid.Column="1">
-                <StackPanel Margin="0" >
-                    <StackPanel Background="SteelBlue"
+                    BorderThickness="1" 
+                    Grid.Column="1">
+                <StackPanel Margin="0" CanVerticallyScroll="True">
+                    <Border BorderThickness="1 2 1 1" BorderBrush="White">
+                        <StackPanel Background="SteelBlue"
                                 Height="35" 
                                 VerticalAlignment="Center">
-                        <TextBlock Text="Attribuer à : "  
+                            <TextBlock Text="Attribuer à : "  
                                    Foreground="White"
                                    Padding="5"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontSize="20"
-                                   FontFamily="Agency Fb"/>
+                                   FontFamily="{StaticResource AgencyFb}"/>
+                        </StackPanel>
+                    </Border>
+                    <StackPanel>
+                        <TextBox x:Name="TbRechercherAgent" 
+                             materialDesign:HintAssist.Hint="Rechercher.." 
+                             Foreground="White" 
+                             VerticalAlignment="Center"
+                             Padding="5"
+                             TextChanged="TbRechercherAgent_TextChanged"/>
                     </StackPanel>
                     <ListView ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                              Height="500" x:Name="ListAgentSelected">
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"                              
+                              ScrollViewer.CanContentScroll="True"
+                              x:Name="ListAgentSelected"
+                              Height="500">
                         <ListView.Resources>
                             <Style TargetType="ListView">
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="White" />
-                                        <Setter Property="Foreground" Value="SteelBlue" />
+                                        <Setter Property="Background" Value="SteelBlue" />
+                                        <Setter Property="Foreground" Value="White" />
                                     </Trigger>
                                     <Trigger Property="IsMouseOver" Value="false">
                                         <Setter Property="Background" Value="SteelBlue" />
@@ -195,5 +234,55 @@
                 </StackPanel>
             </Border>
         </Grid>
-    </StackPanel>
+        
+        <Grid Margin="0 20"
+                    x:Name="PanelLoader"
+                    Grid.Row="1"
+                    Background="White"
+                    Opacity="1"
+                    Visibility="Collapsed"
+                    Height="{Binding ActualHeight,ElementName=PanelData}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="2*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Margin="0"
+                        VerticalAlignment="Center"
+                        Background="White"
+                        Grid.Row="1">
+                <Image gif:ImageBehavior.RepeatBehavior="Forever" 
+                       gif:ImageBehavior.AnimatedSource="/Images/Loader3.gif" 
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Height="70"/>
+                <TextBlock  
+                    Margin="10"
+                    FontSize="20"
+                    FontStyle="Italic"
+                    FontWeight="Bold"
+                    Foreground="SteelBlue"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">Veuillez Patientez Svp ...</TextBlock>
+                <Button Margin="5" 
+                    Background="{x:Null}"
+                    BorderBrush="PaleVioletRed"
+                    BorderThickness="0 1 0 1"
+                    Foreground="PaleVioletRed"
+                    Width="150"
+                    ToolTip="Clicker pour Annuler l'opéraion"
+                    x:Name="BtnAnnuleChargement"
+                    Click="BtnAnnuleChargement_Click">
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock x:Name="LoadText">Annuler</TextBlock>
+                        <materialDesign:PackIcon
+                            x:Name="LoadIcon"
+                            Kind="RemoveCircle"
+                            Margin="7 2 0 0"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
 </Window>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace DOCUMAT.Models
 {
@@ -15,7 +14,7 @@ namespace DOCUMAT.Models
         public int NumeroDepotFin { get; set; }
         public int NombrePageDeclaree { get; set; }
         public int NombrePage { get; set; }
-        public string Observation { get; set;}
+        public string Observation { get; set; }
         public int StatutActuel { get; set; }
         public string CheminDossier { get; set; }
         public string Type { get; set; }

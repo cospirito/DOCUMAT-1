@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:DOCUMAT.Converter"                       
         xmlns:id="http://schemas.microsoft.com/expression/2010/drawing" 
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:WpfToolkit="http://schemas.microsoft.com/netfx/2009/xaml/presentation" xmlns:tool="clr-namespace:DOCUMAT"
-        mc:Ignorable="d"
+        mc:Ignorable="d"          
+        xmlns:local1="clr-namespace:DOCUMAT"
         WindowState="Maximized"
         Title="Controle Phase 1"
         ResizeMode="CanResizeWithGrip"
@@ -15,18 +15,21 @@
         MinWidth="1024"
         WindowStartupLocation="CenterOwner"        
         Loaded="Window_Loaded"
-        Closing="Window_Closing"
         Background="SteelBlue"
         SizeChanged="Window_SizeChanged">
     <Window.Resources>
         <local:StringToImageSourceConverter x:Key="ImageConverter"/>
         <local:DateConverter x:Key="DateConverter"/>
         <ContextMenu x:Key="cmManquantImage"
-                     Background="{x:Null}"
-                     Foreground="SteelBlue">
+                     Background="SteelBlue">
+            <MenuItem Header="Actualiser / Charger"
+                      x:Name="RefrechAll"
+                      Foreground="White"
+                      Icon="{materialDesign:PackIcon Kind=Refresh}"
+                      Click="RefrechAll_Click" />
+            <Separator Background="White" Margin="10 0"></Separator>
             <MenuItem Header="Manquant"
-                      Background="White"
-                      Foreground="SteelBlue"
+                      Foreground="White"
                       x:Name="cmBtnDeclareManquant"
                       Icon="{materialDesign:PackIcon Kind=ImageOff}"
                       Click="cmBtnDeclareManquant_Click" />
@@ -44,16 +47,38 @@
                Background="White">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" 
-                                  MinWidth="350"/>
+                                  MinWidth="350"  
+                                  />
                 <ColumnDefinition Width="2*" 
-                                  MinWidth="200"  />
+                                  MinWidth="350"  
+                                  />
                 <ColumnDefinition Width="2*" 
-                                  MinWidth="200"/>
+                                  MinWidth="200"                                  
+                                  />
+                <ColumnDefinition Width="2*" 
+                                  MinWidth="200"
+                                  />
             </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column ="0" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Right"                          
+                          VerticalAlignment="Stretch"/>
+            <GridSplitter Grid.Column ="2" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Left" 
+                          VerticalAlignment="Stretch"/>
+            <GridSplitter Grid.Column ="3" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Stretch"/>
             <Border BorderBrush="SteelBlue" 
                     Grid.Column="0"
                     VerticalAlignment="Center"  
-                    BorderThickness="1"
+                    BorderThickness="2"
+                    Margin="0 0 3 0"
                     Focusable="True">
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="AgentImage"
@@ -64,7 +89,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="tbxAgentLogin"                         
                                 TextAlignment="Center"   
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 Text="Login"     
                                 FontWeight="Bold"
                                 FontSize="15"                                   
@@ -73,7 +98,7 @@
                                 />
                         <TextBlock x:Name="tbxAgentNoms"                         
                                 TextAlignment="Center"                                      
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="NOM ET PRENOMS"                                
@@ -82,7 +107,7 @@
                                 />
                         <TextBlock x:Name="tbxAgentType"                         
                                 TextAlignment="Center"                                      
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="TYPE AGENT"                                
@@ -98,29 +123,57 @@
                 <StackPanel VerticalAlignment="Center" 
                             HorizontalAlignment="Center"
                             Orientation="Horizontal">
-                    <StackPanel VerticalAlignment="Center"
-                                HorizontalAlignment="Left">
-                        <TextBlock x:Name="tbxQrCode"                         
-                                    TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                    <StackPanel VerticalAlignment="Top"
+                                HorizontalAlignment="Left"
+                                Margin="0 0 20 0">
+                        <TextBlock x:Name="tbxQrCode"     
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="Qrcode "     
                                     FontSize="15"
                                     Foreground="Black"                                                
+                                    FontWeight="Bold"
                                     Margin="10 10 0 0"
                                     />
-                        <TextBlock x:Name="tbxService"                         
-                                    TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                        <TextBlock x:Name="tbxService"     
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="Servvice : "  
                                     FontSize="15"                               
+                                    FontWeight="Bold"                                   
                                     Foreground="Black"                                           
                                     Margin="10 10 0 0"
                                     />
-                        <TextBlock x:Name="tbxVersement"                         
-                                    TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                        <TextBlock x:Name="tbxVersement"   
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="N° Versement : " 
+                                    FontWeight="Bold"                                   
                                     FontSize="15"                               
+                                    Foreground="Black"                                                
+                                    Margin="10 10 0 0"
+                                    />
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Top"
+                                HorizontalAlignment="Left">
+                        <TextBlock x:Name="tbxNumVolume"   
+                                    FontFamily="{StaticResource Androgyne}"                           
+                                    Text="N° Volume "     
+                                    FontSize="15"
+                                    FontWeight="Bold"                                   
+                                    Foreground="Black"                                                
+                                    Margin="10 10 0 0"
+                                    />
+                        <TextBlock x:Name="tbxTypeRegistre"  
+                                    FontFamily="{StaticResource Androgyne}"                           
+                                    Text="Type  : "  
+                                    FontSize="15"    
+                                    FontWeight="Bold"                                   
+                                    Foreground="Black"                                           
+                                    Margin="10 10 0 0"
+                                    />
+                        <TextBlock x:Name="tbxDepotFin"  
+                                    FontFamily="{StaticResource Androgyne}"                           
+                                    Text="N° Dépôt Fin : " 
+                                    FontSize="15"    
+                                    FontWeight="Bold"                                   
                                     Foreground="Black"                                                
                                     Margin="10 10 0 0"
                                     />
@@ -129,7 +182,8 @@
             </Border>
             <Border BorderBrush="SteelBlue"
                     Grid.Column="2" 
-                    BorderThickness="1" >
+                    BorderThickness="2"
+                    Margin="3 0 0 0" >
                 <StackPanel Orientation="Horizontal" 
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center">
@@ -152,7 +206,7 @@
                         <TextBlock 
                              Text="0%"
                              Name="TextIndicator"
-                             Foreground="SteelBlue" FontSize="20" FontFamily="Agency Fb" 
+                             Foreground="SteelBlue" FontSize="20" FontFamily="{StaticResource AgencyFb}" 
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center"/>
                     </Grid>
@@ -161,7 +215,7 @@
                          Text="Terminé : 0,0%"
                          FontSize="15"
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="SteelBlue"                                                
                          Margin="10 0 0 5"
                          />
@@ -169,7 +223,7 @@
                          Text="En instance : 0,0%"                              
                          FontSize="15"
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="LimeGreen"                                                
                          Margin="10 0 0 5"
                          />
@@ -177,7 +231,7 @@
                          Text="En instance : 0,0%"                              
                          FontSize="15"
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="Firebrick"                                                
                          Margin="10 0 0 5"
                          />
@@ -185,10 +239,83 @@
                          Text="Non Traité 0,0%"                          
                          FontSize="15"    
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="Black"                                                
                          Margin="10 0 0 5"
                          />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <Border BorderBrush="SteelBlue"
+                    Grid.Column="3" 
+                    BorderThickness="2"
+                    Margin="3 0 0 0">
+                <StackPanel Orientation="Horizontal" 
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                    <StackPanel VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                        <Grid x:Name="GridThirdCircle">
+                            <Ellipse  
+                              x:Name="ThirdCircle"                               
+                             Stroke="Firebrick" 
+                             StrokeThickness="1" 
+                             Opacity="0.5"/>
+
+                            <id:Arc 
+                             Name="ArcIndicatorThird" 
+                             ArcThickness="10" 
+                             ArcThicknessUnit="Pixel" 
+                             EndAngle="0"                               
+                             Width="110" 
+                             Height="110"
+                             Fill="Firebrick" 
+                             Stretch="None" 
+                             StartAngle="0" />
+
+                            <TextBlock 
+                             Text="0%"
+                             Name="TextIndicatorThird"
+                             Foreground="Firebrick" 
+                             FontSize="20" 
+                             FontFamily="{StaticResource AgencyFb}" 
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Center"/>
+                        </Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock x:Name="tbxNbIndex"
+                                 Text="Nb Index : 0,0%"
+                                 FontSize="15"
+                                 Focusable="False"
+                                 FontFamily="{StaticResource AgencyFb}"
+                                 Foreground="SteelBlue"                                                
+                                 Margin="10 0 0 5"
+                                 />
+                            <TextBlock x:Name="tbxNbIndexRejet"
+                                 Text="Nb Index Rejeté : 0,0%"                              
+                                 FontSize="15"
+                                 Focusable="False"
+                                 FontFamily="{StaticResource AgencyFb}"
+                                 Foreground="Firebrick"                                                
+                                 Margin="10 0 0 5"
+                                 />
+                            <TextBlock x:Name="tbxNbRejetImage"
+                                 Text="Nb Rejet Image : 0"                              
+                                 FontSize="15"
+                                 Margin="10 0 0 5"
+                                 Focusable="False"
+                                 FontFamily="{StaticResource AgencyFb}"
+                                 Foreground="Black"                                                
+                                 />
+                            <TextBlock x:Name="tbxNbImageASupp"
+                                 Text="Nb Image A_Supprimer : 0"                              
+                                 FontSize="15"
+                                 Margin="10 0 0 5"
+                                 Focusable="False"
+                                 FontFamily="{StaticResource AgencyFb}"
+                                 Foreground="Black"                                                
+                                 />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -198,7 +325,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="7*"/>
-                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
             <GridSplitter Grid.Column ="0" 
                           Background="White" 
@@ -268,16 +395,17 @@
             <Border Grid.Column="1"  
                     BorderThickness="2" 
                     BorderBrush="white"                     
-                    x:Name="borderDocument"
-                    SizeChanged="borderDocument_SizeChanged">
-                <StackPanel>
-                    <WindowsFormsHost x:Name="PdfViewerPanel" >
-                        <tool:UserControl1 x:Name="PdfViewer"/>
-                    </WindowsFormsHost>
-                    <DocumentViewer Name="DocumentViewer"                                     
-                                    Background="SteelBlue"
-                                    BorderThickness="0" Margin="0">
-                    </DocumentViewer>
+                    x:Name="borderDocument">
+                <StackPanel x:Name="PanelViewer">
+                    <!--Doit être Convenablement rédimensionner avant d'être utiliser-->
+                    <local1:ZoomBorder x:Name="borderSimpleVIewer" 
+                                       ClipToBounds="True" 
+                                       Background="DarkGray"
+                                       Height="{Binding ActualHeight, ElementName=borderDocument}">
+                        <Image x:Name="PageImage"
+                               Margin="0">
+                        </Image>
+                    </local1:ZoomBorder>
                 </StackPanel>
             </Border>
 
@@ -285,24 +413,39 @@
             <Border Grid.Column="2" 
                     BorderBrush="White" 
                     BorderThickness="2"
-                    Margin="7 0 0 0">
+                    Margin="7 0 0 0"
+                    x:Name="BorderControle"
+                    IsEnabled="False">
                 <StackPanel>
                     <Grid x:Name="PanelControleEnCours">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="35"></RowDefinition>
-                            <RowDefinition Height="35"></RowDefinition>
-                            <RowDefinition Height="30"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                            <RowDefinition MaxHeight="165"></RowDefinition>
-                            <RowDefinition Height="300"></RowDefinition>
+                            <RowDefinition MaxHeight="35"></RowDefinition>
+                            <RowDefinition MaxHeight="35"></RowDefinition>
+                            <RowDefinition MaxHeight="30"></RowDefinition>
+                            <RowDefinition x:Name="gripDgSequence" Height="auto"></RowDefinition>
+                            <RowDefinition MaxHeight="150"></RowDefinition>
+                            <RowDefinition MaxHeight="300"></RowDefinition>
                         </Grid.RowDefinitions>
+                        <GridSplitter 
+                          Grid.Row ="3" 
+                          Background="White" 
+                          Height="3"
+                          HorizontalAlignment="Stretch"                          
+                          VerticalAlignment="Bottom"/>
+                        <GridSplitter 
+                          Grid.Row ="4" 
+                          Background="White" 
+                          Height="3"
+                          IsEnabled="False"
+                          HorizontalAlignment="Stretch"                          
+                          VerticalAlignment="Bottom"/>
                         <StackPanel Grid.Row="0"
                                 Background="White">
                             <TextBlock Text="CONTROLE D'IMAGE"
                                         Foreground="SteelBlue"
                                         FontSize="15"
                                         FontWeight="Bold"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Top"
                                         Margin="10"
@@ -324,26 +467,14 @@
                                     FontSize="12"          
                                     InputScope="Number"                        
                                     Margin="10"/>
-                            <TextBlock x:Name="tbxDebSeq" 
-                                    Foreground="White"
-                                    Text="N° Debut : "
-                                    FontSize="12"          
-                                    InputScope="Number"                        
-                                    Margin="10"/>
-                            <TextBlock x:Name="tbxFinSeq" 
-                                    Foreground="White"
-                                    Text="N° Fin : "
-                                    FontSize="12"          
-                                    InputScope="Number"                        
-                                    Margin="10"/>
                         </StackPanel>
                         <StackPanel Background="White" 
                                     Grid.Row="2">
-                            <TextBlock Text="Séquences de l'image" 
+                            <TextBlock Text="Formalites de l'image" 
                             HorizontalAlignment="Center"
                             Padding="5" 
                             FontSize="17" 
-                            FontFamily="Agency Fb"
+                            FontFamily="{StaticResource AgencyFb}"
                             Foreground="SteelBlue"
                             VerticalAlignment="Top"
                             FontWeight="Bold"/>
@@ -351,6 +482,7 @@
                         <DataGrid 
                             Grid.Row="3"
                             Name="dgSequence" 
+                            Margin="0 0 0 3"
                             AutoGenerateColumns="False"                             
                             VerticalScrollBarVisibility="Auto"
                             HorizontalScrollBarVisibility="Auto"
@@ -358,20 +490,9 @@
                             CanUserSortColumns="False"                               
                             SelectionMode="Single"
                             VerticalAlignment="Top"
-                            MaxHeight="400"
-                            RowDetailsVisibilityMode="VisibleWhenSelected"                                                 
-                            SelectionChanged="dgSequence_SelectionChanged"
+                            RowDetailsVisibilityMode="VisibleWhenSelected"   
                             AreRowDetailsFrozen="False"
-                            LoadingRow="dgSequence_LoadingRow"
-                            PreviewKeyUp="dgSequence_PreviewKeyUp"
-                            PreviewKeyDown="dgSequence_PreviewKeyUp"
-                            KeyUp="dgSequence_KeyUp"
-                            KeyDown="dgSequence_KeyUp"
-                            CanUserAddRows="False"
-                            ScrollBar.Scroll="dgSequence_Scroll"
-                            GotKeyboardFocus="dgSequence_GotKeyboardFocus"
-                            LoadingRowDetails="dgSequence_LoadingRowDetails"
-                            RowEditEnding="dgSequence_RowEditEnding">
+                            CanUserAddRows="False">
                             <DataGrid.Columns>
                                 <DataGridTextColumn IsReadOnly="True" Header="N° Ordre" Binding="{Binding strOrdre}" />
                                 <DataGridTextColumn IsReadOnly="True" Header="Date " Binding="{Binding strDate}" />
@@ -408,7 +529,7 @@
                                                      ScrollViewer.CanContentScroll="True"
                                                      ScrollViewer.VerticalScrollBarVisibility="auto"
                                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                                     MaxHeight="140">
+                                                     MaxHeight="170">
                                                 <ListBox.ItemTemplate>
                                                     <DataTemplate>
                                                         <CheckBox Name="CheckBoxZone" Content="{Binding TheText}"
@@ -425,14 +546,14 @@
                         </DataGrid>
                         <StackPanel 
                                 VerticalAlignment="Top"
-                                Margin="10 20 0 10"
                                 Grid.Row="4"
+                                Margin="0 0 0 3"
                                 HorizontalAlignment="Left"
                                 Orientation="Horizontal">
                             <Expander Name="SequenceSide" 
                                         Background="White" 
                                         HorizontalAlignment="Left"                             
-                                        Header="SEQUENCES"
+                                        Header="FORMALITES"
                                         FontWeight="Bold"
                                         ExpandDirection="Down" 
                                         IsExpanded="False" 
@@ -469,9 +590,9 @@
                                         Background="Transparent"
                                         Click="BtnAnnuleManqueSequences_Click">
                                             <materialDesign:PackIcon Kind="RemoveCircle"
-                                        Width="15"
-                                        Height="15"
-                                        Foreground="White"/>
+                                            Width="15"
+                                            Height="15"
+                                            Foreground="White"/>
                                         </Button>
                                     </StackPanel>
                                 </StackPanel>
@@ -493,27 +614,34 @@
                                                 Content="Rejet"
                                                 Foreground="White"  
                                                 Background="White"
-                                                Margin="0 10"
+                                                Margin="0 10 10 10"
                                                 Checked="cbxRejetImage_Checked"
-                                                Unchecked="cbxRejetImage_Unchecked"/>
+                                                Unchecked="cbxRejetImage_Unchecked">
+                                        </CheckBox>
+                                        <CheckBox 
+                                                x:Name="cbxRejetScan"
+                                                Content="ReScan (Tramé)"
+                                                Foreground="White"  
+                                                Background="White"
+                                                Margin="5 10"
+                                                ToolTip="Rescanner en Tramé"
+                                                Checked="cbxRejetScan_Checked">
+                                        </CheckBox>
                                         <CheckBox x:Name="cbxSupprimerImage"
                                                 Content="A Supprimer"
                                                 Foreground="White"
                                                 Background="White"                                                  
                                                 Margin="10 0"
-                                                Checked="cbxSupprimerImage_Checked"
-                                                Unchecked="cbxSupprimerImage_Unchecked"
-                                                />
+                                                Checked="cbxSupprimerImage_Checked">
+                                        </CheckBox>
                                     </StackPanel>
                                     <!--Pour les rejet images -->
                                     <StackPanel x:Name="PanelRejetImage" 
                                             Margin="4"
                                             Orientation="Horizontal" 
                                             Visibility="Collapsed"
-                                            HorizontalAlignment="Center">
-                                        <ComboBox Name="cbRejetImage" 
-                                                Foreground="White"
-                                                >
+                                            HorizontalAlignment="Left">
+                                        <ComboBox Name="cbRejetImage" Foreground="White">
                                             <ComboBoxItem Content="Qualité Visuelle" IsSelected="True"/>
                                             <ComboBoxItem Content="Ecriture Illisible"/>
                                             <ComboBoxItem Content="Mauvaise Image"/>
@@ -538,40 +666,41 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <StackPanel x:Name="PanelIndexRegistre" 
-                            Visibility="Collapsed"
-                            VerticalAlignment="Top"
-                            Grid.Row="5">
-                            <StackPanel Background="White"
-                                    Height="50">
-                                <TextBlock Foreground="SteelBlue"
-                                        FontWeight="Bold"
-                                        FontSize="20"
-                                        FontFamily="Agency Fb"
-                                        Padding="15"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Center">  INDEX REGISTRE</TextBlock>
-                            </StackPanel>
-                            <Grid Margin="20 10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition></RowDefinition>
-                                    <RowDefinition></RowDefinition>
-                                    <RowDefinition></RowDefinition>
-                                    <RowDefinition></RowDefinition>
-                                    <RowDefinition></RowDefinition>
-                                    <RowDefinition></RowDefinition>
-                                </Grid.RowDefinitions>
 
-                                <TextBlock Foreground="White"
+                        <Expander x:Name="PanelIndexRegistre"                                   
+                                    Visibility="Visible"
+                                    Grid.Row="5"
+                                    Width="{Binding ActualWidth,ElementName=BorderControle}"
+                                    Background="White" 
+                                    HorizontalAlignment="Center"                             
+                                    Header="INDEX REGISTRE"
+                                    FontWeight="Bold"
+                                    ExpandDirection="Down" 
+                                    IsExpanded="False" 
+                                    Foreground="SteelBlue">
+                            <StackPanel 
+                                Background="SteelBlue"                                         
+                                VerticalAlignment="Top">
+                                <Grid Margin="20 10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition></RowDefinition>
+                                        <RowDefinition></RowDefinition>
+                                        <RowDefinition></RowDefinition>
+                                        <RowDefinition></RowDefinition>
+                                        <RowDefinition></RowDefinition>
+                                        <RowDefinition></RowDefinition>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Foreground="White"
                                         Grid.Column="0"
                                         Grid.Row="0"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -581,28 +710,28 @@
                                             <TextBlock> N° Volume :</TextBlock>                                           
                                         </StackPanel>
                                 </TextBlock>
-                                <TextBlock x:Name="tbxVolume"
+                                    <TextBlock x:Name="tbxVolume"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"    
                                         VerticalAlignment="Center"                                      
                                         Grid.Row="0"
                                         ></TextBlock>
-                                <CheckBox Foreground="White" 
+                                    <CheckBox Foreground="White" 
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         Background="White"  
                                         x:Name="cbVolume"                                        
                                         Grid.Row="0">rejete</CheckBox>
 
-                                <TextBlock Foreground="White"
+                                    <TextBlock Foreground="White"
                                         Grid.Column="0"
                                         Grid.Row="1"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -612,28 +741,28 @@
                                             <TextBlock> N° depôt Debut :</TextBlock>                                           
                                         </StackPanel>                                           
                                 </TextBlock>
-                                <TextBlock x:Name="tbxNumDepotDebut"
+                                    <TextBlock x:Name="tbxNumDepotDebut"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"    
                                         VerticalAlignment="Center"                                   
                                         Grid.Row="1"
                                         ></TextBlock>
-                                <CheckBox Foreground="White" 
+                                    <CheckBox Foreground="White" 
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         Background="White"
                                         x:Name="cbNumDepotDebut"
                                         Grid.Row="1">rejete</CheckBox>
 
-                                <TextBlock Foreground="White"
+                                    <TextBlock Foreground="White"
                                         Grid.Column="0"
                                         Grid.Row="2"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -643,28 +772,28 @@
                                             <TextBlock> Date depôt debut :</TextBlock>                                           
                                         </StackPanel>                                           
                                 </TextBlock>
-                                <TextBlock x:Name="tbxDateDepotDebut"
+                                    <TextBlock x:Name="tbxDateDepotDebut"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"  
                                         VerticalAlignment="Center"                                     
                                         Grid.Row="2"
                                         ></TextBlock>
-                                <CheckBox Foreground="White" 
+                                    <CheckBox Foreground="White" 
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         Background="White"
                                         x:Name="cbDateDepotDebut"
                                         Grid.Row="2">rejete</CheckBox>
 
-                                <TextBlock Foreground="White"
+                                    <TextBlock Foreground="White"
                                         Grid.Column="0"
                                         Grid.Row="3"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -674,28 +803,28 @@
                                             <TextBlock>N° Depôt Fin :</TextBlock>                                           
                                         </StackPanel>                                           
                                 </TextBlock>
-                                <TextBlock x:Name="tbxNumDepotFin"
+                                    <TextBlock x:Name="tbxNumDepotFin"
                                         Grid.Column="1"  
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"  
                                         VerticalAlignment="Center"                                    
                                         Grid.Row="3"
                                         ></TextBlock>
-                                <CheckBox Foreground="White" 
+                                    <CheckBox Foreground="White" 
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         Background="White"
                                         x:Name="cbNumDepotFin"
                                         Grid.Row="3">rejete</CheckBox>
 
-                                <TextBlock Foreground="White"
+                                    <TextBlock Foreground="White"
                                         Grid.Column="0"
                                         Grid.Row="4"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -705,28 +834,28 @@
                                             <TextBlock> Date Depôt Fin :</TextBlock>                                           
                                         </StackPanel>                                           
                             </TextBlock>
-                                <TextBlock x:Name="tbxDateDepotFin"
+                                    <TextBlock x:Name="tbxDateDepotFin"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"  
                                         VerticalAlignment="Center"                                     
                                         Grid.Row="4"
                                         ></TextBlock>
-                                <CheckBox Foreground="White" 
+                                    <CheckBox Foreground="White" 
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         Background="White"
                                         x:Name="cbDateDepotFin"
                                         Grid.Row="4">rejete</CheckBox>
 
-                                <TextBlock Foreground="White"
+                                    <TextBlock Foreground="White"
                                         Grid.Column="0"
                                         Grid.Row="6"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -736,41 +865,42 @@
                                             <TextBlock> Nombre de Page :</TextBlock>                                           
                                         </StackPanel>                                           
                             </TextBlock>
-                                <TextBlock x:Name="tbxNbPage"
+                                    <TextBlock x:Name="tbxNbPage"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"  
                                         VerticalAlignment="Center"                                    
                                         Grid.Row="6"
                                         ></TextBlock>
-                                <CheckBox Foreground="White" 
+                                    <CheckBox Foreground="White" 
                                         Grid.Column="2"
                                         VerticalAlignment="Center"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         Background="White"
                                         x:Name="cbNbPage"
                                         Grid.Row="6">rejete</CheckBox>
-                            </Grid>
-                            <StackPanel>
-                                <Button x:Name="BtnTerminerControlePageDeGarde"
+                                </Grid>
+                                <StackPanel>
+                                    <Button x:Name="BtnTerminerControlePageDeGarde"
                                     Margin="5 0"
                                     BorderThickness="0 5 0 5"
                                     BorderBrush="White"
                                     Background="Transparent"
                                     Height="50"
                                     Click="BtnTerminerControlePageDeGarde_Click">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Margin="10 0" > Terminer Contrôle</TextBlock>
-                                        <materialDesign:PackIcon Kind="CheckCircle"
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Margin="10 0" > Terminer Contrôle</TextBlock>
+                                            <materialDesign:PackIcon Kind="CheckCircle"
                                         Width="25"
                                         Height="25"
                                         Foreground="White"/>
-                                    </StackPanel>
-                                </Button>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
+                        </Expander>
                     </Grid>
                     <StackPanel Visibility="Collapsed"
                                 x:Name="PanelControleEffectue">
@@ -780,7 +910,7 @@
                                         Foreground="SteelBlue"
                                         FontSize="15"
                                         FontWeight="Bold"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         HorizontalAlignment="Center"
                                         Margin="10"
                                         />
@@ -799,7 +929,7 @@
                                 Text="VALIDE"
                                 HorizontalAlignment="Center"
                                 Foreground="White"
-                                FontFamily="Agency Fb"
+                                FontFamily="{StaticResource AgencyFb}"
                                 FontWeight="Black"
                                 FontSize="17"/>
                             <Button x:Name="btnSuivant" 

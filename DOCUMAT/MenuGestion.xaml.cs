@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DOCUMAT.Models;
+using System;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -7,8 +8,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using DOCUMAT.Models;
-using DOCUMAT.Pages.Scannerisation;
 
 namespace DOCUMAT
 {
@@ -17,19 +16,15 @@ namespace DOCUMAT
     /// </summary>
     public partial class Menu : Window
     {
-        // Définition du timer de rafraichissement de la session de travail
-        System.Timers.Timer Timer;
         Models.Agent Utilisateur;
         Models.SessionTravail UserSession;
         Pages.Home.Admin Accueil;
-        Pages.Service.Main Service;
         Pages.Inventaire.Inventaire Inventaire;
-        Pages.Preindexation.Preindexation Preindexation;
         Pages.Scannerisation.Scannerisation Scannerisation;
         Pages.Indexation.Indexation Indexation;
         Pages.Controle.Controle Controle;
         Pages.Correction.Correction Correction;
-        
+
         Pages.Parametre.Parametre Parametre;
         Pages.Agent.GestionAgent GestionAgent;
         Pages.Dispatching.Dispatching Dispatching; //Dispatching Indexation
@@ -45,7 +40,7 @@ namespace DOCUMAT
             InitializeComponent();
         }
 
-        public Menu(Models.Agent agent,SessionTravail sessionTravail):this()
+        public Menu(Models.Agent agent, SessionTravail sessionTravail) : this()
         {
             #region GESTION DES PRIVILEGES UTILISATEUR
             try
@@ -55,15 +50,14 @@ namespace DOCUMAT
                 UserSession = sessionTravail;
                 if (!string.IsNullOrWhiteSpace(agent.CheminPhoto))
                 {
-                    if(File.Exists(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"],Utilisateur.CheminPhoto)))
+                    if (File.Exists(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"], Utilisateur.CheminPhoto)))
                     {
                         try
                         {
-                            FileInfo file = new FileInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"], Utilisateur.CheminPhoto));
-                            //ImgPhotoUser.Source = BitmapFrame.Create(new Uri(Path.Combine(Directory.GetCurrentDirectory(), Utilisateur.CheminPhoto)), BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
+                            FileInfo file = new FileInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"], Utilisateur.CheminPhoto));                            
                             ImgPhotoUser.Source = BitmapFrame.Create(new Uri(file.FullName), BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
                         }
-                        catch (Exception ex){MessageBox.Show(ex.Message, "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);}
+                        catch (Exception ex) { MessageBox.Show(ex.Message, "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning); }
                     }
                 }
                 tbxUserName.Text = Utilisateur.Login;
@@ -104,7 +98,7 @@ namespace DOCUMAT
                         BtnSCANNERISATION.IsEnabled = false;
                         BtnINDEXATION.IsEnabled = true;
                         BtnCONTROLE.IsEnabled = false;
-                        BtnCORRECTION.IsEnabled = false;
+                        BtnCORRECTION.IsEnabled = true;
                         BtnGestionAgent.IsEnabled = false;
                         BtnDispatchAgent.IsEnabled = false;
                         BtnParametre.IsEnabled = false;
@@ -145,7 +139,7 @@ namespace DOCUMAT
                         BtnCONTROLE.IsEnabled = true;
                         BtnCORRECTION.IsEnabled = true;
                         BtnGestionAgent.IsEnabled = true;
-                        BtnDispatchAgent.IsEnabled =true;
+                        BtnDispatchAgent.IsEnabled = true;
                         BtnParametre.IsEnabled = false;
                         BtnDispatchControle.IsEnabled = true;
                         BtnDispatchCorrection.IsEnabled = true;
@@ -192,11 +186,19 @@ namespace DOCUMAT
             switch (index)
             {
                 case 0:
+                    if (Accueil == null)
+                    {
+                        Accueil = new Pages.Home.Admin();
+                    }
                     this.ContenuAdd.Navigate(Accueil);
                     //ContenuAdd.Content = new Pages.Home.Admin();
                     break;
                 case 1:
-                    this.ContenuAdd.Navigate(new Pages.Inventaire.Inventaire(Utilisateur));
+                    if (Inventaire == null)
+                    {
+                        Inventaire = new Pages.Inventaire.Inventaire(Utilisateur);
+                    }
+                    this.ContenuAdd.Navigate(Inventaire);
                     //ContenuAdd.Content = new Pages.Inventaire.Inventaire();
                     break;
                 case 2:
@@ -204,24 +206,40 @@ namespace DOCUMAT
                     //ContenuAdd.Content = new Pages.Preindexation.Preindexation();                    
                     break;
                 case 3:
+                    if (Scannerisation == null)
+                    {
+                        Scannerisation = new Pages.Scannerisation.Scannerisation(Utilisateur);
+                    }
                     // SCANNERISATION
-                    this.ContenuAdd.Navigate(new Pages.Scannerisation.Scannerisation(Utilisateur));
+                    this.ContenuAdd.Navigate(Scannerisation);
                     break;
                 case 4:
-                    this.ContenuAdd.Navigate(new Pages.Indexation.Indexation(Utilisateur));
+                    if (Indexation == null)
+                    {
+                        Indexation = new Pages.Indexation.Indexation(Utilisateur);
+                    }
+                    this.ContenuAdd.Navigate(Indexation);
                     //ContenuAdd.Content = new Pages.Indexation.Indexation();
                     break;
                 case 5:
-                    this.ContenuAdd.Navigate(new Pages.Controle.Controle(Utilisateur));
+                    if (Controle == null)
+                    {
+                        Controle = new Pages.Controle.Controle(Utilisateur);
+                    }
+                    this.ContenuAdd.Navigate(Controle);
                     //ContenuAdd.Content = new Pages.Controle.Controle();
                     break;
                 case 6:
-                    this.ContenuAdd.Navigate(new Pages.Correction.Correction(Utilisateur));
+                    if (Correction == null)
+                    {
+                        Correction = new Pages.Correction.Correction(Utilisateur);
+                    }
+                    this.ContenuAdd.Navigate(Correction);
                     //ContenuAdd.Content = new Pages.Correction.Correction();
                     break;
                 default:
-                    //GridCursor.Background = Brushes.DimGray;
                     this.ContenuAdd.Navigate(Accueil);
+                    //GridCursor.Background = Brushes.DimGray;
                     //ContenuAdd.Content = new Pages.Home.Admin();
                     break;
             }
@@ -238,29 +256,12 @@ namespace DOCUMAT
             DispatchingCorrection = new Pages.Dispatching.DispatchingCorrection(Utilisateur);
             this.ContenuAdd.Navigate(Accueil);
 
-            // Désactivation de la Préindexation
+            // Désactivation 
             BtnPREINDEXATION.IsEnabled = false;
-
-            // Définition du Timer de maintient de session 
-            Timer = new System.Timers.Timer() { AutoReset = true, Interval = 1 * 60 * 1000 };
-            Timer.Elapsed += Timer_Elapsed;
-            Timer.Start();
-        }   
-
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            // Mise à jour de la session de Travail
-            using(var ct = new DocumatContext())
-            {
-                try
-                {
-                    SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
-                    sessionTravail.DateModif = DateTime.Now;
-                    ct.SaveChanges();
-                }
-                catch(Exception ex){ /*MessageBox.Show(ex.Message, "ERREUR ARRET SESSION", MessageBoxButton.OK, MessageBoxImage.Error);*/ }
-            }
+            BtnDispatchCorrection.IsEnabled = false;
+            BtnCORRECTION.IsEnabled = false;
         }
+
 
         private void Button_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
@@ -318,7 +319,7 @@ namespace DOCUMAT
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(isDeconex != true)
+            if (isDeconex != true)
             {
                 if (MessageBox.Show("VOULEZ VOUS VRAIMENT FERMER L'APPLICATION ? ", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
                 {
@@ -335,65 +336,69 @@ namespace DOCUMAT
                             sessionTravail.DateFin = sessionTravail.DateModif = DateTime.Now;
                             if (ct.SaveChanges() > 0)
                             {
-                                Timer.Stop();
                                 Application.Current.Shutdown();
                             }
                             else
                             {
                                 MessageBox.Show("La session a été stopper !!!", "ERREUR ARRET SESSION", MessageBoxButton.OK, MessageBoxImage.Error);
                                 Application.Current.Shutdown();
-
                             }
                         }
                     }
-                    catch (Exception){ Application.Current.Shutdown(); }
+                    catch (Exception) { Application.Current.Shutdown(); }
                 }
             }
         }
 
         private void BtnDeconnex_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (MessageBox.Show("DECONNECTER SE COMPTE ? ", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            try
             {
-                // Enregistrement de la fin de la session de travail
-                using (var ct = new DocumatContext())
+                if (MessageBox.Show("DECONNECTER SE COMPTE ? ", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
-                    sessionTravail.DateFin = sessionTravail.DateModif = DateTime.Now;
-                    ct.SaveChanges();
-
-                    Connexion Connexion = new Connexion();
-                    Connexion.Show();
-                    isDeconex = true;
-                    Timer.Stop();
-                    this.Close();
-
-                    // Fermeture des Fenetres Potentiellement Ouverte 
-                    if(Dispatching.IsVisible)
+                    // Enregistrement de la fin de la session de travail
+                    using (var ct = new DocumatContext())
                     {
-                        Dispatching.Close();
-                    }
+                        SessionTravail sessionTravail = ct.SessionTravails.FirstOrDefault(st => st.SessionTravailID == UserSession.SessionTravailID);
+                        sessionTravail.DateFin = sessionTravail.DateModif = DateTime.Now;
+                        ct.SaveChanges();
 
-                    if (DispatchingControle.IsVisible)
-                    {
-                        DispatchingControle.Close();
-                    }
+                        Connexion Connexion = new Connexion();
+                        Connexion.Show();
+                        isDeconex = true;
+                        this.Close();
 
-                    if(DispatchingCorrection.IsVisible)
-                    {
-                        DispatchingCorrection.Close();
-                    }
+                        // Fermeture des Fenetres Potentiellement Ouverte 
+                        if (Dispatching.IsVisible)
+                        {
+                            Dispatching.Close();
+                        }
 
-                    if(Parametre.IsVisible)
-                    {
-                        Parametre.Close();
-                    }
+                        if (DispatchingControle.IsVisible)
+                        {
+                            DispatchingControle.Close();
+                        }
 
-                    if(GestionAgent.IsVisible)
-                    {
-                        GestionAgent.Close();
+                        if (DispatchingCorrection.IsVisible)
+                        {
+                            DispatchingCorrection.Close();
+                        }
+
+                        if (Parametre.IsVisible)
+                        {
+                            Parametre.Close();
+                        }
+
+                        if (GestionAgent.IsVisible)
+                        {
+                            GestionAgent.Close();
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
             }
         }
 
@@ -423,7 +428,7 @@ namespace DOCUMAT
         {
             // Reéquilibre la taille minimal du GridMenuContainer height pour 
             // ne pas avoir de pied de page blanc
-            if(e.HeightChanged)
+            if (e.HeightChanged)
             {
                 Size size = e.NewSize;
                 double minGridHeight = 500;
@@ -431,7 +436,7 @@ namespace DOCUMAT
 
                 if (size.Height > menuHeight)
                 {
-                    double ratio = size.Height - menuHeight;                   
+                    double ratio = size.Height - menuHeight;
                     GridMain.MinHeight = minGridHeight + ratio;
                 }
                 else
@@ -440,9 +445,9 @@ namespace DOCUMAT
                 }
             }
 
-            if(e.WidthChanged)
+            if (e.WidthChanged)
             {
-                if(e.NewSize.Width < 1140)
+                if (e.NewSize.Width < 1140)
                 {
                     BtnACCUEIL.Width = 100;
                     BtnACCUEIL.Content = "ACC..";

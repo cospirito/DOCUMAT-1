@@ -26,7 +26,7 @@ namespace DOCUMAT.Pages.Dispatching
             InitializeComponent();
         }
 
-        public DispatchingCorrection(Models.Agent user):this()
+        public DispatchingCorrection(Models.Agent user) : this()
         {
             this.Utilisateur = user;
         }
@@ -253,7 +253,7 @@ namespace DOCUMAT.Pages.Dispatching
                                         int IdAgent = Int32.Parse(listViewItem.Tag.ToString());
                                         Models.Agent agent = ct.Agent.Where(a => a.AgentID == IdAgent).FirstOrDefault();
                                         // traitement de l'attribution 
-                                        DocumatContext.AddTraitement(DocumatContext.TbUnite, unite.UniteID, agent.AgentID, (int)Enumeration.TypeTraitement.CORRECTION_ATTRIBUE, "ATTRIBUTION CONTROLE UNITE PAR L'AGENT ID N° : " + Utilisateur.AgentID);
+                                        DocumatContext.AddTraitement(DocumatContext.TbUnite, unite.UniteID, agent.AgentID, (int)Enumeration.TypeTraitement.CORRECTION_ATTRIBUE, "ATTRIBUTION CONTROLE UNITE PAR AGENT ID N° : " + Utilisateur.AgentID);
 
                                         // remise en place de l'affichage
                                         dgUnite.IsEnabled = true;

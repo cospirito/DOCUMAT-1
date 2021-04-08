@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DOCUMAT.Pages.Parametre"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"        
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
-        Title="CONFIG" 
+        Title="Configuration" 
         Background="SlateGray"
         Height="450" 
         Width="600"     
@@ -79,11 +80,21 @@
                     ToolTip="Tester La Connexion"
                     x:Name="BtnCheckConnex"
                     Click="BtnCheckConnex_Click">
-                <materialDesign:PackIcon Kind="Check"
-                    x:Name="ckeckIcon"
-                    Width="25"
-                    Height="25"
-                    Foreground="White"/>
+                <StackPanel HorizontalAlignment="Center">
+                    <materialDesign:PackIcon Kind="Check"
+                        x:Name="ckeckIcon"
+                        Width="25"
+                        Height="25"
+                        HorizontalAlignment="Center"
+                        Foreground="White"
+                        Visibility="Visible"/>
+                    <Image x:Name="loaderGif" gif:ImageBehavior.RepeatBehavior="Forever" 
+                       gif:ImageBehavior.AnimatedSource="/Images/Loader_in_slategray.gif" 
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"  
+                       Visibility="Collapsed"
+                       Height="22"/>
+                </StackPanel>
             </Button>
         </Grid>
 

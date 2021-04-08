@@ -21,14 +21,19 @@ namespace DOCUMAT.Pages.Image
     public partial class SimpleViewer : Window
     {
 		string CheminImage = "";
-        public SimpleViewer()
-        {
-            InitializeComponent();
-		}
 
-		public SimpleViewer(string CheminImage):this()
+		public SimpleViewer(string CheminImage)
         {
-			this.CheminImage = CheminImage;
+            try
+            {
+                InitializeComponent();
+
+                this.CheminImage = CheminImage;
+            }
+            catch (Exception ex)
+            {            
+                 MessageBox.Show("Adobe Reader n'est pas Installé sur cette machine pour permettre la lecture du  fichier, le pdf sera ouvert par la lecteuse par défault", "Adobe Reader Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
 		/// <summary>
@@ -78,7 +83,22 @@ namespace DOCUMAT.Pages.Image
             }
             catch (Exception ex)
             {
-                ex.ExceptionCatcher();
+                if (fileInfo.Extension.ToUpper() == ".PDF")
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(ImagePath);
+                    }
+                    catch (Exception exiner)
+                    {
+                        exiner.ExceptionCatcher();
+                    }
+                    finally { this.Close(); }
+                }
+                else
+                {
+                    ex.ExceptionCatcher();
+                }
             }
 		}
 

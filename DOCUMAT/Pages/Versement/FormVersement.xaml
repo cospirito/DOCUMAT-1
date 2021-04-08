@@ -29,7 +29,7 @@
                         Padding="10"
                         TextDecorations="underline"
                         FontWeight="Bold"
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         HorizontalAlignment="Center"
                         FontSize="20"/>
                 <Grid>
@@ -92,7 +92,7 @@
                            HorizontalAlignment="Center" 
                            FontSize="20"
                            FontWeight="Bold"
-                           FontFamily="Agency FB"
+                           FontFamily="{StaticResource AgencyFb}"
                            Foreground="White"/>
                 <StackPanel Orientation="Horizontal"  HorizontalAlignment="Center">
                     <TextBox x:Name="tbNombreR3" 
@@ -143,7 +143,7 @@
                 <TextBlock x:Name="txbFormLivHeader" 
                     Text="FORMULAIRE DE LIVRAISON"
                     Foreground="White"
-                    FontFamily="Agency FB"
+                    FontFamily="{StaticResource AgencyFb}"
                     FontWeight="Bold"
                     TextDecorations="underline"
                     HorizontalAlignment="Center"                    

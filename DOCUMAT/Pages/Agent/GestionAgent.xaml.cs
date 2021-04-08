@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using DOCUMAT.Models;
@@ -14,6 +16,8 @@ namespace DOCUMAT.Pages.Agent
     public partial class GestionAgent : Window
     {
         public Models.Agent Utilisateur;
+        private readonly BackgroundWorker RefreshData = new BackgroundWorker();
+        public List<AgentView> ListAgentActuel = new List<AgentView>();
 
         #region Mes Fonctions
 
@@ -30,30 +34,51 @@ namespace DOCUMAT.Pages.Agent
                 MessageBox.Show(ex.Message, "ATTENTION", MessageBoxButton.OK, MessageBoxImage.Error); ;
             }
         }
+        #endregion
 
-        private void rechercheAgent()
+        public GestionAgent()
         {
+            InitializeComponent();
+            RefreshData.WorkerSupportsCancellation = true;
+            RefreshData.DoWork += RefreshData_DoWork;
+            RefreshData.RunWorkerCompleted += RefreshData_RunWorkerCompleted;
+            RefreshData.Disposed += RefreshData_Disposed;
+        }
+
+        private void RefreshData_Disposed(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void RefreshData_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Définition de la methode de récupération des données 
             try
             {
-                if (TbRechercher.Text != "")
-                {
-                    dgAgent.ItemsSource = AgentView.GetViewsList().Where(av => av.Agent.Noms.ToLower().Contains(TbRechercher.Text.ToLower())).ToList();
-                }
-                else
-                {
-                    refreshListAgent();
-                }
+                List<AgentView> AgentViews = new List<AgentView>();
+                AgentViews = AgentView.GetViewsList();
+                e.Result = AgentViews;
             }
             catch (Exception ex)
             {
                 ex.ExceptionCatcher();
             }
         }
-        #endregion
 
-        public GestionAgent()
+        private void RefreshData_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            InitializeComponent();
+            try
+            {
+                ListAgentActuel = e.Result as List<AgentView>;
+                dgAgent.ItemsSource = ListAgentActuel;
+                PanelLoader.Visibility = Visibility.Collapsed;
+                panelInteracBtn.IsEnabled = true;
+                dgAgent.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         public GestionAgent(Models.Agent user):this()
@@ -61,19 +86,23 @@ namespace DOCUMAT.Pages.Agent
             Utilisateur = user;
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void btnRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            refreshListAgent();
-        }
-
         private void BtnRechercher_Click(object sender, RoutedEventArgs e)
         {
-            rechercheAgent();
+            try
+            {
+                if (TbRechercher.Text != "")
+                {
+                    dgAgent.ItemsSource = ListAgentActuel.Where(av => av.Agent.Noms.ToLower().Contains(TbRechercher.Text.ToLower())).ToList();
+                }
+                else
+                {
+                    dgAgent.ItemsSource = ListAgentActuel;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         private void BtnEdit_Click(object sender, RoutedEventArgs e)
@@ -101,6 +130,7 @@ namespace DOCUMAT.Pages.Agent
                         foreach (AgentView item in dgAgent.SelectedItems)
                         {
                             agentIds.Add(item.Agent.AgentID);
+                            agentView.context.SessionTravails.RemoveRange(agentView.context.SessionTravails.Where(st => st.AgentID == item.Agent.AgentID));
                             agentView.context.Agent.Remove(agentView.context.Agent.FirstOrDefault(a => a.AgentID == item.Agent.AgentID));
                         }
                         agentView.context.SaveChanges();
@@ -127,7 +157,21 @@ namespace DOCUMAT.Pages.Agent
 
         private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
         {
-            rechercheAgent();
+            try
+            {
+                if (TbRechercher.Text != "")
+                {
+                    dgAgent.ItemsSource = ListAgentActuel.Where(av => av.Agent.Noms.ToLower().Contains(TbRechercher.Text.ToLower())).ToList();
+                }
+                else
+                {
+                    dgAgent.ItemsSource = ListAgentActuel;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -135,7 +179,6 @@ namespace DOCUMAT.Pages.Agent
             ContextMenu cm = this.FindResource("cmButton") as ContextMenu;
             dgAgent.ContextMenu = cm;
             MenuItem menuItem = (MenuItem)cm.Items.GetItemAt(2);
-            refreshListAgent();
 
             switch (Utilisateur.Affectation)
             {
@@ -149,6 +192,9 @@ namespace DOCUMAT.Pages.Agent
                     menuItem.IsEnabled = false;
                     break;
             }
+
+            //Chargement des éléments
+            BtnActualise_Click(sender, e);
         }
 
         private void dgAgent_LoadingRow(object sender, DataGridRowEventArgs e)
@@ -165,6 +211,25 @@ namespace DOCUMAT.Pages.Agent
             FormAgent formAgent = new FormAgent(this,Utilisateur);
             this.IsEnabled = false;
             formAgent.Show();
+        }
+
+        private void BtnActualise_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                RefreshData.RunWorkerAsync(Utilisateur);
+                PanelLoader.Visibility = Visibility.Visible;
+                panelInteracBtn.IsEnabled = false;
+                dgAgent.Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                //ex.ExceptionCatcher();
+                RefreshData.CancelAsync();
+                PanelLoader.Visibility = Visibility.Collapsed;
+                panelInteracBtn.IsEnabled = true;
+                dgAgent.Visibility = Visibility.Visible;
+            }
         }
     }
 }

@@ -52,11 +52,10 @@
             this.Load += new System.EventHandler(this.UserControl1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.axAcroPDF1)).EndInit();
             this.ResumeLayout(false);
-
         }
 
         #endregion
 
         public AxAcroPDFLib.AxAcroPDF axAcroPDF1;
-    }
+    } 
 }

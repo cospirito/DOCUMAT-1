@@ -2,18 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DOCUMAT.ViewModels
 {
-    public class ServiceView : IView<ServiceView,Models.Service>
+    public class ServiceView : IView<ServiceView, Models.Service>
     {
         public Models.Service Service { get; set; }
         public int NombreVersement { get; private set; }
         public int NombreRegistre { get; private set; }
         public int NumeroOrdre { get; set; }
-        public DocumatContext context { get ; set ; }
+        public DocumatContext context { get; set; }
 
         public static List<ServiceView> GetServiceViewsList(List<Models.Service> services)
         {
@@ -47,7 +45,7 @@ namespace DOCUMAT.ViewModels
         public ServiceView GetView(int Id)
         {
             List<ServiceView> ServiceViews = this.GetViewsList();
-             return ServiceViews.FirstOrDefault(sv => sv.Service.ServiceID == Id);
+            return ServiceViews.FirstOrDefault(sv => sv.Service.ServiceID == Id);
         }
 
         public List<ServiceView> GetViewsList()

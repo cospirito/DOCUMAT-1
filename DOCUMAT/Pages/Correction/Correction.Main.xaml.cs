@@ -1,13 +1,14 @@
-﻿using DOCUMAT.Models;
+﻿using DOCUMAT.DataModels;
+using DOCUMAT.Models;
 using DOCUMAT.ViewModels;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -21,46 +22,65 @@ namespace DOCUMAT.Pages.Correction
     {
         public Models.Agent Utilisateur;
         string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
+        private readonly BackgroundWorker RefreshData = new BackgroundWorker();
+        public List<RegistreDataModel> ListRegistreActuel = new List<RegistreDataModel>();
+        public int CurrentPhase = 1;
+        int parRecup = Int32.Parse(ConfigurationManager.AppSettings["perRecup"]);
+
 
         public Correction()
         {
             InitializeComponent();
+            RefreshData.WorkerSupportsCancellation = true;
+            RefreshData.WorkerReportsProgress = true;
+            RefreshData.DoWork += RefreshData_DoWork;
+            RefreshData.RunWorkerCompleted += RefreshData_RunWorkerCompleted;
+            RefreshData.Disposed += RefreshData_Disposed;
+            RefreshData.ProgressChanged += RefreshData_ProgressChanged;
         }
 
-        public Correction(Models.Agent user):this()
+        private void RefreshData_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            Utilisateur = user;
+            #region SET PROGRESSION 
+            // Affichage de la progression
+            double widthPro = (BtnAnnuleChargement.ActualWidth * e.ProgressPercentage) / 100;
+
+            if (e.ProgressPercentage > 97)
+            {
+                BtnAnnuleChargement.BorderBrush = Brushes.LightGreen;
+                BtnAnnuleChargement.Foreground = Brushes.White;
+            }
+
+            if (e.ProgressPercentage > 40)
+            {
+                BtnAnnuleChargement.Foreground = Brushes.White;
+            }
+
+            if (e.ProgressPercentage > 2)
+            {
+                LoadText.Text = e.ProgressPercentage.ToString();
+                LoadIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Percent;
+                BtnAnnuleChargement.BorderThickness = new Thickness(widthPro, 1, 0, 1);
+            }
+            #endregion
         }
 
-        public int CurrentPhase = 1;
-
-        #region FONCTIONS
-        public void RefreshRegistrePhase1()
+        private void RefreshData_Disposed(object sender, EventArgs e)
         {
             try
             {
-                if (cbChoixunite.SelectedItem != null)
-                {
-                    //Remplissage de la list de registre
-                    //Les registres de type Phase 1 sont les registre nouvellement indexée 
-                    // Devra être modifié pour empêcher l'affichage des régistres déja attribués
-                    Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
-                    RegistreView registreView = new RegistreView();
-                    List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE1 && r.Registre.ID_Unite == unite.UniteID).ToList();
-                    List<Models.Correction> corrections = new List<Models.Correction>();
-                    using (var ct = new DocumatContext())
-                    {
-                        corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
-                                                          && c.StatutCorrection == 1 && c.PhaseCorrection == 1).ToList();
-                    }
-                    var jointure = from r in registreViews
-                                   join c in corrections
-                                   on r.Registre.RegistreID equals c.RegistreId
-                                   select r;
+                PanelLoader.Visibility = Visibility.Collapsed;
+                panelInteracBtn.IsEnabled = true;
+                PanelPhase.IsEnabled = true;
 
-                    //dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE1);
-                    dgRegistre.ItemsSource = jointure;
-                }
+                #region RESET PROGRESSION 
+                // Affichage de la progression
+                LoadText.Text = "Annuler";
+                LoadIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.RemoveCircle;
+                BtnAnnuleChargement.BorderThickness = new Thickness(0, 1, 0, 1);
+                BtnAnnuleChargement.Foreground = Brushes.PaleVioletRed;
+                BtnAnnuleChargement.BorderBrush = Brushes.PaleVioletRed;
+                #endregion
             }
             catch (Exception ex)
             {
@@ -68,43 +88,228 @@ namespace DOCUMAT.Pages.Correction
             }
         }
 
-        public void RefreshRegistrePhase2()
+        private void RefreshData_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             try
             {
-                if (cbChoixunite.SelectedItem != null)
-                {
-                    //Remplissage de la list de registre
-                    //Les registres de type Phase 1 sont les registre nouvellement indexée 
-                    // Devra être modifié pour empêcher l'affichage des régistres déja attribués
-                    Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
-                    RegistreView registreView = new RegistreView();
-                    List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE3 && r.Registre.ID_Unite == unite.UniteID).ToList();
-                    List<Models.Correction> corrections = new List<Models.Correction>();
-                    using (var ct = new DocumatContext())
-                    {
-                        corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
-                                                          && c.StatutCorrection == 1 && c.PhaseCorrection == 3).ToList();
-                    }
-                    var jointure = from r in registreViews
-                                   join c in corrections
-                                   on r.Registre.RegistreID equals c.RegistreId
-                                   select r;
+                ListRegistreActuel = e.Result as List<RegistreDataModel>;
+                dgRegistre.ItemsSource = ListRegistreActuel;
+                PanelLoader.Visibility = Visibility.Collapsed;
+                panelInteracBtn.IsEnabled = true;
+                PanelPhase.IsEnabled = true;
 
-                    //dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE1);
-                    dgRegistre.ItemsSource = jointure;
-                }
+                #region RESET PROGRESSION 
+                // Affichage de la progression
+                LoadText.Text = "Annuler";
+                LoadIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.RemoveCircle;
+                BtnAnnuleChargement.BorderThickness = new Thickness(0, 1, 0, 1);
+                BtnAnnuleChargement.Foreground = Brushes.PaleVioletRed;
+                BtnAnnuleChargement.BorderBrush = Brushes.PaleVioletRed;
+                #endregion
             }
             catch (Exception ex)
             {
                 ex.ExceptionCatcher();
             }
         }
-        #endregion
 
-        private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
+        private void RefreshData_DoWork(object sender, DoWorkEventArgs e)
         {
-            ((RegistreView)e.Row.Item).NumeroOrdre = e.Row.GetIndex() + 1;
+            // Définition de la methode de récupération des données 
+            // Récupération de l'argument de la phase 
+            var param = (object[])e.Argument;
+            var phaseData = (int)param[0];
+            var unite = (Models.Unite)param[1];
+            var agent = (Models.Agent)param[2];
+
+            if (phaseData == 1)
+            {
+                // Registre en PHASE 1
+                try
+                {
+                    if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR ||
+                       Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR ||
+                       Utilisateur.Affectation == (int)Enumeration.AffectationAgent.CORRECTION)
+                    {
+                        using (var ct = new DocumatContext())
+                        {
+                            int nbRecup = 1;
+                            string reqstr = $"SELECT COUNT(DISTINCT RG.RegistreID) FROM Registres RG " +
+                                            $"INNER JOIN CORRECTIONS CR ON CR.RegistreID = RG.RegistreID " +
+                                            $"WHERE RG.StatutActuel = {(int)Enumeration.Registre.PHASE1} " +
+                                            $"AND RG.ID_Unite = {unite.UniteID} AND CR.ImageID IS NULL AND CR.SequenceID IS NULL AND CR.StatutCorrection = 1 AND CR.PhaseCorrection = 1";
+
+                            // récupération du nombre total de registres au statut scanné
+                            int nbLigne = ct.Database.SqlQuery<int>(reqstr).FirstOrDefault();
+
+                            // Liste à récupérer
+                            List<RegistreDataModel> registreDataModels = new List<RegistreDataModel>();
+                            if (nbLigne > parRecup)
+                            {
+                                nbRecup = (int)Math.Ceiling(((float)nbLigne / (float)parRecup));
+                            }
+
+                            for (int i = 0; i < nbRecup; i++)
+                            {
+                                if (RefreshData.CancellationPending == false)
+                                {
+                                    int limitId = (registreDataModels.Count == 0) ? 0 : registreDataModels.LastOrDefault().RegistreID;
+                                    registreDataModels.AddRange(RegistreView.GetRegistreDataCorrectionPhase1(unite.UniteID, limitId, parRecup, (int)Enumeration.Registre.PHASE1).ToList());
+                                    RefreshData.ReportProgress((int)Math.Ceiling(((float)i / (float)nbRecup) * 100));
+                                }
+                                else
+                                {
+                                    e.Result = registreDataModels;
+                                    return;
+                                }
+                            }
+
+                            //Remplissage de la list de registre
+                            e.Result = registreDataModels;
+                        }
+
+                        ////Remplissage de la list de registre
+                        //RegistreView registreView = new RegistreView();
+                        //List<RegistreDataModel> registreViews = RegistreView.GetRegistreData((int)Enumeration.Registre.PHASE1).Where(r => r.ID_Unite == unite.UniteID).ToList();
+                        //List<Models.Correction> corrections = new List<Models.Correction>();
+                        //using (var ct = new DocumatContext())
+                        //{
+                        //    corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
+                        //                                      && c.StatutCorrection == 1 && c.PhaseCorrection == 1).ToList();
+                        //}
+                        //var jointure = from r in registreViews
+                        //               join c in corrections
+                        //               on r.RegistreID equals c.RegistreId
+                        //               select r;
+
+                        //e.Result = jointure.ToList();
+                    }
+                    else if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.INDEXATION)
+                    {
+                        //Remplissage de la list de registre
+                        RegistreView registreView = new RegistreView();
+                        List<RegistreDataModel> registreViews = RegistreView.GetRegistreDataByTraitbyAgent(agent.AgentID,(int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION,(int)Enumeration.Registre.PHASE1).Where(r => r.ID_Unite == unite.UniteID).ToList();
+                        List<Models.Correction> corrections = new List<Models.Correction>();
+                        using (var ct = new DocumatContext())
+                        {
+                            corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
+                                                              && c.StatutCorrection == 1 && c.PhaseCorrection == 1).ToList();
+                        }
+                        var jointure = from r in registreViews
+                                       join c in corrections
+                                       on r.RegistreID equals c.RegistreId
+                                       select r;
+
+                        e.Result = jointure.ToList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ex.ExceptionCatcher();
+                }
+            }
+            else if (phaseData == 2)
+            {
+                try
+                {
+                    if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR ||
+                       Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR ||
+                       Utilisateur.Affectation == (int)Enumeration.AffectationAgent.CONTROLE)
+                    {
+                        using (var ct = new DocumatContext())
+                        {
+                            int nbRecup = 1;
+                            string reqstr = $"SELECT COUNT(DISTINCT RG.RegistreID) FROM Registres RG " +
+                                            $"INNER JOIN CORRECTIONS CR ON CR.RegistreID = RG.RegistreID " +
+                                            $"WHERE RG.StatutActuel = {(int)Enumeration.Registre.PHASE1} " +
+                                            $"AND RG.ID_Unite = {unite.UniteID} AND CR.ImageID IS NULL AND CR.SequenceID IS NULL AND CR.StatutCorrection = 1 AND CR.PhaseCorrection = 3";
+
+                            // récupération du nombre total de registres au statut scanné
+                            int nbLigne = ct.Database.SqlQuery<int>(reqstr).FirstOrDefault();
+
+                            // Liste à récupérer
+                            List<RegistreDataModel> registreDataModels = new List<RegistreDataModel>();
+                            if (nbLigne > parRecup)
+                            {
+                                nbRecup = (int)Math.Ceiling(((float)nbLigne / (float)parRecup));
+                            }
+
+                            for (int i = 0; i < nbRecup; i++)
+                            {
+                                if (RefreshData.CancellationPending == false)
+                                {
+                                    int limitId = (registreDataModels.Count == 0) ? 0 : registreDataModels.LastOrDefault().RegistreID;
+                                    registreDataModels.AddRange(RegistreView.GetRegistreDataCorrectionPhase1(unite.UniteID, limitId, parRecup, (int)Enumeration.Registre.PHASE3).ToList());
+                                    RefreshData.ReportProgress((int)Math.Ceiling(((float)i / (float)nbRecup) * 100));
+                                }
+                                else
+                                {
+                                    e.Result = registreDataModels;
+                                    return;
+                                }
+                            }
+
+                            //Remplissage de la list de registre
+                            e.Result = registreDataModels;
+                        }
+
+                        ////Remplissage de la list de registre
+                        //RegistreView registreView = new RegistreView();
+                        //List<RegistreDataModel> registreViews = RegistreView.GetRegistreData((int)Enumeration.Registre.PHASE3).Where(r => r.ID_Unite == unite.UniteID).ToList();
+                        //List<Models.Correction> corrections = new List<Models.Correction>();
+                        //using (var ct = new DocumatContext())
+                        //{
+                        //    corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
+                        //                                      && c.StatutCorrection == 1 && c.PhaseCorrection == 3).ToList();
+                        //}
+                        //var jointure = from r in registreViews
+                        //               join c in corrections
+                        //               on r.RegistreID equals c.RegistreId
+                        //               select r;
+
+                        //e.Result = jointure.ToList();
+                    }
+                    else if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.INDEXATION)
+                    {
+                        //Remplissage de la list de registre
+                        RegistreView registreView = new RegistreView();
+                        List<RegistreDataModel> registreViews = RegistreView.GetRegistreDataByTraitbyAgent(agent.AgentID, (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION,(int)Enumeration.Registre.PHASE3).Where(r => r.ID_Unite == unite.UniteID).ToList();
+                        List<Models.Correction> corrections = new List<Models.Correction>();
+                        using (var ct = new DocumatContext())
+                        {
+                            corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
+                                                              && c.StatutCorrection == 1 && c.PhaseCorrection == 3).ToList();
+                        }
+                        var jointure = from r in registreViews
+                                       join c in corrections
+                                       on r.RegistreID equals c.RegistreId
+                                       select r;
+
+                        e.Result = jointure.ToList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ex.ExceptionCatcher();
+                }
+            }
+        }
+
+        public Correction(Models.Agent user) : this()
+        {
+            try
+            {
+                Utilisateur = user;
+                // Liste des Tranches 
+                using (var ct = new DocumatContext())
+                {
+                    cbChoixTranche.ItemsSource = ct.Tranches.ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
@@ -114,8 +319,8 @@ namespace DOCUMAT.Pages.Correction
                 // Chargement de l'image du Qrcode de la ligne
                 Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
                 var element = e.DetailsElement.FindName("QrCode");
-                RegistreView registre = (RegistreView)e.Row.Item;
-                var image = qrcode.Draw(registre.Registre.QrCode, 40);
+                RegistreDataModel registre = (RegistreDataModel)e.Row.Item;
+                var image = qrcode.Draw(registre.QrCode, 40);
                 var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
                 ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
             }
@@ -127,84 +332,35 @@ namespace DOCUMAT.Pages.Correction
 
         private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
         {
-            
-        }
-
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
-            dgRegistre.ContextMenu = cm;
-
-            // Liste des Tranches 
-            using (var ct = new DocumatContext())
-            {
-                cbChoixTranche.ItemsSource = ct.Tranches.ToList();
-            }
-        }
-
-        private void BtnRechercher_Click(object sender, RoutedEventArgs e)
-        {
             try
             {
-                switch (CurrentPhase)
+                if (TbRechercher.Text != "")
                 {
-                    // Recherche des registre en phase 1
-                    case 1:
-                        if (TbRechercher.Text != "")
-                        {
-                            if (cbChoixunite.SelectedItem != null)
-                            {
-                                //Remplissage de la list de registre
-                                //Les registres de type Phase 1 sont les registre nouvellement indexée 
-                                // Devra être modifié pour empêcher l'affichage des régistres déja attribués
-                                Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
-                                RegistreView registreView = new RegistreView();
-                                List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE1 
-                                                                    && r.Registre.ID_Unite == unite.UniteID && r.Registre.Numero.ToLower().Contains(TbRechercher.Text.Trim().ToLower())).ToList();
-                                List<Models.Correction> corrections = new List<Models.Correction>();
-                                using (var ct = new DocumatContext())
-                                {
-                                    corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
-                                                                      && c.StatutCorrection == 1 && c.PhaseCorrection == 1).ToList();
-                                }
-                                var jointure = from r in registreViews
-                                               join c in corrections
-                                               on r.Registre.RegistreID equals c.RegistreId
-                                               select r;
+                    List<RegistreDataModel> registreData = ListRegistreActuel as List<RegistreDataModel>;
 
-                                //dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE1);
-                                dgRegistre.ItemsSource = jointure;
-                            }                            
-                        } else{RefreshRegistrePhase1();}
-                        break;
-                    case 2:
-                        if (TbRechercher.Text != "")
-                        {
-                            if (cbChoixunite.SelectedItem != null)
-                            {
-                                //Remplissage de la list de registre
-                                //Les registres de type Phase 1 sont les registre nouvellement indexée 
-                                // Devra être modifié pour empêcher l'affichage des régistres déja attribués
-                                Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
-                                RegistreView registreView = new RegistreView();
-                                List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE3 
-                                                && r.Registre.ID_Unite == unite.UniteID && r.Registre.Numero.ToLower().Contains(TbRechercher.Text.Trim().ToLower())).ToList();
-                                List<Models.Correction> corrections = new List<Models.Correction>();
-                                using (var ct = new DocumatContext())
-                                {
-                                    corrections = ct.Correction.Where(c => c.ImageID == null && c.SequenceID == null
-                                                                        && c.StatutCorrection == 1 && c.PhaseCorrection == 3).ToList();
-                                }
-                                var jointure = from r in registreViews
-                                                join c in corrections
-                                                on r.Registre.RegistreID equals c.RegistreId
-                                                select r;
-
-                                //dgRegistre.ItemsSource = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.PHASE1);
-                                dgRegistre.ItemsSource = jointure;
-                            }
-                        } else{RefreshRegistrePhase2();}
-                        break;
+                    switch (cbChoixRecherche.SelectedIndex)
+                    {
+                        case 0:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreData.Where(r => r.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 1:
+                            // Récupération des registre par service
+                            dgRegistre.ItemsSource = registreData.Where(r => r.NomComplet.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 2:
+                            // Récupération des registre par Région
+                            dgRegistre.ItemsSource = registreData.Where(r => r.NomRegion.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 3:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreData.Where(r => r.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                    }
+                }
+                else
+                {
+                    dgRegistre.ItemsSource = ListRegistreActuel;
                 }
             }
             catch (Exception ex)
@@ -213,25 +369,79 @@ namespace DOCUMAT.Pages.Correction
             }
         }
 
-        private void cbChoixRecherche_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
+                dgRegistre.ContextMenu = cm;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
-        private void dgRegistre_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void BtnRechercher_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                if (TbRechercher.Text != "")
+                {
+                    List<RegistreDataModel> registreData = ListRegistreActuel as List<RegistreDataModel>;
 
+                    switch (cbChoixRecherche.SelectedIndex)
+                    {
+                        case 0:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreData.Where(r => r.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 1:
+                            // Récupération des registre par service
+                            dgRegistre.ItemsSource = registreData.Where(r => r.NomComplet.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 2:
+                            // Récupération des registre par Région
+                            dgRegistre.ItemsSource = registreData.Where(r => r.NomRegion.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 3:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreData.Where(r => r.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                    }
+                }
+                else
+                {
+                    dgRegistre.ItemsSource = ListRegistreActuel;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         private void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            if (CurrentPhase == 1)
+            try
             {
-                RefreshRegistrePhase1();
+                if (cbChoixunite.SelectedItem != null)
+                {
+                    Models.Unite unite = (Models.Unite)cbChoixunite.SelectedItem;
+                    object[] arg = new object[] { CurrentPhase,unite,Utilisateur };
+                    RefreshData.RunWorkerAsync(arg);
+                    PanelLoader.Visibility = Visibility.Visible;
+                    panelInteracBtn.IsEnabled = false;
+                    PanelPhase.IsEnabled = false;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                RefreshRegistrePhase2();
+                ex.ExceptionCatcher();
+                RefreshData.CancelAsync();
+                PanelLoader.Visibility = Visibility.Collapsed;
+                panelInteracBtn.IsEnabled = true;
+                PanelPhase.IsEnabled = true;
             }
         }
 
@@ -246,7 +456,7 @@ namespace DOCUMAT.Pages.Correction
             BtnPhase2.Background = null;
 
             CurrentPhase = 1;
-            RefreshRegistrePhase1();
+            btnRefresh_Click(sender, e);
         }
 
         private void BtnPhase2_Click(object sender, RoutedEventArgs e)
@@ -260,23 +470,34 @@ namespace DOCUMAT.Pages.Correction
             BtnPhase1.Background = null;
 
             CurrentPhase = 2;
-            RefreshRegistrePhase2();
+            btnRefresh_Click(sender, e);
         }
 
         private void CorrectionImage_Click(object sender, RoutedEventArgs e)
         {
-            if(dgRegistre.SelectedItems.Count == 1)
+            try
             {
-                if(CurrentPhase == 1)
+                using (var ct = new DocumatContext())
                 {
-                    Image.ImageCorrecteur imageCorrecteur = new Image.ImageCorrecteur((RegistreView)dgRegistre.SelectedItem, this);
-                    imageCorrecteur.Show();
+                    if (dgRegistre.SelectedItems.Count == 1)
+                    {
+                        Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == ((RegistreDataModel)dgRegistre.SelectedItem).RegistreID);
+                        if (CurrentPhase == 1)
+                        {
+                            Image.ImageCorrecteur imageCorrecteur = new Image.ImageCorrecteur(registre, this);
+                            imageCorrecteur.Show();
+                        }
+                        else
+                        {
+                            Image.ImageCorrecteurSecond imageCorrecteur = new Image.ImageCorrecteurSecond(registre, this);
+                            imageCorrecteur.Show();
+                        }
+                    }
                 }
-                else
-                {
-                    Image.ImageCorrecteurSecond imageCorrecteur = new Image.ImageCorrecteurSecond((RegistreView)dgRegistre.SelectedItem,this);
-                    imageCorrecteur.Show(); 
-                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
             }
         }
 
@@ -284,7 +505,6 @@ namespace DOCUMAT.Pages.Correction
         {
             if (dgRegistre.SelectedItems.Count == 1)
             {
-
                 RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
                 DirectoryInfo RegistreDossier = new DirectoryInfo(Path.Combine(DossierRacine, registreView.Registre.CheminDossier));
                 OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -304,9 +524,7 @@ namespace DOCUMAT.Pages.Correction
                 dlg.ShowPlacesList = true;
                 dlg.InitialDirectory = RegistreDossier.FullName;
 
-                if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
-                {
-                }
+                if (dlg.ShowDialog() == CommonFileDialogResult.Ok){}
             }
         }
 
@@ -318,7 +536,9 @@ namespace DOCUMAT.Pages.Correction
                 Models.Tranche tranche = (Models.Tranche)cbChoixTranche.SelectedItem;
                 using (var ct = new DocumatContext())
                 {
-                    if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                    if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR 
+                        || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR 
+                        || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.INDEXATION)
                     {
                         cbChoixunite.ItemsSource = ct.Unites.Where(u => u.TrancheID == tranche.TrancheID).ToList();
                     }
@@ -341,24 +561,13 @@ namespace DOCUMAT.Pages.Correction
 
         private void cbChoixunite_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            try
+            if (cbChoixunite.SelectedItem != null)
             {
-                if (cbChoixunite.SelectedItem != null)
-                {
-                    if (CurrentPhase == 1)
-                    {
-
-                        RefreshRegistrePhase1();
-                    }
-                    else
-                    {
-                        RefreshRegistrePhase2();
-                    }
-                }
+                btnRefresh_Click(sender, e);
             }
-            catch (Exception ex)
+            else
             {
-                ex.ExceptionCatcher();
+                dgRegistre.ItemsSource = null;
             }
         }
 
@@ -370,12 +579,21 @@ namespace DOCUMAT.Pages.Correction
                 int StandardDgHeight = 450;
                 if (e.NewSize.Height < StandardHeight)
                 {
-                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height)*2/3);
+                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height) * 2 / 3);
                 }
                 else
                 {
-                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight)*2/3);
+                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight) * 2 / 3);
                 }
+            }
+        }
+
+        private void BtnAnnuleChargement_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Voulez vous vraiment annuler l'opération ?", "Annuler", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                == MessageBoxResult.Yes)
+            {
+                RefreshData.CancelAsync();
             }
         }
     }

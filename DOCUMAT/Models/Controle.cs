@@ -25,6 +25,7 @@ namespace DOCUMAT.Models
         public int? NumeroPageImage_idx { get; set; }
         public int? NomPageImage_idx { get; set; }
         public int? RejetImage_idx { get; set; }
+        public int? RejetImage_scan { get; set; }
         public string MotifRejetImage_idx { get; set; }
 
         //Index Séquence

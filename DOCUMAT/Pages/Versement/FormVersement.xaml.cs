@@ -36,7 +36,7 @@ namespace DOCUMAT.Pages.Versement
             dtLivraison.Language = XmlLanguage.GetLanguage("fr-FR");
         }
 
-        public FormVersement(ServiceView serviceView,VersementView versement, Inventaire.Inventaire parent,Models.Agent user):this()
+        public FormVersement(ServiceView serviceView, VersementView versement, Inventaire.Inventaire parent, Models.Agent user) : this()
         {
             EditMode = true;
             WindowsParent = parent;
@@ -58,9 +58,9 @@ namespace DOCUMAT.Pages.Versement
             cbLivraison.ItemsSource = serviceView.context.Livraison.Where(l => l.ServiceID == serviceView.Service.ServiceID).ToList();
             cbLivraison.DisplayMemberPath = "Numero";
             cbLivraison.SelectedValuePath = "LivraisonID";
-            cbLivraison.SelectedValue = versement.Versement.LivraisonID;      
-            
-            if(user.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || user.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+            cbLivraison.SelectedValue = versement.Versement.LivraisonID;
+
+            if (user.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || user.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
             {
                 tbNumeroVers.IsEnabled = true;
             }
@@ -70,22 +70,23 @@ namespace DOCUMAT.Pages.Versement
             }
         }
 
-        public FormVersement(ServiceView serviceView,Inventaire.Inventaire parent, Models.Agent user) :this()
-        {            
+        public FormVersement(ServiceView serviceView, Inventaire.Inventaire parent, Models.Agent user) : this()
+        {
             EditMode = false;
             WindowsParent = parent;
             Utilisateur = user;
-            
+
             // Chargement des composantes déja connu
             ServiceViewParent = serviceView;
             dtVers.SelectedDate = DateTime.Now;
             tbService.Text = serviceView.Service.NomComplet;
             dtLivraison.SelectedDate = DateTime.Now;
-            cbLivraison.ItemsSource = serviceView.context.Livraison.Where(l=> l.ServiceID == serviceView.Service.ServiceID).ToList();
+            cbLivraison.ItemsSource = serviceView.context.Livraison.Where(l => l.ServiceID == serviceView.Service.ServiceID).ToList();
             cbLivraison.DisplayMemberPath = "Numero";
             cbLivraison.SelectedValuePath = "LivraisonID";
             cbLivraison.SelectedIndex = 0;
         }
+
         private void cbLivraison_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
@@ -106,13 +107,13 @@ namespace DOCUMAT.Pages.Versement
                         livraison.DateLivraison = dtLivraison.SelectedDate.Value;
                         livraison.ServiceID = ServiceViewParent.Service.ServiceID;
                         VersementView vm = new VersementView();
-                        int idLivraison =  vm.AddLivraison(livraison);
-                        if(idLivraison == 0)
+                        int idLivraison = vm.AddLivraison(livraison);
+                        if (idLivraison == 0)
                         {
-                            if(MessageBox.Show("Cet élément existe déja, Voulez vous mettre à jour la date de livraison", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                            if (MessageBox.Show("Cet élément existe déja, Voulez vous mettre à jour la date de livraison", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                             {
                                 vm.UpLivraison(livraison);
-                                DocumatContext.AddTraitement(DocumatContext.TbLivraison, vm.Versement.Livraison.LivraisonID,WindowsParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION);
+                                DocumatContext.AddTraitement(DocumatContext.TbLivraison, vm.Versement.Livraison.LivraisonID, WindowsParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION);
                                 cbLivraison.ItemsSource = vm.context.Livraison.Where(l => l.ServiceID == ServiceViewParent.Service.ServiceID).ToList();
                                 cbLivraison.SelectedIndex = cbLivraison.Items.Count - 1;
                                 MessageBox.Show("Livraison Modifié", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -169,7 +170,7 @@ namespace DOCUMAT.Pages.Versement
                 if (versementView.Versement.NumeroVers != numVers || (dtVers.SelectedDate.HasValue && versement.DateVers != dtVers.SelectedDate.Value)
                     || versementView.Versement.NomAgentVersant != tbNomAgentVersant.Text || versementView.Versement.PrenomsAgentVersant != tbPrenomsAgentVersant.Text)
                 {
-                    versement.NumeroVers = numVers;                
+                    versement.NumeroVers = numVers;
                     versement.DateVers = dtVers.SelectedDate.Value;
                     versement.NomAgentVersant = tbNomAgentVersant.Text;
                     versement.PrenomsAgentVersant = tbPrenomsAgentVersant.Text;
@@ -205,7 +206,7 @@ namespace DOCUMAT.Pages.Versement
                     throw new Exception("Veuillez entrer un nombre correcte pour le champ nombre de registre R3 versé !!!");
 
                 int nombreR4 = 0;
-                if (!Int32.TryParse(tbNombreR3.Text, out nombreR4))
+                if (!Int32.TryParse(tbNombreR4.Text, out nombreR4))
                     throw new Exception("Veuillez entrer un nombre correcte pour le champ nombre de registre R4 versé !!!");
 
                 bool aUnBordereau = true;
@@ -268,16 +269,16 @@ namespace DOCUMAT.Pages.Versement
                         // Copy du bordereau dans le dossier du service
                         string newFile = "BORDEREAU_" + ServiceViewParent.Service.Nom + "_L" + cbLivraison.Text + "_V" + numeroVers + ".pdf";
                         string newFilePath = DossierService + @"\" + newFile;
-                        if(File.Exists(newFilePath))
+                        if (File.Exists(newFilePath))
                         {
-                            if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR)
+                            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR)
                             {
                                 MessageBoxResult question = MessageBox.Show("Voulez vous remplacer le fichier existant ou l'utiliser \n OUI-(REMPLACER) OU NON-(UTILISER) ?", "QUESTION", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
                                 if (question == MessageBoxResult.Yes)
                                 {
-                                    File.Copy(nomFichier, newFilePath,true);
+                                    File.Copy(nomFichier, newFilePath, true);
                                 }
-                                else if(question == MessageBoxResult.No)
+                                else if (question == MessageBoxResult.No)
                                 {
                                     nomFichierExistant = newFilePath;
                                 }
@@ -311,7 +312,7 @@ namespace DOCUMAT.Pages.Versement
                         versementView.Add();
 
                         // Enregistrement du traitement de l'agent 
-                        DocumatContext.AddTraitement(DocumatContext.TbVersement, versementView.Versement.VersementID,WindowsParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
+                        DocumatContext.AddTraitement(DocumatContext.TbVersement, versementView.Versement.VersementID, WindowsParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
 
                         MessageBox.Show("Versement Ajouté !!!", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
                         WindowsParent.IsEnabled = true;
@@ -356,7 +357,7 @@ namespace DOCUMAT.Pages.Versement
             else
             {
                 ModifVersement();
-            }            
+            }
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -365,11 +366,11 @@ namespace DOCUMAT.Pages.Versement
         }
 
         private void tbNumeroVers_TextChanged(object sender, TextChangedEventArgs e)
-        {           
+        {
             Regex regex = new Regex("^[0-9]{1,}$");
             TextBox textBox = ((TextBox)sender);
             string text = textBox.Text;
-            if(text.Length > 0)
+            if (text.Length > 0)
             {
                 if (!regex.IsMatch(text.Substring(text.Length - 1)))
                 {

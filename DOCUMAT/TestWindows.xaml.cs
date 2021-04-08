@@ -30,14 +30,14 @@ namespace DOCUMAT
         public void SetProgress()
         {
             //Configuration de l'indicateur
-            double pixelSize = ProgressBarCirculaire.Height = ProgressBarCirculaire.Width  = 300;
+            double pixelSize = ProgressBarCirculaire.Height = ProgressBarCirculaire.Width = 300;
             double pixelPick = (defaultPick * pixelSize) / defaultWidth;
-            
+
             double pixelPercent = (pixelPick * percent) / 100;
 
             ProgressBarCirculaire.ProgressIndicator = pixelPercent + " " + pixelPick;
             ProgressBarCirculaire.TextIndicator = percent + "%";
-            indicator.Text = " pixelPick : " + pixelPick + "; \n pixelSize : " + pixelSize + ";\n pixelPercent : " + pixelPercent 
+            indicator.Text = " pixelPick : " + pixelPick + "; \n pixelSize : " + pixelSize + ";\n pixelPercent : " + pixelPercent
                             + "; \n ProgressBarIndicator : " + ProgressBarCirculaire.ProgressIndicator;
         }
     }

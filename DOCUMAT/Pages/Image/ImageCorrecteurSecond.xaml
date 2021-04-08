@@ -36,9 +36,21 @@
                 <ColumnDefinition Width="2*" 
                                   MinWidth="200"/>
             </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column ="0" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Right" 
+                          VerticalAlignment="Stretch"/>
+            <GridSplitter Grid.Column ="2" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Left" 
+                          VerticalAlignment="Stretch"/>
+            
             <Border Grid.Column="0"
                     BorderBrush="SteelBlue" 
-                    BorderThickness="2">
+                    BorderThickness="2"
+                    Margin="0 0 3 0">
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="AgentImage"
                        Source="/Images/user.png"
@@ -48,7 +60,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="tbxAgentLogin"                         
                                 TextAlignment="Center"   
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 Text="Login"     
                                 FontWeight="Bold"
                                 FontSize="15"                                   
@@ -57,7 +69,7 @@
                                 />
                         <TextBlock x:Name="tbxAgentNoms"                         
                                 TextAlignment="Center"                                      
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="NOM ET PRENOMS"                                
@@ -66,7 +78,7 @@
                                 />
                         <TextBlock x:Name="tbxAgentType"                         
                                 TextAlignment="Center"                                      
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="TYPE AGENT"                                
@@ -76,8 +88,9 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <Border BorderBrush="SteelBlue"
+            <Border BorderBrush="SteelBlue" 
                     BorderThickness="2"
+                    Margin="0 0 3 0"
                     Grid.Column="1">
                 <StackPanel VerticalAlignment="Center" 
                             HorizontalAlignment="Center"
@@ -86,7 +99,7 @@
                                 HorizontalAlignment="Left">
                         <TextBlock x:Name="tbxQrCode"                         
                                     TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="Qrcode "     
                                     FontSize="15"
                                     Foreground="Black"                                                
@@ -94,7 +107,7 @@
                                     />
                         <TextBlock x:Name="tbxService"                         
                                     TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="Servvice : "  
                                     FontSize="15"                               
                                     Foreground="Black"                                           
@@ -102,7 +115,7 @@
                                     />
                         <TextBlock x:Name="tbxVersement"                         
                                     TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="N° Versement : " 
                                     FontSize="15"                               
                                     Foreground="Black"                                                
@@ -136,7 +149,7 @@
                         <TextBlock 
                              Text="0%"
                              Name="TextIndicator"
-                             Foreground="SteelBlue" FontSize="20" FontFamily="Agency Fb" 
+                             Foreground="SteelBlue" FontSize="20" FontFamily="{StaticResource AgencyFb}" 
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center"/>
                     </Grid>
@@ -145,7 +158,7 @@
                          Text="Terminé : 0,0%"
                          FontSize="15"
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="SteelBlue"                                                
                          Margin="10 0 0 5"
                          />
@@ -153,7 +166,7 @@
                          Text="En instance : 0,0%"                              
                          FontSize="15"
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="LimeGreen"                                                
                          Margin="10 0 0 5"
                          />
@@ -161,7 +174,7 @@
                          Text="En instance : 0,0%"                              
                          FontSize="15"
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="Firebrick"                                                
                          Margin="10 0 0 5"
                          />
@@ -169,7 +182,7 @@
                          Text="Non Traité 0,0%"                          
                          FontSize="15"    
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="Black"                                                
                          Margin="10 0 0 5"
                          />
@@ -255,14 +268,16 @@
                     BorderBrush="white"
                     x:Name="borderDocument"
                     SizeChanged="borderDocument_SizeChanged">
-                <StackPanel>
-                    <WindowsFormsHost x:Name="PdfViewerPanel" >
-                        <tool:UserControl1 x:Name="PdfViewer"/>
-                    </WindowsFormsHost>
-                    <DocumentViewer Name="DocumentViewer"                                     
-                                    Background="SteelBlue"
-                                    BorderThickness="0" Margin="0">
-                    </DocumentViewer>
+                <StackPanel x:Name="PanelViewer">
+                    <!--Doit être Convenablement rédimensionner avant d'être utiliser-->
+                    <tool:ZoomBorder x:Name="borderSimpleVIewer" 
+                                       ClipToBounds="True" 
+                                       Background="DarkGray"
+                                       Height="{Binding ActualHeight, ElementName=borderDocument}">
+                        <Image x:Name="PageImage"
+                               Margin="0">
+                        </Image>
+                    </tool:ZoomBorder>
                 </StackPanel>
             </Border>
 
@@ -335,11 +350,9 @@
                             IsReadOnly="True"                        
                             MaxHeight="200"       
                             Visibility="Collapsed"
-                            RowDetailsVisibilityMode="VisibleWhenSelected"                         
-                            LoadingRow="dgSequence_LoadingRow"
+                            RowDetailsVisibilityMode="VisibleWhenSelected"  
                             SelectionChanged="dgSequence_SelectionChanged"
-                            AreRowDetailsFrozen="False"
-                            LoadingRowDetails="dgSequence_LoadingRowDetails">
+                            AreRowDetailsFrozen="False">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="N° Ordre" Binding="{Binding strOrdre}" />
                                     <DataGridTextColumn Header="Date " Binding="{Binding strDate}" />
@@ -356,9 +369,7 @@
                             IsReadOnly="True"
                             RowDetailsVisibilityMode="VisibleWhenSelected"                                                 
                             SelectionChanged="dgSequence_SelectionChanged"
-                            AreRowDetailsFrozen="False"
-                            LoadingRow="dgSequence_LoadingRow"
-                            LoadingRowDetails="dgSequence_LoadingRowDetails">
+                            AreRowDetailsFrozen="False">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn IsReadOnly="True" Header="N° Ordre" Binding="{Binding strOrdre}" />
                                     <DataGridTextColumn IsReadOnly="True" Header="Date " Binding="{Binding strDate}" />
@@ -564,8 +575,7 @@
                                                 Background="Transparent"
                                                 IsEnabled="True"
                                                 Visibility="Collapsed"
-                                                Content="SUPPRIMER"
-                                                Click="btnSupprimerImage_Click"/>
+                                                Content="SUPPRIMER"/>
                                             <Button x:Name="BtnTerminerImage"
                                                 Margin="5"
                                                 BorderBrush="White"
@@ -589,7 +599,7 @@
                                 <TextBlock Foreground="SteelBlue"
                                         FontWeight="Bold"
                                         FontSize="20"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         Padding="15"
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center">  INDEX REGISTRE</TextBlock>
@@ -612,7 +622,7 @@
                                         Grid.Column="0"
                                         Grid.Row="0"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -625,7 +635,7 @@
                                 <TextBox x:Name="tbxVolume"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"    
                                         VerticalAlignment="Center"                                      
@@ -636,7 +646,7 @@
                                         Grid.Column="0"
                                         Grid.Row="1"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -649,7 +659,7 @@
                                 <TextBox x:Name="tbxNumDepotDebut"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"    
                                         VerticalAlignment="Center"                                   
@@ -660,7 +670,7 @@
                                         Grid.Column="0"
                                         Grid.Row="2"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -673,7 +683,7 @@
                                 <TextBox x:Name="tbxDateDepotDebut"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"  
                                         VerticalAlignment="Center"                                     
@@ -684,7 +694,7 @@
                                         Grid.Column="0"
                                         Grid.Row="3"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -697,7 +707,7 @@
                                 <TextBox x:Name="tbxNumDepotFin"
                                         Grid.Column="1"  
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"  
                                         VerticalAlignment="Center"                                    
@@ -708,7 +718,7 @@
                                         Grid.Column="0"
                                         Grid.Row="4"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -721,7 +731,7 @@
                                 <TextBox x:Name="tbxDateDepotFin"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"  
                                         VerticalAlignment="Center"                                     
@@ -732,7 +742,7 @@
                                         Grid.Column="0"
                                         Grid.Row="6"
                                         Margin="5"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         VerticalAlignment="Center"> 
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -745,7 +755,7 @@
                                 <TextBox x:Name="tbxNbPage"
                                         Grid.Column="1" 
                                         Foreground="White"
-                                        FontFamily="Agency Fb"
+                                        FontFamily="{StaticResource AgencyFb}"
                                         FontSize="15"
                                         FontWeight="Bold"  
                                         VerticalAlignment="Center"                                    
@@ -789,7 +799,7 @@
                                    Text="VALIDE"
                                    HorizontalAlignment="Center"
                                    Foreground="White"
-                                   FontFamily="Agency Fb"
+                                   FontFamily="{StaticResource AgencyFb}"
                                    FontWeight="Black"
                                    FontSize="17"/>
                             <Button x:Name="btnSuivant" 

@@ -36,7 +36,7 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void SupprimerFeuillet_Click(object sender, RoutedEventArgs e)
         {
-            
+
         }
 
         //Affichage de la liste des images du registre à préindexer
@@ -301,7 +301,7 @@ namespace DOCUMAT.Pages.Preindexation
                         imageView.Image.DateCreation = DateTime.Now;
                         imageView.Image.DateModif = DateTime.Now;
                         imageView.Image.DateScan = DateTime.Now;
-                        imageView.Image.DateDebutSequence = dtDateSequence.SelectedDate.Value;             
+                        imageView.Image.DateDebutSequence = dtDateSequence.SelectedDate.Value;
                         LastImage = imageView.AddPreIndex();
 
                         //Ajout de la liste des séquences à multiréférences
@@ -368,10 +368,10 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void btnSupprimerFeuillet_Click(object sender, RoutedEventArgs e)
         {
-            List<ImageView> imageViews = (List<ImageView>)dgFeuillet.ItemsSource;            
+            List<ImageView> imageViews = (List<ImageView>)dgFeuillet.ItemsSource;
             if (imageViews.Count > 0)
             {
-                if(MessageBox.Show("Voulez vous supprimer la dernière image préindexée, et la reprendre à zéro ?","AVERTISSEMENT",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show("Voulez vous supprimer la dernière image préindexée, et la reprendre à zéro ?", "AVERTISSEMENT", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     using (var ct = new DocumatContext())
                     {
@@ -411,12 +411,12 @@ namespace DOCUMAT.Pages.Preindexation
                     // Enregistrement de l'action effectué par l'agent
                     DocumatContext.AddTraitement(DocumatContext.TbImage, LastImage.ImageID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION, "PREINDEXATION SUPPRESSION IMAGE N° " + LastImage.NumeroPage + " AU REGISTRE ID N° " + LastImage.RegistreID);
                 }
-            }            
+            }
         }
 
         private void BtnSupprimerSequence_Click(object sender, RoutedEventArgs e)
         {
-            if(dgSequence.SelectedItems.Count > 0)
+            if (dgSequence.SelectedItems.Count > 0)
             {
                 Models.Sequence sequence = (Sequence)dgSequence.SelectedItem;
                 Sequences.Remove(sequence);
@@ -425,22 +425,22 @@ namespace DOCUMAT.Pages.Preindexation
                 tbNumeroOrdreSequence.Focus();
             }
         }
-         
+
         private void tbNumeroPageSequence_TextChanged(object sender, TextChangedEventArgs e)
         {
 
         }
 
         private void BtnAddSequence_Click(object sender, RoutedEventArgs e)
-        {            
-            if(tbNumeroOrdreFin.Text != "" && tbNumeroOrdreSequence.Text != "" && tbNumeroOrdreSequence.Text != "")
+        {
+            if (tbNumeroOrdreFin.Text != "" && tbNumeroOrdreSequence.Text != "" && tbNumeroOrdreSequence.Text != "")
             {
                 int numeroOrdreSequence = 0, NombreReference = 0;
                 int NombreReferences = 0;
                 if (Int32.TryParse(tbNumeroOrdreSequence.Text, out numeroOrdreSequence) && Int32.TryParse(tbNombreReferences.Text, out NombreReferences))
                 {
-                    int imageID = 0;                    
-                    if (Int32.TryParse(tbNombreReferences.Text,out NombreReference) && NombreReference > 0)
+                    int imageID = 0;
+                    if (Int32.TryParse(tbNombreReferences.Text, out NombreReference) && NombreReference > 0)
                     {
                         if (Int32.Parse(tbNumeroOrdreSequence.Text) >= Int32.Parse(tbNumeroOrdreDebut.Text)
                                 && Int32.Parse(tbNumeroOrdreSequence.Text) <= Int32.Parse(tbNumeroOrdreFin.Text))
@@ -452,7 +452,7 @@ namespace DOCUMAT.Pages.Preindexation
                                 if (cbxBisOrdre.IsChecked == true)
                                 {
                                     Models.Sequence bisseq = Sequences.Where(s => s.NUmeroOdre == numeroOrdreSequence && s.isSpeciale.ToLower().Contains("bis")).LastOrDefault();
-                                    if(bisseq != null)
+                                    if (bisseq != null)
                                     {
                                         string isBisNum = bisseq.isSpeciale;
                                         isBisNum = isBisNum.Split('_')[1];
@@ -461,7 +461,7 @@ namespace DOCUMAT.Pages.Preindexation
                                     }
                                     else
                                     {
-                                        isSpecial = "bis_1";  
+                                        isSpecial = "bis_1";
                                     }
                                 }
                                 else if (cbxDoublonOrdre.IsChecked == true)
@@ -521,7 +521,7 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void MarquerPreindexer_Click(object sender, RoutedEventArgs e)
         {
-            if(MarquerPreindexer.IsChecked == true)
+            if (MarquerPreindexer.IsChecked == true)
             {
                 if (MessageBox.Show("Attention vous ne pourrez plus faire de modification sur ce registre, Voulez vous terminer la préindexation",
                                     "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
@@ -644,7 +644,7 @@ namespace DOCUMAT.Pages.Preindexation
             {
                 // Récupération des registre par code registre
                 RegistreView RegistreView = new RegistreView();
-                List<RegistreView> registreViews = RegistreView.GetViewsList().Where(r=>r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
+                List<RegistreView> registreViews = RegistreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.CREE).ToList();
                 List<Traitement> traitementsCreer = RegistreView.context.Traitement.Where(tr => tr.TableSelect.ToLower() == DocumatContext.TbRegistre.ToLower() && tr.TypeTraitement == (int)Enumeration.TypeTraitement.CREATION
                 && tr.AgentID == Utilisateur.AgentID).ToList();
 
@@ -679,7 +679,7 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void tbNombreReferences_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if(e.Key == System.Windows.Input.Key.Enter)
+            if (e.Key == System.Windows.Input.Key.Enter)
             {
                 BtnAddSequence_Click(sender, e);
             }
@@ -687,7 +687,7 @@ namespace DOCUMAT.Pages.Preindexation
 
         private void tbNumeroOrdreSequence_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if(e.Key == System.Windows.Input.Key.Enter)
+            if (e.Key == System.Windows.Input.Key.Enter)
             {
                 tbNombreReferences.Focus();
             }
@@ -706,13 +706,13 @@ namespace DOCUMAT.Pages.Preindexation
                     && tr.AgentID == Utilisateur.AgentID).ToList();
 
                     var registreViewList = from r in registreViews
-                                   join t in traitementsCreer on r.Registre.RegistreID equals t.TableID
-                                   select r;
+                                           join t in traitementsCreer on r.Registre.RegistreID equals t.TableID
+                                           select r;
 
                     switch (cbChoixRecherche.SelectedIndex)
                     {
-                        case 0:                           
-                            dgRegistre.ItemsSource = registreViewList.Where(r=>r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                        case 0:
+                            dgRegistre.ItemsSource = registreViewList.Where(r => r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
                             break;
                         case 1:
                             // Récupération des registre par service
@@ -766,7 +766,7 @@ namespace DOCUMAT.Pages.Preindexation
             catch (Exception ex)
             {
                 ex.ExceptionCatcher();
-            } 
+            }
         }
 
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -778,12 +778,12 @@ namespace DOCUMAT.Pages.Preindexation
                 if (e.NewSize.Height < StandardHeight)
                 {
                     dgFeuillet.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height));
-                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height)*2/3);
+                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height) * 2 / 3);
                 }
                 else
                 {
                     dgFeuillet.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight));
-                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight)*2/3);
+                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight) * 2 / 3);
                 }
             }
         }

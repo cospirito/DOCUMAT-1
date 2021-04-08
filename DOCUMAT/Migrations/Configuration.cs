@@ -3,21 +3,19 @@
     using DOCUMAT.Models;
     using System;
     using System.Collections.Generic;
-    using System.Data.Entity;
     using System.Data.Entity.Migrations;
-    using System.Linq;
 
     internal sealed class Configuration : DbMigrationsConfiguration<DOCUMAT.Models.DocumatContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
-            AutomaticMigrationDataLossAllowed = true;           
+            AutomaticMigrationDataLossAllowed = true;
         }
 
         protected override void Seed(DOCUMAT.Models.DocumatContext context)
         {
-            if (true == true)
+            if (true == false)
             {
                 //  This method will be called after migrating to the latest version.
 

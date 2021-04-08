@@ -38,6 +38,10 @@ namespace DOCUMAT.Converter
             {
                 image = "Images/drive.png";
             }
+            else if (path == "simple")
+            {
+                image = "Images/simplefile1.png";
+            }
             else if (path == "valide")
             {
                 image = "Images/valide2.png";

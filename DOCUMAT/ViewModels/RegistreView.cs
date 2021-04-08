@@ -1,30 +1,30 @@
-﻿using DOCUMAT.Migrations;
+﻿using DOCUMAT.DataModels;
 using DOCUMAT.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Windows;
-using System.Xml;
 
 namespace DOCUMAT.ViewModels
 {
     public class RegistreView : IView<RegistreView, Registre>
     {
         private string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
-        private string FileLogName = ConfigurationManager.AppSettings["Nom_Log_Scan"];
+        string fichier_sid = Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], "sid_scanners_users.tmp");
 
-        public int NumeroOrdre {get ; set ;}
-        public DocumatContext context {get ; set; }
+        public int NumeroOrdre { get; set; }
+        public DocumatContext context { get; set; }
 
         public Registre Registre { get; set; }
         public Versement Versement { get; set; }
         public Agent AgentTraitant { get; set; }
         public Service ServiceVersant { get; set; }
-        public  Agent ChefService { get; set; }
+        public Agent ChefService { get; set; }
         public string CheminDossier { get; private set; }
         public StatutRegistre StatutActuel { get; set; }
 
@@ -37,9 +37,10 @@ namespace DOCUMAT.ViewModels
             Registre = new Registre();
             context = new DocumatContext();
         }
+
         public void Add()
         {
-           
+
         }
 
         public int AddRegistre()
@@ -47,14 +48,27 @@ namespace DOCUMAT.ViewModels
             try
             {
                 //Vérification qu'un numéro de registre identique n'existe pas *
-                if (context.Registre.Any(r => r.Numero == Registre.Numero && r.VersementID == Registre.VersementID))
+                if (context.Registre.Any(r => r.Numero == Registre.Numero && r.VersementID == Registre.VersementID
+                    && r.Type.ToUpper() == Registre.Type.ToUpper() && r.QrCode.Trim().ToUpper() != "DEFAUT".ToUpper()))
                 {
                     throw new Exception("Un registre ayant le même numéro de volume existe déja !!!");
                 }
 
-                Registre.QrCode = "DEFAUT";
-                Registre.CheminDossier = Registre.QrCode;
-                context.Registre.Add(Registre);
+                // Recherche d'un registre defaut du même versement ayant le même type et le même Numéro Volume 
+                Models.Registre registreExistant = context.Registre.FirstOrDefault(r => r.Numero == Registre.Numero && r.VersementID == Registre.VersementID
+                    && r.Type.ToUpper() == Registre.Type.ToUpper() && r.QrCode.Trim().ToUpper() == "DEFAUT".ToUpper());
+
+                if (registreExistant != null)
+                {
+                    Registre = registreExistant;
+                }
+                else
+                {
+                    Registre.QrCode = "DEFAUT";
+                    Registre.CheminDossier = Registre.QrCode;
+                    context.Registre.Add(Registre);
+                }
+
                 context.SaveChanges();
 
                 // Procédure d'Ajout du QrCode
@@ -150,103 +164,12 @@ namespace DOCUMAT.ViewModels
                 List<Registre> registres = new List<Registre>();
                 if (Versement != null)
                 {
-                    registres = context.Registre.Where(r=>r.VersementID == Versement.VersementID).ToList();
+                    registres = context.Registre.Where(r => r.VersementID == Versement.VersementID &&
+                                                        r.QrCode != "DEFAUT").ToList();
                 }
                 else
                 {
-                    registres = context.Registre.ToList();
-                }
-
-                List<RegistreView> RegistreViews = new List<RegistreView>();
-
-                // Numero Ordre des Registres
-                foreach (Registre reg in registres)
-                {
-                    RegistreView regV = new RegistreView();
-                    regV.Registre = reg;
-
-                    //Récupération du versement du registre  
-                    if (Versement != null)
-                    {
-                        // Récupération des informations sur le service 
-                        regV.Versement = Versement;
-                        Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == Versement.LivraisonID);
-                        regV.ServiceVersant = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
-                    }
-                    else
-                    {
-                        regV.Versement = context.Versement.FirstOrDefault(v => v.VersementID == reg.VersementID);
-                        Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == regV.Versement.LivraisonID);
-                        regV.ServiceVersant = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
-                    }
-
-                    // récupération des images liées au registre dans la Base de Données
-                    regV.NombreImageCompte = context.Image.Where(i => i.RegistreID == regV.Registre.RegistreID).Count();
-                    
-                    //Nombre de page scanné dans le Dossier du registre
-                    regV.NombreImageScan = 0;
-
-                    try
-                    {
-                        DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
-                        //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
-                        if (directoryInfo.Exists)
-                        {
-                            regV.NombreImageScan = directoryInfo.GetFiles().Where(f=>f.Extension.ToLower() == ".tif" 
-                                 || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg").ToList().Count();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Le repertoire du Registre de type : \"" + reg.Type + "\", de code : " + reg.QrCode + " ,dont le chemin est \""
-                                                + reg.CheminDossier + "\" est introuvable","AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Warning);
-                            if (MessageBox.Show("Voulez vous suspendre les requêtes de récuparation des autres registre afin de régler le problème ?", "SUSPENDRE", MessageBoxButton.YesNo,MessageBoxImage.Question)
-                                == MessageBoxResult.Yes)
-                            {
-                                return RegistreViews;
-                            }
-                        }
-                    }
-                    catch(Exception ex)
-                    {
-                        MessageBox.Show(ex.Message + "\n Repertoire : " + reg.CheminDossier,"AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Warning);
-                        if (MessageBox.Show("Voulez vous suspendre les requêtes de récuparation des autres registre afin de régler le problème ?", "SUSPENDRE", MessageBoxButton.YesNo, MessageBoxImage.Question)
-                            == MessageBoxResult.Yes)
-                        {
-                            return RegistreViews;
-                        }
-                    }
-
-                    //Définition du chemin d'accès au dossier
-                    regV.CheminDossier = Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier);
-
-
-                    // Affichage de statut en string
-                    regV.StatutActuel = context.StatutRegistre.FirstOrDefault(s => s.Code == reg.StatutActuel && s.RegistreID == reg.RegistreID);
-                    regV.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre),regV.StatutActuel.Code);
-                    
-                    RegistreViews.Add(regV);
-                }
-                return RegistreViews;
-            }
-            catch (Exception ex)
-            {
-                ex.ExceptionCatcher();
-                return new List<RegistreView>();
-            }
-        }
-
-        public List<RegistreView> GetViewsListByStatus(int CodeStatut)
-        {
-            try
-            {
-                List<Registre> registres = new List<Registre>();
-                if (Versement != null)
-                {
-                    registres = context.Registre.Where(r => r.VersementID == Versement.VersementID && r.StatutActuel == CodeStatut).ToList();
-                }
-                else
-                {
-                    registres = context.Registre.Where(r => r.StatutActuel == CodeStatut).ToList();
+                    registres = context.Registre.Where(r => r.QrCode != "DEFAUT").ToList();
                 }
 
                 List<RegistreView> RegistreViews = new List<RegistreView>();
@@ -327,8 +250,282 @@ namespace DOCUMAT.ViewModels
             }
         }
 
+        public static RegistreView GetViewRegistreByStatus(int CodeStatut, int IdRegistre)
+        {
+            using (var ct = new DocumatContext())
+            {
+                Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == IdRegistre && r.QrCode.Trim().ToUpper() != "DEFAUT".ToUpper().Trim() && CodeStatut == (int)Enumeration.Registre.CREE);
+                RegistreView regV = new RegistreView();
 
-        public List<RegistreView> GetViewsListByTraite(int codeTraite, bool isTraite,int CodeStatus)
+                if (registre != null)
+                {
+                    regV.Registre = registre;
+
+                    //Récupération du versement du registre                      
+                    regV.Versement = ct.Versement.FirstOrDefault(v => v.VersementID == registre.VersementID);
+                    Livraison livraison = ct.Livraison.FirstOrDefault(l => l.LivraisonID == regV.Versement.LivraisonID);
+                    regV.ServiceVersant = ct.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
+
+                    // récupération des images liées au registre dans la Base de Données
+                    regV.NombreImageCompte = ct.Image.Where(i => i.RegistreID == regV.Registre.RegistreID).Count();
+
+                    //Nombre de page scanné dans le Dossier du registre
+                    regV.NombreImageScan = 0;
+
+                    try
+                    {
+                        DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], registre.CheminDossier));
+                        //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                        if (directoryInfo.Exists)
+                        {
+                            regV.NombreImageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                 || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return null;
+                    }
+
+                    //Définition du chemin d'accès au dossier
+                    regV.CheminDossier = Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], registre.CheminDossier);
+
+
+                    // Affichage de statut en string
+                    regV.StatutActuel = ct.StatutRegistre.FirstOrDefault(s => s.Code == registre.StatutActuel && s.RegistreID == registre.RegistreID);
+                    regV.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), regV.StatutActuel.Code);
+                }
+
+                return regV;
+            }
+        }
+
+        public List<RegistreView> GetViewsListByStatus(int CodeStatut)
+        {
+            try
+            {
+                List<Registre> registres = new List<Registre>();
+                if (Versement != null)
+                {
+                    registres = context.Registre.Where(r => r.VersementID == Versement.VersementID
+                                                        && r.StatutActuel == CodeStatut && r.QrCode != "DEFAUT").ToList();
+                }
+                else
+                {
+                    registres = context.Registre.Where(r => r.StatutActuel == CodeStatut && r.QrCode != "DEFAUT").ToList();
+                }
+
+                List<RegistreView> RegistreViews = new List<RegistreView>();
+
+                // Numero Ordre des Registres
+                foreach (Registre reg in registres)
+                {
+                    RegistreView regV = new RegistreView();
+                    regV.Registre = reg;
+
+                    //Récupération du versement du registre  
+                    if (Versement != null)
+                    {
+                        // Récupération des informations sur le service 
+                        regV.Versement = Versement;
+                        Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == Versement.LivraisonID);
+                        regV.ServiceVersant = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
+                    }
+                    else
+                    {
+                        regV.Versement = context.Versement.FirstOrDefault(v => v.VersementID == reg.VersementID);
+                        Livraison livraison = context.Livraison.FirstOrDefault(l => l.LivraisonID == regV.Versement.LivraisonID);
+                        regV.ServiceVersant = context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID);
+                    }
+
+                    // récupération des images liées au registre dans la Base de Données
+                    regV.NombreImageCompte = context.Image.Where(i => i.RegistreID == regV.Registre.RegistreID).Count();
+
+                    //Nombre de page scanné dans le Dossier du registre
+                    regV.NombreImageScan = 0;
+
+                    try
+                    {
+                        DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                        //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                        if (directoryInfo.Exists)
+                        {
+                            regV.NombreImageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                 || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Le repertoire du Registre de type : \"" + reg.Type + "\", de code : " + reg.QrCode + " ,dont le chemin est \""
+                                                + reg.CheminDossier + "\" est introuvable", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            if (MessageBox.Show("Voulez vous suspendre les requêtes de récuparation des autres registre afin de régler le problème ?", "SUSPENDRE", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                                == MessageBoxResult.Yes)
+                            {
+                                return RegistreViews;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message + "\n Repertoire : " + reg.CheminDossier, "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        if (MessageBox.Show("Voulez vous suspendre les requêtes de récuparation des autres registre afin de régler le problème ?", "SUSPENDRE", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                            == MessageBoxResult.Yes)
+                        {
+                            return RegistreViews;
+                        }
+                    }
+
+                    //Définition du chemin d'accès au dossier
+                    regV.CheminDossier = Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier);
+
+                    // Affichage de statut en string
+                    regV.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+
+                    RegistreViews.Add(regV);
+                }
+                return RegistreViews;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return new List<RegistreView>();
+            }
+        }
+
+        public List<RegistreView> GetViewsListByScanAgent(string login)
+        {
+            //Récupération des Fichiers .mets de Tout les Répertoires
+            DirectoryInfo AlldirectoryInfo = new DirectoryInfo(Path.Combine(DossierRacine, "DOCUMAT"));
+            List<DirectoryInfo> ServiceDirectoryInfo = AlldirectoryInfo.GetDirectories().ToList();
+            List<FileInfo> filesmets = new List<FileInfo>();
+            List<RegistreView> registreViewsAgentScan = new List<RegistreView>();
+            string loginAgent = "", sidAgent = "", FullLine = "";
+
+            // Vérification de l'agent dans le fichier
+            if (File.Exists(fichier_sid))
+            {
+                using (StreamReader fileStream = new StreamReader(fichier_sid))
+                {
+                    while (!fileStream.EndOfStream)
+                    {
+                        string line = fileStream.ReadLine().Trim();
+                        string lineUser = line.Split(' ')[0].ToLower();
+                        string lineSid = line.Split(' ')[line.Split(' ').Length - 1].ToLower();
+
+                        if (login.ToLower().Trim() == lineUser)
+                        {
+                            loginAgent = lineUser;
+                            sidAgent = lineSid;
+                            FullLine = line;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Fichier Configuration de sid manquant ", "Fichier agent de scan introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return registreViewsAgentScan;
+            }
+
+            // Cas où le Login Agent est introuvable
+            if (string.IsNullOrWhiteSpace(loginAgent))
+            {
+                MessageBox.Show("Votre Login ne se Trouve pas dans le Fichier de configuration ", "Login introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return registreViewsAgentScan;
+            }
+
+            foreach (var svdir in ServiceDirectoryInfo)
+            {
+                List<DirectoryInfo> typedirs = svdir.GetDirectories().ToList();
+                foreach (var tpdir in typedirs)
+                {
+                    List<DirectoryInfo> RegistresDirectories = tpdir.GetDirectories().ToList();
+                    foreach (var regdir in RegistresDirectories)
+                    {
+                        filesmets.AddRange(regdir.GetFiles().Where(f => f.Extension.Trim().ToLower() == ".mets".ToLower()));
+                    }
+                }
+            }
+
+            foreach (var file in filesmets)
+            {
+                IdentityReference sid = null;
+                string owner = null;
+                bool fileAgent = false;
+                try
+                {
+                    FileSecurity fileSecurity = File.GetAccessControl(file.FullName);
+                    sid = fileSecurity.GetOwner(typeof(SecurityIdentifier));
+                    NTAccount ntAccount = sid.Translate(typeof(NTAccount)) as NTAccount;
+                    owner = ntAccount.Value;
+                }
+                catch (IdentityNotMappedException ex)
+                {
+                    if (sid != null)
+                    {
+                        owner = sid.ToString();
+                    }
+                }
+
+                // Recherche du sid agent
+                if (sidAgent.Trim().ToUpper() == owner.Trim().ToUpper())
+                {
+                    fileAgent = true;
+                }
+
+
+                if (fileAgent)
+                {
+                    using (var ct = new DocumatContext())
+                    {
+                        Models.Registre registre = ct.Registre.FirstOrDefault(r => r.QrCode.ToLower().Trim() == file.Directory.Name.Trim().ToLower()
+                                                                              && r.StatutActuel == (int)Enumeration.Registre.CREE);
+
+                        if (registre != null)
+                        {
+                            registreViewsAgentScan.Add(GetViewRegistreByStatus((int)Enumeration.Registre.CREE, registre.RegistreID));
+                        }
+                    }
+                }
+            }
+
+            return registreViewsAgentScan;
+        }
+
+
+        public bool Update(Registre UpRegistre)
+        {
+            if (Registre.DateDepotDebut != UpRegistre.DateDepotDebut || Registre.DateDepotFin != UpRegistre.DateDepotFin
+                || Registre.NombrePage != UpRegistre.NombrePage || Registre.NumeroDepotDebut != UpRegistre.NumeroDepotDebut
+                || Registre.NumeroDepotFin != UpRegistre.NumeroDepotFin || Registre.Observation != UpRegistre.Observation
+                || Registre.Numero != UpRegistre.Numero || Registre.NombrePageDeclaree != UpRegistre.NombrePageDeclaree)
+            {
+                //if(context.Registre.Any(r => r.Numero == UpRegistre.Numero && r.VersementID == Registre.VersementID && r.RegistreID != Registre.RegistreID))
+                //    throw new Exception("Ce numéro de Volume est utilisé par un autre registre !!!");
+
+                Registre.Numero = UpRegistre.Numero;
+                Registre.NombrePageDeclaree = UpRegistre.NombrePageDeclaree;
+                Registre.NombrePage = UpRegistre.NombrePage;
+                Registre.NumeroDepotDebut = UpRegistre.NumeroDepotDebut;
+                Registre.DateDepotDebut = UpRegistre.DateDepotDebut;
+                Registre.NumeroDepotFin = UpRegistre.NumeroDepotFin;
+                Registre.DateDepotFin = UpRegistre.DateDepotFin;
+                Registre.Observation = UpRegistre.Observation;
+                Registre.DateModif = DateTime.Now;
+                context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                throw new Exception("Aucun changement n'a été effectué");
+            }
+        }
+
+        public List<RegistreView> GetViewsListByTraite(int codeTraite, bool isTraite, int CodeStatus)
         {
             RegistreView RegistreView1 = new RegistreView();
             List<RegistreView> registreViewIsTraites = new List<RegistreView>();
@@ -362,77 +559,704 @@ namespace DOCUMAT.ViewModels
             }
         }
 
-        public List<RegistreView> GetViewsListByScanAgent()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="CodeStatut"></param>
+        /// <returns></returns>
+        public static List<RegistreDataModel> GetRegistreData(int? CodeStatut = null)
         {
-            RegistreView RegistreView1 = new RegistreView();
-            List<RegistreView> RegistreViews = RegistreView1.GetViewsListByStatus((int)Enumeration.Registre.CREE).ToList();
-            List<RegistreView> registreViewsAgentScan = new List<RegistreView>();
-
-            foreach (var regV in RegistreViews)
+            try
             {
-                DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(DossierRacine, regV.Registre.CheminDossier));
-                FileInfo logFile = directoryInfo.GetFiles().FirstOrDefault(f => f.Name.ToLower() == FileLogName.ToLower());
-                if (logFile != null)
+                using (var ct = new DocumatContext())
                 {
-                    //Chargement du fichier XML 
-                    XmlDocument xmlDocument = new XmlDocument();
-                    xmlDocument.Load(logFile.FullName);
+                    // Nombre d'index du Registres 
+                    string reqAllreg = "SELECT RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID ";
 
-                    //Récupération de l'agent de scan
-                    string LoginAgent = xmlDocument.GetElementsByTagName("dc:creator").Item(0).InnerText;
+                    string whereClause = "";
 
-                    Models.Agent agentScan = regV.context.Agent.FirstOrDefault(a => a.Login.ToLower() == LoginAgent && a.Affectation == (int)Enumeration.AffectationAgent.SCANNE);
-                    if (agentScan != null)
+                    if (CodeStatut != null)
                     {
-                        regV.AgentTraitant = agentScan;
-                        registreViewsAgentScan.Add(regV);
+                        whereClause = $"WHERE RG.StatutActuel = {CodeStatut} ";
+                    }
+
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        if (CodeStatut != null && CodeStatut == (int)Enumeration.Registre.CREE)
+                        {
+                            // Recherche du Nombre de Page Scannées
+                            if (!string.IsNullOrWhiteSpace(reg.CheminDossier))
+                            {
+                                DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                                //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                                if (directoryInfo.Exists)
+                                {
+                                    reg.NombrePageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                         || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                                }
+                            }
+                        }
+
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+        /// <summary>
+        ///  Récupération des registres par group par codestatut
+        /// </summary>
+        /// <param name="limitStart"></param>
+        /// <param name="limitLenght"></param>
+        /// <param name="CodeStatut"></param>
+        /// <returns></returns>
+        public static List<RegistreDataModel> GetRegistreData(int limitId, int limitLenght, int? CodeStatut = null)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg =  $"SELECT TOP {limitLenght}  RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID ";
+
+                    // Définition de la limite de récupération
+                    string whereClause = (limitId > 0) ? $"WHERE RG.RegistreID > {limitId} " : "";
+
+                    if (CodeStatut != null)
+                    {
+                        whereClause += (limitId > 0) ? $" AND RG.StatutActuel = {CodeStatut}" : $"WHERE RG.StatutActuel = {CodeStatut}";
+                    }
+                    whereClause += " ORDER BY RG.RegistreID";
+
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        if (CodeStatut != null && CodeStatut == (int)Enumeration.Registre.CREE)
+                        {
+                            // Recherche du Nombre de Page Scannées
+                            if (!string.IsNullOrWhiteSpace(reg.CheminDossier))
+                            {
+                                DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                                //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                                if (directoryInfo.Exists)
+                                {
+                                    reg.NombrePageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                         || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                                }
+                            }
+                        }
+
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                        reg.PercentPageTraiteIndex = Math.Round((((double)(reg.NombrePageIndex + reg.NombrePageInst) / (double)reg.NombrePageScan) * 100), 1);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+        public static List<RegistreDataModel> GetRegistreDataByTrait(int codeTraite, int? CodeStatut = null)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg = "SELECT RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                         "INNER JOIN TRAITEMENTS TR ON TR.TableID = RG.RegistreID ";
+
+                    string whereClause = $"WHERE Lower(TR.TableSelect) = Lower('Registres') AND TR.TypeTraitement = {codeTraite}";
+
+                    if (CodeStatut != null)
+                    {
+                        whereClause += $" AND RG.StatutActuel = {CodeStatut} ";
+                    }
+
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        if (CodeStatut != null && CodeStatut == (int)Enumeration.Registre.CREE)
+                        {
+                            // Recherche du Nombre de Page Scannées
+                            if (!string.IsNullOrWhiteSpace(reg.CheminDossier))
+                            {
+                                DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                                //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                                if (directoryInfo.Exists)
+                                {
+                                    reg.NombrePageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                         || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                                }
+                            }
+                        }
+
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+        public static List<RegistreDataModel> GetRegistreDataByTrait(int codeTraite,int limitId, int limitLenght, int? CodeStatut = null)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg =  $"SELECT TOP {limitLenght} RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                         "INNER JOIN TRAITEMENTS TR ON TR.TableID = RG.RegistreID ";
+
+                    string whereClause = $"WHERE Lower(TR.TableSelect) = Lower('Registres') AND TR.TypeTraitement = {codeTraite}";
+                    whereClause += (limitId > 0) ? $"AND RG.RegistreID > {limitId} " : "";
+
+                    if (CodeStatut != null)
+                    {
+                        whereClause += $" AND RG.StatutActuel = {CodeStatut}";
+                    }
+                    whereClause += " ORDER BY RG.RegistreID";
+
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        if (CodeStatut != null && CodeStatut == (int)Enumeration.Registre.CREE)
+                        {
+                            // Recherche du Nombre de Page Scannées
+                            if (!string.IsNullOrWhiteSpace(reg.CheminDossier))
+                            {
+                                DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                                //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                                if (directoryInfo.Exists)
+                                {
+                                    reg.NombrePageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                         || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                                }
+                            }
+                        }
+
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+        public static List<RegistreDataModel> GetRegistreDataByTraitbyAgent(int idAgent, int codeTraite, int? CodeStatut = null)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg = "SELECT RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                         "INNER JOIN TRAITEMENTS TR ON TR.TableID = RG.RegistreID ";
+
+                    string whereClause = $"WHERE Lower(TR.TableSelect) = Lower('Registres') AND TR.TypeTraitement = {codeTraite} " +
+                                         $"AND TR.AgentID = {idAgent} ";
+
+                    if (CodeStatut != null)
+                    {
+                        whereClause += $" AND RG.StatutActuel = {CodeStatut} ";
+                    }
+
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        if (CodeStatut != null && CodeStatut == (int)Enumeration.Registre.CREE)
+                        {
+                            // Recherche du Nombre de Page Scannées
+                            if (!string.IsNullOrWhiteSpace(reg.CheminDossier))
+                            {
+                                DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                                //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                                if (directoryInfo.Exists)
+                                {
+                                    reg.NombrePageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                         || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                                }
+                            }
+                        }
+
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+        public static List<RegistreDataModel> GetRegistreDataByTraitbyAgent(int idAgent, int codeTraite, int limitId, int limitLenght, int? CodeStatut = null)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg = $"SELECT TOP {limitLenght} RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                        "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                        "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                        "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                        "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                        "FROM REGISTRES RG " +
+                                        "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                        "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                        "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                        "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                        "INNER JOIN TRAITEMENTS TR ON TR.TableID = RG.RegistreID ";
+
+                    string whereClause = $"WHERE Lower(TR.TableSelect) = Lower('Registres') AND TR.TypeTraitement = {codeTraite} " +
+                                         $"AND TR.AgentID = {idAgent} ";
+                    whereClause += (limitId > 0) ? $"AND RG.RegistreID > {limitId} " : "";
+
+                    if (CodeStatut != null)
+                    {
+                        whereClause += $" AND RG.StatutActuel = {CodeStatut}";
+                    }
+                    whereClause += " ORDER BY RG.RegistreID";
+
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        if (CodeStatut != null && CodeStatut == (int)Enumeration.Registre.CREE)
+                        {
+                            // Recherche du Nombre de Page Scannées
+                            if (!string.IsNullOrWhiteSpace(reg.CheminDossier))
+                            {
+                                DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                                //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                                if (directoryInfo.Exists)
+                                {
+                                    reg.NombrePageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                         || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                                }
+                            }
+                        }
+
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+
+        public static List<RegistreDataModel> GetRegistreDataByUnite(int uniteID,int limitId, int limitLenght, int? CodeStatut = null)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg = $"SELECT TOP {limitLenght}  RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                         $"WHERE RG.ID_Unite = {uniteID}";
+
+                    // Définition de la limite de récupération
+                    string whereClause = (limitId > 0) ? $"AND RG.RegistreID > {limitId} " : "";
+
+                    if (CodeStatut != null)
+                    {
+                        whereClause += $" AND RG.StatutActuel = {CodeStatut}";
+                    }
+                    whereClause += " ORDER BY RG.RegistreID";
+
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        if (CodeStatut != null && CodeStatut == (int)Enumeration.Registre.CREE)
+                        {
+                            // Recherche du Nombre de Page Scannées
+                            if (!string.IsNullOrWhiteSpace(reg.CheminDossier))
+                            {
+                                DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                                //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                                if (directoryInfo.Exists)
+                                {
+                                    reg.NombrePageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                         || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                                }
+                            } 
+                        }
+
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+
+        public static List<RegistreDataModel> GetRegistreDataControlePhase2(int uniteID, int limitId, int limitLenght, int CodeStatut)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg = $"SELECT TOP {limitLenght}  RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                         "INNER JOIN CORRECTIONS CR ON CR.RegistreID = RG.RegistreID " +
+                                         $"WHERE RG.ID_Unite = {uniteID} AND CR.ImageID IS NULL AND CR.SequenceID IS NULL AND CR.StatutCorrection = 0 AND CR.PhaseCorrection <> 3" +
+                                         $"AND RG.StatutActuel = {CodeStatut}";
+
+                    // Définition de la limite de récupération
+                    string whereClause = (limitId > 0) ? $"AND RG.RegistreID > {limitId} " : "";
+                    whereClause += " ORDER BY RG.RegistreID";
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+        public static List<RegistreDataModel> GetRegistreDataControlePhaseFinal(int uniteID, int limitId, int limitLenght, int CodeStatut)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg =  $"SELECT TOP {limitLenght}  RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                         "INNER JOIN CORRECTIONS CR ON CR.RegistreID = RG.RegistreID " +
+                                         $"WHERE RG.ID_Unite = {uniteID} AND CR.ImageID IS NULL AND CR.SequenceID IS NULL AND CR.PhaseCorrection = 3 " +
+                                         $"AND RG.StatutActuel = {CodeStatut}";
+
+                    // Définition de la limite de récupération
+                    string whereClause = (limitId > 0) ? $"AND RG.RegistreID > {limitId} " : "";
+                    whereClause += " ORDER BY RG.RegistreID";
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+
+        public static List<RegistreDataModel> GetRegistreDataCorrectionPhase1(int uniteID, int limitId, int limitLenght, int CodeStatut)
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    // Nombre d'index du Registres 
+                    string reqAllreg =  $"SELECT TOP {limitLenght}  RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                         "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                         "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                         "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                         "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                         "FROM REGISTRES RG " +
+                                         "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                         "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                         "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                         "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                         "INNER JOIN CORRECTIONS CR ON CR.RegistreID = RG.RegistreID " +
+                                        $"WHERE RG.ID_Unite = {uniteID} AND CR.ImageID IS NULL AND CR.SequenceID IS NULL AND CR.StatutCorrection = 1 AND CR.PhaseCorrection = 1 " +
+                                        $"AND RG.StatutActuel = {CodeStatut}";
+
+                    // Définition de la limite de récupération
+                    string whereClause = (limitId > 0) ? $"AND RG.RegistreID > {limitId} " : "";
+                    whereClause += " ORDER BY RG.RegistreID";
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg + whereClause).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        //Définition du statut du registre
+                        reg.StatutName = Enum.GetName(typeof(Models.Enumeration.Registre), reg.StatutActuel);
+                    }
+
+                    return dataObjects;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+                return null;
+            }
+        }
+
+        public static List<RegistreDataModel> GetRegistreDataByScanAgent(string login)
+        {
+            //Récupération des Fichiers .mets de Tout les Répertoires            
+            string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
+            string fichier_sid = Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], "sid_scanners_users.tmp");
+            DirectoryInfo AlldirectoryInfo = new DirectoryInfo(Path.Combine(DossierRacine, "DOCUMAT"));
+            List<DirectoryInfo> ServiceDirectoryInfo = AlldirectoryInfo.GetDirectories().ToList();
+            List<FileInfo> filesmets = new List<FileInfo>();
+            List<RegistreDataModel> registreViewsAgentScan = new List<RegistreDataModel>();
+            string loginAgent = "", sidAgent = "", FullLine = "", ListRegistreScanAgent = "";
+
+            // Vérification de l'agent dans le fichier
+            if (File.Exists(fichier_sid))
+            {
+                using (StreamReader fileStream = new StreamReader(fichier_sid))
+                {
+                    while (!fileStream.EndOfStream)
+                    {
+                        string line = fileStream.ReadLine().Trim();
+                        string lineUser = line.Split(' ')[0].ToLower();
+                        string lineSid = line.Split(' ')[line.Split(' ').Length - 1].ToLower();
+
+                        if (login.ToLower().Trim() == lineUser)
+                        {
+                            loginAgent = lineUser;
+                            sidAgent = lineSid;
+                            FullLine = line;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Fichier Configuration de sid manquant ", "Fichier agent de scan introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return registreViewsAgentScan;
+            }
+
+            // Cas où le Login Agent est introuvable
+            if (string.IsNullOrWhiteSpace(loginAgent))
+            {
+                MessageBox.Show($"Votre Login ne se Trouve pas dans le Fichier de Config : {fichier_sid}", "Login introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return registreViewsAgentScan;
+            }
+
+            // Récupération des Fichier .mets
+            foreach (var svdir in ServiceDirectoryInfo)
+            {
+                List<DirectoryInfo> typedirs = svdir.GetDirectories().ToList();
+                foreach (var tpdir in typedirs)
+                {
+                    List<DirectoryInfo> RegistresDirectories = tpdir.GetDirectories().ToList();
+                    foreach (var regdir in RegistresDirectories)
+                    {
+                        filesmets.AddRange(regdir.GetFiles().Where(f => f.Extension.Trim().ToLower() == ".mets".ToLower()));
                     }
                 }
             }
 
-            return registreViewsAgentScan;
-        }
-
-
-        public bool Update(Registre UpRegistre)
-        {
-            if(Registre.DateDepotDebut != UpRegistre.DateDepotDebut || Registre.DateDepotFin != UpRegistre.DateDepotFin
-                || Registre.NombrePage != UpRegistre.NombrePage || Registre.NumeroDepotDebut != UpRegistre.NumeroDepotDebut
-                || Registre.NumeroDepotFin != UpRegistre.NumeroDepotFin || Registre.Observation != UpRegistre.Observation 
-                || Registre.Numero != UpRegistre.Numero || Registre.NombrePageDeclaree != UpRegistre.NombrePageDeclaree)
+            // Pour chaque fichier .mets Récupérer, 
+            foreach (var file in filesmets)
             {
-                if(context.Registre.Any(r => r.Numero == UpRegistre.Numero && r.VersementID == Registre.VersementID && r.RegistreID != Registre.RegistreID))
-                    throw new Exception("Ce numéro de Volume est utilisé par un autre registre !!!");
+                IdentityReference fileSid = null;
+                string owner = null;
+                bool fileAgent = false;
 
-                Registre.Numero = UpRegistre.Numero;
-                Registre.NombrePageDeclaree = UpRegistre.NombrePageDeclaree;
-                Registre.NombrePage = UpRegistre.NombrePage;
-                Registre.NumeroDepotDebut = UpRegistre.NumeroDepotDebut;
-                Registre.DateDepotDebut = UpRegistre.DateDepotDebut;
-                Registre.NumeroDepotFin = UpRegistre.NumeroDepotFin;
-                Registre.DateDepotFin = UpRegistre.DateDepotFin;
-                //Registre.Type = UpRegistre.Type;
-                Registre.Observation = UpRegistre.Observation;                
-                Registre.DateModif = DateTime.Now;
-                context.SaveChanges();
-                return true;
+                try
+                {
+                    FileSecurity fileSecurity = File.GetAccessControl(file.FullName);
+                    fileSid = fileSecurity.GetOwner(typeof(SecurityIdentifier));
+                    NTAccount ntAccount = fileSid.Translate(typeof(NTAccount)) as NTAccount;
+                    owner = ntAccount.Value;
+                }
+                catch (IdentityNotMappedException ex)
+                {
+                    if (fileSid != null)
+                    {
+                        owner = fileSid.ToString();
+                    }
+                }
+
+                // Recherche du sid agent
+                if (sidAgent.Trim().ToUpper() == fileSid.Value.Trim().ToUpper())
+                {
+                    fileAgent = true;
+                }
+
+                if (fileAgent)
+                {
+                    ListRegistreScanAgent += $"'{file.Directory.Name.Trim().ToLower()}',";
+                }
+            }
+
+            if(ListRegistreScanAgent.Length != 0)
+            {
+                ListRegistreScanAgent = ListRegistreScanAgent.Remove(ListRegistreScanAgent.Length - 1);
+
+                using (var ct = new DocumatContext())
+                {
+                    // Récupération des registres 
+                    string reqAllreg = "SELECT RG.*, RG.DateCreation AS DateCreationRegistre,RG.DateModif AS DateModifRegistre, " +
+                                       "VS.NumeroVers ,VS.NomAgentVersant, VS.PrenomsAgentVersant, VS.DateVers, VS.cheminBordereau, VS.NombreRegistreR3, VS.NombreRegistreR4, VS.DateCreation AS DateCreationVersement, VS.DateModif AS DateModifVersement, " +
+                                       "LV.LivraisonID ,LV.Numero AS NumeroLivraison,LV.DateLivraison, LV.ServiceID, LV.DateCreation AS DateCreationLivraison, LV.DateModif AS DateModifLivraison, " +
+                                       "SV.Code ,SV.Nom ,SV.NomComplet,SV.Description ,SV.NomChefDeService ,SV.PrenomChefDeService, SV.DateCreation AS DateCreationService, SV.DateModif AS DateModifService, " +
+                                       "SV.CheminDossier AS CheminDossierService,SV.NombreR3,SV.NombreR4,RE.RegionID,RE.Nom AS NomRegion, RE.DateCreation AS DateCreationRegion, RE.DateModif AS DateModifRegion " +
+                                       "FROM REGISTRES RG " +
+                                       "INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                       "INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                       "INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                       "INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                       $"WHERE RG.StatutActuel = {(int)Enumeration.Registre.CREE} AND RG.QrCode IN ({ListRegistreScanAgent})";
+
+                    List<RegistreDataModel> dataObjects = ct.Database.SqlQuery<RegistreDataModel>(reqAllreg).ToList();
+
+                    foreach (var reg in dataObjects)
+                    {
+                        if (!string.IsNullOrWhiteSpace(reg.CheminDossier))
+                        {
+                            DirectoryInfo directoryInfo = new DirectoryInfo(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Scan"], reg.CheminDossier));
+                            //DirectoryInfo directoryInfo = new DirectoryInfo(ConfigurationManager.AppSettings["CheminDossier_Scan"] + "/"+ reg.CheminDossier);                       
+                            if (directoryInfo.Exists)
+                            {
+                                reg.NombrePageScan = directoryInfo.GetFiles().Where(f => f.Extension.ToLower() == ".tif"
+                                     || f.Extension.ToLower() == ".png" || f.Extension.ToLower() == ".jpg" || f.Extension.ToLower() == ".pdf").ToList().Count();
+                            }
+                        }
+                    }
+
+                    return dataObjects;
+                }
             }
             else
             {
-                throw new Exception("Aucun changement n'a été effectué");
+                return registreViewsAgentScan;
             }
-        }
-
-        public static List<RegistreView> GetRowOrder(List<RegistreView> registreViews)
-        {
-            int numOrder = 1;
-            foreach(var regV in registreViews)
-            {
-                regV.NumeroOrdre = numOrder;
-                numOrder = numOrder + 1;
-            }
-
-            return registreViews;
         }
     }
 }

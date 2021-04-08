@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DOCUMAT.Pages.Dispatching" xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:src="clr-namespace:DOCUMAT.Converter"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         Title="Dispatching Controle"
         MinHeight="600"
@@ -46,22 +47,28 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Horizontal"
                             Name="panelRecherche">
-                    <Button Margin="10" 
-                        Background="{x:Null}"
-                        BorderBrush="CornflowerBlue"
-                        ToolTip="Actualisé"
-                        x:Name="BtnActualiser"
+                    <Button Margin="10" Background="{x:Null}"
+                        BorderBrush="White"
+                        BorderThickness="1 0 1 0"
+                        ToolTip="Rechercher"
+                        x:Name="BtnRefresh"
                         KeyboardNavigation.AcceptsReturn="False"
                         KeyboardNavigation.TabNavigation="None"
                         KeyboardNavigation.ControlTabNavigation="None"
                         KeyboardNavigation.DirectionalNavigation="None"
                         KeyboardNavigation.IsTabStop="True"
-                        Click="BtnActualiser_Click"
-                        >
-                        <materialDesign:PackIcon Kind="Refresh"
-                                            Width="25"
-                                            Height="25"
-                                            Foreground="White"/>
+                        Click="BtnActualiser_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh"
+                                                Width="25"
+                                                Height="25"
+                                                Foreground="White"/>
+                            <TextBlock> /</TextBlock>
+                            <materialDesign:PackIcon Kind="Download"
+                                                Width="25"
+                                                Height="25"
+                                                Foreground="White"/>
+                        </StackPanel>
                     </Button>
                     <ComboBox x:Name="cbChoixTranche" 
                         Foreground="White"
@@ -105,7 +112,8 @@
         </StackPanel>
 
         <!--Grid View des Registres -->
-        <Grid Margin="0 30 0 0">
+        <Grid Margin="0 30 0 0"
+              x:Name="PanelData">
             <Grid.Effect>
                 <DropShadowEffect ShadowDepth="1" />
             </Grid.Effect>
@@ -113,9 +121,15 @@
                 <ColumnDefinition Width="3*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column ="0" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Right"                          
+                          VerticalAlignment="Stretch"/>
             <Border Grid.Column="0" 
                     BorderBrush="White"
-                    BorderThickness="1">
+                    BorderThickness="1"
+                    Margin="0 0 3 0">
                 <DataGrid Name="dgUnite"                               
                                   AutoGenerateColumns="False" 
                                   VerticalScrollBarVisibility="Auto"
@@ -164,7 +178,7 @@
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontSize="20"
-                                   FontFamily="Agency Fb"/>
+                                   FontFamily="{StaticResource AgencyFb}"/>
                     </StackPanel>
                     <ListView ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               Height="500" x:Name="ListAgentSelected">
@@ -186,5 +200,27 @@
                 </StackPanel>
             </Border>
         </Grid>
+        <StackPanel Margin="0 30 0 0"
+                    x:Name="PanelLoader"
+                    Grid.Row="1"
+                    Background="White"
+                    Opacity="1"
+                    Height="350"
+                    Visibility="Collapsed">
+            <StackPanel Margin="20 100 20 0"
+                        VerticalAlignment="Center">
+                <Image gif:ImageBehavior.RepeatBehavior="Forever" 
+                       gif:ImageBehavior.AnimatedSource="/Images/Loader3.gif" 
+                       VerticalAlignment="Center"
+                       Height="70"/>
+                <TextBlock  
+                    Margin="10"
+                    FontSize="20"
+                    FontStyle="Italic"
+                    FontWeight="Bold"
+                    Foreground="SteelBlue"
+                    HorizontalAlignment="Center">Veuillez Patientez Svp ...</TextBlock>
+            </StackPanel>
+        </StackPanel>
     </StackPanel>
 </Window>

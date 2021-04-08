@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace DOCUMAT.ViewModels
 {
-    class AgentView 
+    public class AgentView
     {
         private static string imageDefault = "/Images/user.png";
 
@@ -27,12 +27,12 @@ namespace DOCUMAT.ViewModels
 
         public void Dispose()
         {
-            context.Dispose();        
+            context.Dispose();
         }
 
         public static int Add(Models.Agent agent)
         {
-            using(var ct = new DocumatContext())
+            using (var ct = new DocumatContext())
             {
                 if (!ct.Agent.Any(a => a.Matricule.Trim().ToLower() == agent.Matricule.Trim().ToLower()
                  || a.Login.Trim().ToLower() == agent.Login.Trim().ToLower()))
@@ -63,9 +63,9 @@ namespace DOCUMAT.ViewModels
             using (var ct = new DocumatContext())
             {
                 if (!ct.Agent.Any(a => a.AgentID != agent.AgentID && (a.Matricule.Trim().ToLower() == agent.Matricule.Trim().ToLower()
-                 || a.Login.Trim().ToLower() == agent.Login.Trim().ToLower()) ))
+                 || a.Login.Trim().ToLower() == agent.Login.Trim().ToLower())))
                 {
-                    Models.Agent modifAgent = ct.Agent.FirstOrDefault(a=>a.AgentID == agent.AgentID);
+                    Models.Agent modifAgent = ct.Agent.FirstOrDefault(a => a.AgentID == agent.AgentID);
                     modifAgent.Affectation = agent.Affectation;
                     modifAgent.CheminPhoto = agent.CheminPhoto;
                     modifAgent.DateModif = DateTime.Now;
@@ -76,7 +76,7 @@ namespace DOCUMAT.ViewModels
                     modifAgent.Mdp = agent.Mdp;
                     modifAgent.Nom = agent.Nom;
                     modifAgent.Prenom = agent.Prenom;
-                    modifAgent.StatutMat = agent.StatutMat;                                        
+                    modifAgent.StatutMat = agent.StatutMat;
                     return ct.SaveChanges();
                 }
                 else

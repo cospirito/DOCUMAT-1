@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DOCUMAT.ViewModels
 {
-    interface IView <MV,M> : IDisposable
+    interface IView<MV, M> : IDisposable
     {
         int NumeroOrdre { get; set; }
         Models.DocumatContext context { get; set; }

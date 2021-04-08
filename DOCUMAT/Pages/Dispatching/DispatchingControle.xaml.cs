@@ -1,6 +1,7 @@
 ﻿using DOCUMAT.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -19,22 +20,110 @@ namespace DOCUMAT.Pages.Dispatching
         List<ListViewItem> listViewItems;
         public bool AllComponentisLoad = false;
         public Models.Agent Utilisateur { get; }
+        private readonly BackgroundWorker RefreshData = new BackgroundWorker();
+        public List<Unite> ListUnites = new List<Unite>();
 
         public DispatchingControle()
         {
             InitializeComponent();
+            RefreshData.WorkerSupportsCancellation = true;
+            RefreshData.DoWork += RefreshData_DoWork;
+            RefreshData.RunWorkerCompleted += RefreshData_RunWorkerCompleted;
+            RefreshData.Disposed += RefreshData_Disposed;
         }
 
-        public DispatchingControle(Models.Agent user):this()
+        private void RefreshData_Disposed(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void RefreshData_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            try
+            {
+                ListUnites = e.Result as List<Unite>;
+                dgUnite.ItemsSource = ListUnites;
+                PanelLoader.Visibility = Visibility.Collapsed;
+                PanelData.Visibility = Visibility.Visible;
+                panelRecherche.IsEnabled = true;
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
+        private void RefreshData_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Définition de la methode de récupération des données 
+            // Récupération de l'argument de la phase 
+            var param = (object[])e.Argument;
+            var phaseData = (int)param[0];
+            var tranche = (Models.Tranche)param[1];
+
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    if (phaseData == 0)
+                    {
+                        List<Models.Unite> unites = ct.Unites.Where(u => u.TrancheID == tranche.TrancheID).ToList();
+                        List<Models.Traitement> traitementsAttrUnite = ct.Traitement.Where(t => t.TableSelect.ToUpper() == DocumatContext.TbUnite.ToUpper()
+                                                && t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_ATTIBUE).ToList();
+
+                        var jointure = from u in unites
+                                       join t in traitementsAttrUnite on u.UniteID equals t.TableID
+                                       select u;
+                        e.Result = jointure.ToList();
+                    }
+                    else if (phaseData == 1)
+                    {
+
+                        List<Models.Unite> unites = ct.Unites.Where(u => u.TrancheID == tranche.TrancheID).ToList();
+                        List<Models.Traitement> traitementsAttrUnite = ct.Traitement.Where(t => t.TableSelect.ToUpper() == DocumatContext.TbUnite.ToUpper()
+                                                && t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_ATTIBUE).ToList();
+
+                        var jointure = from u in unites
+                                       join t in traitementsAttrUnite on u.UniteID equals t.TableID
+                                       select u;
+                        e.Result = unites.Except(jointure).ToList();
+                    }
+                    else
+                    {
+                        e.Result = ct.Unites.Where(u => u.TrancheID == tranche.TrancheID).ToList();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
+        public DispatchingControle(Models.Agent user) : this()
         {
             this.Utilisateur = user;
         }
 
-
         private void BtnActualiser_Click(object sender, RoutedEventArgs e)
         {
-            RefreshUnite();
-            FindAgent(0);
+            try
+            {
+                Models.Tranche tranche = (Models.Tranche)cbChoixTranche.SelectedItem;
+                object[] arg = new object[] { cbChoixStatut.SelectedIndex, tranche };
+                RefreshData.RunWorkerAsync(arg);
+                PanelLoader.Visibility = Visibility.Visible;
+                PanelData.Visibility = Visibility.Collapsed;
+                panelRecherche.IsEnabled = false;
+            }
+            catch (Exception ex)
+            {
+                //ex.ExceptionCatcher();
+                RefreshData.CancelAsync();
+                PanelLoader.Visibility = Visibility.Collapsed;
+                PanelData.Visibility = Visibility.Visible;
+                panelRecherche.IsEnabled = true;
+            }
         }
 
         private void dgUnite_LoadingRow(object sender, DataGridRowEventArgs e)
@@ -53,7 +142,7 @@ namespace DOCUMAT.Pages.Dispatching
                     Models.Unite unite = (Models.Unite)dgUnite.SelectedItem;
                     Models.Traitement traitement = ct.Traitement.FirstOrDefault(t => t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_ATTIBUE
                     && t.TableSelect == DocumatContext.TbUnite && t.TableID == unite.UniteID);
- 
+
                     if (traitement != null)
                     {
                         FindAgent(traitement.AgentID);
@@ -63,7 +152,7 @@ namespace DOCUMAT.Pages.Dispatching
                     {
                         ListAgentSelected.ItemsSource = null;
                         menuItem.IsEnabled = true;
-                    } 
+                    }
                 }
             }
             else
@@ -85,7 +174,7 @@ namespace DOCUMAT.Pages.Dispatching
         {
             if (AllComponentisLoad)
             {
-                RefreshUnite();
+                BtnActualiser_Click(sender, e);
             }
         }
 
@@ -98,51 +187,17 @@ namespace DOCUMAT.Pages.Dispatching
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ContextMenu cm = this.FindResource("cmUnite") as ContextMenu;
-            dgUnite.ContextMenu = cm;
-            FindAgent(0);
-            AllComponentisLoad = true;
-
-            // Liste des Tranches 
-            using (var ct = new DocumatContext())
-            {
-                cbChoixTranche.ItemsSource = ct.Tranches.ToList();
-            }
-        }
-
-        private void RefreshUnite()
-        {
             try
             {
+                ContextMenu cm = this.FindResource("cmUnite") as ContextMenu;
+                dgUnite.ContextMenu = cm;
+                FindAgent(0);
+                AllComponentisLoad = true;
+
+                // Liste des Tranches 
                 using (var ct = new DocumatContext())
                 {
-                    if (cbChoixStatut.SelectedIndex == 0)
-                    {
-                        List<Models.Unite> unites = ct.Unites.Where(u => u.TrancheID == ((Models.Tranche)cbChoixTranche.SelectedItem).TrancheID).ToList();
-                        List<Models.Traitement> traitementsAttrUnite = ct.Traitement.Where(t => t.TableSelect.ToUpper() == DocumatContext.TbUnite.ToUpper() 
-                                                && t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_ATTIBUE).ToList();
-
-                        var jointure = from u in unites
-                                       join t in traitementsAttrUnite on u.UniteID equals t.TableID
-                                       select u;
-                        dgUnite.ItemsSource = jointure;
-                    }
-                    else if (cbChoixStatut.SelectedIndex == 1)
-                    {
-
-                        List<Models.Unite> unites = ct.Unites.Where(u => u.TrancheID == ((Models.Tranche)cbChoixTranche.SelectedItem).TrancheID).ToList();
-                        List<Models.Traitement> traitementsAttrUnite = ct.Traitement.Where(t => t.TableSelect.ToUpper() == DocumatContext.TbUnite.ToUpper()
-                                                && t.TypeTraitement == (int)Enumeration.TypeTraitement.CONTROLE_ATTIBUE).ToList();
-
-                        var jointure = from u in unites
-                                        join t in traitementsAttrUnite on u.UniteID equals t.TableID
-                                        select u;                        
-                        dgUnite.ItemsSource = unites.Except(jointure);
-                    }
-                    else
-                    {
-                        dgUnite.ItemsSource = ct.Unites.Where(u => u.TrancheID == ((Models.Tranche)cbChoixTranche.SelectedItem).TrancheID).ToList();
-                    } 
+                    cbChoixTranche.ItemsSource = ct.Tranches.ToList();
                 }
             }
             catch (Exception ex)
@@ -153,9 +208,9 @@ namespace DOCUMAT.Pages.Dispatching
 
         private void cbChoixTranche_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(cbChoixTranche.SelectedItem != null)
+            if (cbChoixTranche.SelectedItem != null)
             {
-                RefreshUnite();
+                BtnActualiser_Click(sender, e);
             }
         }
 
@@ -252,20 +307,20 @@ namespace DOCUMAT.Pages.Dispatching
                                         int IdAgent = Int32.Parse(listViewItem.Tag.ToString());
                                         Models.Agent agent = ct.Agent.Where(a => a.AgentID == IdAgent).FirstOrDefault();
                                         // traitement de l'attribution 
-                                        DocumatContext.AddTraitement(DocumatContext.TbUnite, unite.UniteID, agent.AgentID, (int)Enumeration.TypeTraitement.CONTROLE_ATTIBUE,"ATTRIBUTION CONTROLE UNITE PAR L'AGENT ID N° : " + Utilisateur.AgentID);
+                                        DocumatContext.AddTraitement(DocumatContext.TbUnite, unite.UniteID, agent.AgentID, (int)Enumeration.TypeTraitement.CONTROLE_ATTIBUE, "ATTRIBUTION CONTROLE UNITE PAR AGENT ID N° : " + Utilisateur.AgentID);
 
                                         // remise en place de l'affichage
                                         dgUnite.IsEnabled = true;
                                         panelRecherche.IsEnabled = true;
                                         panelSelection.Visibility = Visibility.Collapsed;
                                         IsSelectionAgent.IsChecked = false;
-                                        RefreshUnite();
+                                        BtnActualiser_Click(sender, e);
                                     }
                                     else
                                     {
                                         MessageBox.Show("Impossible, ce registre est attribué à un autre agent !!!", "IMPOSSIBLE", MessageBoxButton.OK, MessageBoxImage.Error);
                                     }
-                                } 
+                                }
                             }
                         }
                     }

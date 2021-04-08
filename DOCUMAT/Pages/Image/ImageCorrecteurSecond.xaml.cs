@@ -23,7 +23,7 @@ namespace DOCUMAT.Pages.Image
     {
 		Correction.Correction MainParent;
 
-		RegistreView RegistreViewParent;
+		Models.Registre RegistreParent;
 		ImageView CurrentImageView;
 		private int currentImage = 1;
 
@@ -42,6 +42,8 @@ namespace DOCUMAT.Pages.Image
 		string RefInitiale = "R";
 		//Liste des possibles references		
 		Dictionary<String, String> References = new Dictionary<String, String>();
+		// Controle des chargements de l'aborescence
+		public bool AllisLoad = false;
 
 		#region FONCTIONS			
 		public static string GetFileFolderName(string path)
@@ -69,44 +71,18 @@ namespace DOCUMAT.Pages.Image
 		/// </summary>
 		/// <param name="ImagePath"> Chemin de l'image à afficher </param>
 		private void viewImage(string ImagePath)
-		{				
+		{
 			FileInfo fileInfo = new FileInfo(ImagePath);
 			try
 			{
-				if(fileInfo.Exists)
+				if (fileInfo.Exists)
 				{
-					if(fileInfo.Extension.ToUpper() == ".PDF")
-					{
-						PdfViewerPanel.Visibility = Visibility.Visible;
-						DocumentViewer.Visibility = Visibility.Collapsed;
-						PdfViewer.axAcroPDF1.LoadFile(ImagePath);
-					}
-					else
-					{
-						DocumentViewer.Visibility = Visibility.Visible;
-						PdfViewerPanel.Visibility = Visibility.Collapsed;
-						System.Windows.Controls.Image Image;
-						FixedDocument FixedDocument;
-						FixedPage FixedPage;
-						PageContent PageContent;
-
-						ImageSource img = BitmapFrame.Create(new Uri(ImagePath), BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
-						Image = new System.Windows.Controls.Image();
-						Image.Source = img;
-						FixedPage = new FixedPage();
-						FixedPage.Height = img.Height;
-						FixedPage.Width = img.Width;
-						FixedPage.Children.Add(Image);
-						PageContent = new PageContent();
-						PageContent.Child = FixedPage;
-						FixedDocument = new FixedDocument();
-						FixedDocument.Pages.Add(PageContent);
-						DocumentViewer.Document = FixedDocument;
-					}
+					PageImage.Source = null;
+					PageImage.Source = BitmapFrame.Create(new Uri(fileInfo.FullName), BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
 				}
 				else
 				{
-					MessageBox.Show("Fichier Introuvable !!!","Fichier Introuvable",MessageBoxButton.OK, MessageBoxImage.Warning);
+					MessageBox.Show("Fichier Introuvable !!!", "Fichier Introuvable", MessageBoxButton.OK, MessageBoxImage.Warning);
 				}
 			}
 			catch (Exception ex)
@@ -134,10 +110,15 @@ namespace DOCUMAT.Pages.Image
 			//Remplissage des éléments de la vue
 			//Obtention de la liste des images du registre dans la base de données 
 			ImageView imageView1 = new ImageView();
-			List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
-			tbxQrCode.Text = "QRCODE : " + RegistreViewParent.Registre.QrCode;
-			tbxVersement.Text = "Versement N° : " + RegistreViewParent.Versement.NumeroVers.ToString();
-			tbxService.Text = "Service : " + RegistreViewParent.ServiceVersant.Nom;
+			List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreParent);
+			tbxQrCode.Text = "QRCODE : " + RegistreParent.QrCode;
+			using (var ct = new DocumatContext())
+			{
+				Models.Versement versement = ct.Versement.FirstOrDefault(v => v.VersementID == RegistreParent.VersementID);
+				Livraison livraison = ct.Livraison.FirstOrDefault(l => l.LivraisonID == versement.LivraisonID);
+				tbxService.Text = "Service : " + ct.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).NomComplet;
+				tbxVersement.Text = "N° Versement : " + versement.NumeroVers.ToString();
+			}
 
 			// Récupération des images en correction
 			List<Models.Image> imagesEnCorrection = new List<Models.Image>();
@@ -146,10 +127,10 @@ namespace DOCUMAT.Pages.Image
 			{
 				using (var ct = new DocumatContext())
 				{
-					if (ct.Correction.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.ImageID == image.Image.ImageID
+					if (ct.Correction.Any(c => c.RegistreId == RegistreParent.RegistreID && c.ImageID == image.Image.ImageID
 						 && c.SequenceID == null && c.StatutCorrection == 1 && c.PhaseCorrection == 3)
 						 &&
-						 !ct.Correction.Any(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.ImageID == image.Image.ImageID
+						 !ct.Correction.Any(c => c.RegistreId == RegistreParent.RegistreID && c.ImageID == image.Image.ImageID
 						 && c.SequenceID == null && c.StatutCorrection == 0 && c.PhaseCorrection == 3))
 					{
 						imagesEnCorrection.Add(image.Image);
@@ -174,76 +155,8 @@ namespace DOCUMAT.Pages.Image
 			TextIndicator.Text = Math.Round(perTerminer, 1) + "%";
 		}
 
-		/// <summary>
-		/// Actualise l'aborescence en fonction des changements lors de l'indexation !!!
-		/// </summary>
-		private void ActualiserArborescence()
+		private void setActiveAborescenceImage()
 		{
-			// Définition des types d'icon dans l'aborescence en fonction des statuts des images
-			foreach (TreeViewItem item in registreAbre.Items)
-			{
-				using (var ct = new DocumatContext())
-				{
-					Models.Image image1 = ct.Image.FirstOrDefault(i => i.NomPage.ToLower() == item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower()
-																&& i.RegistreID == RegistreViewParent.Registre.RegistreID);
-					if (image1 != null)
-					{
-						if (image1.StatutActuel == (int)Enumeration.Image.PHASE1)
-						{							
-							item.Tag = "valide";
-
-						}
-						else if(image1.StatutActuel == (int)Enumeration.Image.PHASE2)
-                        {
-							item.Tag = "Correct";
-						}
-						else if (image1.StatutActuel == (int)Enumeration.Image.PHASE3)
-						{ 
-							if (ct.Controle.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-								&& c.PhaseControle == 3 && c.StatutControle == 0) != null)
-							{
-								item.Tag = "valide";
-							}
-							else
-							{
-								if (ct.Controle.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-										&& c.PhaseControle == 3 && c.StatutControle == 1 && c.ASupprimer == 1) != null)
-								{
-									item.Tag = "fileDelele";
-								}
-								else
-								{
-									item.Tag = "instance";
-								}
-							}
-						}
-
-						// Cas de la PAGE DE GARDE AYANT LES INDEX DE REGISTRES ERRONES
-						if (image1.NumeroPage == -1)
-						{
-							List<Models.Correction> corrections = ct.Correction.Where(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.PhaseCorrection == 3
-														   && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
-														   || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)).ToList();
-							if (corrections.Count > 0)
-							{
-								if (corrections.Any(c => c.StatutCorrection == 0))
-								{
-									item.Tag = "Correct";
-								}
-								else
-								{
-									item.Tag = "instance";
-								}
-							}
-						}
-					}
-					else
-					{
-						item.Tag = "image.png";
-					}					
-				}
-			}
-
 			// On rend tout les items de l'aborescence normaux et on met en gras l'élément concerné
 			foreach (TreeViewItem item in registreAbre.Items)
 			{
@@ -252,7 +165,7 @@ namespace DOCUMAT.Pages.Image
 				Models.ManquantImage manquantImage = null;
 				using (var ct = new DocumatContext())
 				{
-					manquantImage = ct.ManquantImage.FirstOrDefault(m => m.IdRegistre == RegistreViewParent.Registre.RegistreID
+					manquantImage = ct.ManquantImage.FirstOrDefault(m => m.IdRegistre == RegistreParent.RegistreID
 											&& m.NumeroPage.ToString() == item.Header.ToString());
 				}
 
@@ -288,12 +201,94 @@ namespace DOCUMAT.Pages.Image
 			}
 		}
 
+		/// <summary>
+		/// Actualise l'aborescence en fonction des changements lors de l'indexation !!!
+		/// </summary>
+		private void ActualiserArborescence()
+		{
+			// Définition des types d'icon dans l'aborescence en fonction des statuts des images
+			// récupération de la liste des Images
+			ImageView imageView1 = new ImageView();
+			// Récupération de la liste des manquants pour ce registre
+			List<Models.ManquantImage> manquantImages = imageView1.context.ManquantImage.Where(m => m.IdRegistre == RegistreParent.RegistreID).ToList();
+			// Liste des Images de ce registre
+			List<Models.Image> images = imageView1.context.Image.Where(i => i.RegistreID == RegistreParent.RegistreID).ToList();
+			// Liste des Controles pour ce registres 
+			List<Models.Controle> controles = imageView1.context.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseControle == 3).ToList();
+			// Liste des Corrections pour ce registres
+			List<Models.Correction> corrections = imageView1.context.Correction.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3).ToList();
+
+			// Définition des types d'icon dans l'aborescence en fonction des statuts des images
+			foreach (TreeViewItem item in registreAbre.Items)
+			{
+				using (var ct = new DocumatContext())
+				{
+					Models.Image image1 = images.FirstOrDefault(i => i.NomPage.ToLower() == item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower());
+					if (image1 != null)
+					{
+						if (image1.StatutActuel == (int)Enumeration.Image.PHASE1)
+						{							
+							item.Tag = "valide";
+
+						}
+						else if(image1.StatutActuel == (int)Enumeration.Image.PHASE2)
+                        {
+							item.Tag = "Correct";
+						}
+						else if (image1.StatutActuel == (int)Enumeration.Image.PHASE3)
+						{ 
+							if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
+								&& c.PhaseControle == 3 && c.StatutControle == 0) != null)
+							{
+								item.Tag = "valide";
+							}
+							else
+							{
+								if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
+										&& c.PhaseControle == 3 && c.StatutControle == 1 && c.ASupprimer == 1) != null)
+								{
+									item.Tag = "fileDelele";
+								}
+								else
+								{
+									item.Tag = "instance";
+								}
+							}
+						}
+
+						// Cas de la PAGE DE GARDE AYANT LES INDEX DE REGISTRES ERRONES
+						if (image1.NumeroPage == -1)
+						{
+							List<Models.Correction> correctionpg = corrections.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3
+														   && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
+														   || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)).ToList();
+							if (correctionpg.Count > 0)
+							{
+								if (correctionpg.Any(c => c.StatutCorrection == 0))
+								{
+									item.Tag = "Correct";
+								}
+								else
+								{
+									item.Tag = "instance";
+								}
+							}
+						}
+					}
+					else
+					{
+						item.Tag = "image.png";
+					}					
+				}
+			}
+		}
+
 		private void FileTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
 		{
 			TreeViewItem treeViewItem = (TreeViewItem)sender;
 			// Récupération des images du registre
 			ImageView imageView1 = new ImageView();
-			List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
+			List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreParent);
 
 			//Chargement de l'image 
 			int numeroPage = 0;
@@ -301,7 +296,7 @@ namespace DOCUMAT.Pages.Image
 
 			using (var ct = new DocumatContext())
 			{
-				manquantImage = ct.ManquantImage.FirstOrDefault(m => m.IdRegistre == RegistreViewParent.Registre.RegistreID
+				manquantImage = ct.ManquantImage.FirstOrDefault(m => m.IdRegistre == RegistreParent.RegistreID
 											&& m.NumeroPage.ToString() == treeViewItem.Header.ToString());
 			}
 
@@ -355,14 +350,14 @@ namespace DOCUMAT.Pages.Image
 							{
 								using (var ct = new DocumatContext())
 								{
-									string Destination = System.IO.Path.Combine(RegistreViewParent.Registre.CheminDossier
+									string Destination = System.IO.Path.Combine(RegistreParent.CheminDossier
 														, newfichier + fichierSource.Extension);
 									//Copy du fichier dans le dossier du registre
 									File.Copy(fichierSource.FullName, Destination, true);
 									//Ajout de l'image avec le statut scanné
 									Models.Image image = new Models.Image()
 									{
-										RegistreID = RegistreViewParent.Registre.RegistreID,
+										RegistreID = RegistreParent.RegistreID,
 										NomPage = newfichier,
 										NumeroPage = manquantImage.NumeroPage,
 										CheminImage = Destination,
@@ -529,10 +524,10 @@ namespace DOCUMAT.Pages.Image
 			InitializeComponent();
 		}
 
-		public ImageCorrecteurSecond(RegistreView registreview, Correction.Correction correction) : this()
+		public ImageCorrecteurSecond(Models.Registre registre, Correction.Correction correction) : this()
 		{
 			MainParent = correction;
-			RegistreViewParent = registreview;
+			RegistreParent = registre;
 		}
 
 		/// <summary>
@@ -543,41 +538,43 @@ namespace DOCUMAT.Pages.Image
 		{
             try
             {
-                #region RECUPERATION ET AFFICHAGE DE L'IMAGE SELECTIONNEE
                 ImageView imageView1 = new ImageView();
-				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
+				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreParent);
 				imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
 
 				if (imageView1 != null)
 				{
-					//On change l'image actuelle
-					CurrentImageView = imageView1;
-					this.currentImage = currentImage;
+                    #region CHARGEMENT DE L'ENTETE DU FORMULAIRE DE CORRECTION
+                    //On change l'image actuelle
+                    CurrentImageView = imageView1;
+                    this.currentImage = currentImage;
 
-					if (imageView1.Image.NumeroPage == -1)
-					{
-						tbxNomPage.Text = "PAGE DE GARDE";
-						tbxNumeroPage.Text = "";
-						tbxDebSeq.Text = "";
-						tbxFinSeq.Text = "";
-					}
-					else if (imageView1.Image.NumeroPage == 0)
-					{
-						tbxNomPage.Text = "PAGE D'OUVERTURE";
-						tbxNumeroPage.Text = "";
-						tbxDebSeq.Text = "";
-						tbxFinSeq.Text = "";
-					}
-					else
-					{
-						tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
-						tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
-						tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
-						tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
-					}
+                    if (imageView1.Image.NumeroPage == -1)
+                    {
+                        tbxNomPage.Text = "PAGE DE GARDE";
+                        tbxNumeroPage.Text = "";
+                        tbxDebSeq.Text = "";
+                        tbxFinSeq.Text = "";
+                    }
+                    else if (imageView1.Image.NumeroPage == 0)
+                    {
+                        tbxNomPage.Text = "PAGE D'OUVERTURE";
+                        tbxNumeroPage.Text = "";
+                        tbxDebSeq.Text = "";
+                        tbxFinSeq.Text = "";
+                    }
+                    else
+                    {
+                        tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
+                        tbxNumeroPage.Text = "N° " + imageView1.Image.NumeroPage.ToString() + "/ " + (imageViews.Count() - 2);
+                        tbxDebSeq.Text = "N° Debut : " + imageView1.Image.DebutSequence;
+                        tbxFinSeq.Text = "N° Fin : " + imageView1.Image.FinSequence;
+                    } 
+                    #endregion
 
-					// Chargement de la visionneuse
-					if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
+                    #region CHARGEMENT DE L'IMAGE SCANNEE
+                    // Chargement de la visionneuse
+                    if (File.Exists(Path.Combine(DossierRacine, imageView1.Image.CheminImage)))
                     {
 						viewImage(Path.Combine(DossierRacine, imageView1.Image.CheminImage));
                     }
@@ -712,12 +709,12 @@ namespace DOCUMAT.Pages.Image
 					{
                         using (var ct= new DocumatContext())
                         {
-                            Models.Controle controle = ct.Controle.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.StatutControle == 1 && c.PhaseControle == 3
+                            Models.Controle controle = ct.Controle.FirstOrDefault(c => c.RegistreId == RegistreParent.RegistreID && c.StatutControle == 1 && c.PhaseControle == 3
                                                                               && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
                                                                               || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1));
                             if (controle != null)
                             {
-								if(!ct.Correction.Any(c=>c.RegistreId == RegistreViewParent.Registre.RegistreID && c.StatutCorrection == 0 && c.PhaseCorrection == 3
+								if(!ct.Correction.Any(c=>c.RegistreId == RegistreParent.RegistreID && c.StatutCorrection == 0 && c.PhaseCorrection == 3
 																			  && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 
 																			  || c.NumeroDepotFin_idx == 1 || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 
 																			  || c.NombrePage_idx == 1)))
@@ -735,12 +732,12 @@ namespace DOCUMAT.Pages.Image
 									if (controle.DateDepotFin_idx == 1) tbxDateDepotFin.IsEnabled = true; else tbxDateDepotFin.IsEnabled = false;
 									if (controle.NombrePage_idx == 1) tbxNbPage.IsEnabled = true; else tbxNbPage.IsEnabled = false;
 
-									tbxVolume.Text = RegistreViewParent.Registre.Numero.ToString();
-									tbxNumDepotDebut.Text = RegistreViewParent.Registre.NumeroDepotDebut.ToString();
-									tbxDateDepotDebut.Text = RegistreViewParent.Registre.DateDepotDebut.ToShortDateString();
-									tbxNumDepotFin.Text = RegistreViewParent.Registre.NumeroDepotFin.ToString();
-									tbxDateDepotFin.Text = RegistreViewParent.Registre.DateDepotFin.ToShortDateString();
-									tbxNbPage.Text = RegistreViewParent.Registre.NombrePage.ToString();
+									tbxVolume.Text = RegistreParent.Numero.ToString();
+									tbxNumDepotDebut.Text = RegistreParent.NumeroDepotDebut.ToString();
+									tbxDateDepotDebut.Text = RegistreParent.DateDepotDebut.ToShortDateString();
+									tbxNumDepotFin.Text = RegistreParent.NumeroDepotFin.ToString();
+									tbxDateDepotFin.Text = RegistreParent.DateDepotFin.ToShortDateString();
+									tbxNbPage.Text = RegistreParent.NombrePage.ToString();
 									PanelIndexRegistre.Visibility = Visibility.Visible;
                                 }
 								else
@@ -763,27 +760,29 @@ namespace DOCUMAT.Pages.Image
                     }
 					#endregion
 
-					// Actualisation de l'aborescence
-					ActualiserArborescence();
-
-					//Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
-					bool valide = true;
-					foreach (TreeViewItem item in registreAbre.Items)
-					{
-						if (!item.Tag.ToString().Equals("valide") && !item.Tag.ToString().Equals("Correct"))
+                    #region CHARGEMENT DU BOUTON DE VALIDATION DE LA CORRECTION
+                    //Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
+                    bool valide = true;
+                    foreach (TreeViewItem item in registreAbre.Items)
+                    {
+                        if (!item.Tag.ToString().Equals("valide") && !item.Tag.ToString().Equals("Correct"))
                         {
-							valide = false;
+                            valide = false;
                         }
-					}
+                    }
 
-					if (valide)
-					{
-						btnValideCorrection.Visibility = Visibility.Visible;
-					}
-					else
-					{
-						btnValideCorrection.Visibility = Visibility.Collapsed;
-					}
+                    if (valide)
+                    {
+                        btnValideCorrection.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        btnValideCorrection.Visibility = Visibility.Collapsed;
+                    }
+					#endregion                
+					
+					// Actualisation de l'aborescence
+					setActiveAborescenceImage();
 				}
 				else
 				{
@@ -801,9 +800,111 @@ namespace DOCUMAT.Pages.Image
 			this.Close();
 		}
 
-		private void Window_Closed(object sender, EventArgs e)
+		private void LoadAll()
 		{
-			//Image.RefreshImages();	
+            try
+			{
+				#region VERIFICATION DES PAGES SPECIALES
+				// Récupération des Pages Spéciaux : PAGE DE GARDE : numero : -1 ET PAGE D'OUVERTURE : numero : 0			
+				using (var ct = new DocumatContext())
+				{
+					//PAGE DE GARDE N°-1
+					if (ct.Image.FirstOrDefault(i => i.RegistreID == RegistreParent.RegistreID && i.NumeroPage == -1) == null)
+					{
+						throw new Exception("La PAGE DE GARDE est manquante !!!");
+					}
+
+					//PAGE D'OUVERTURE N°0
+					if (ct.Image.FirstOrDefault(i => i.RegistreID == RegistreParent.RegistreID && i.NumeroPage == 0) == null)
+					{
+						throw new Exception("La PAGE D'OUVERTURE est manquante !!!");
+					}
+				}
+				#endregion
+
+				#region VERIFICATION DES PAGES NUMEROTEES
+				// Les Pages doivent être scannées de manière à respecter la nomenclature de fichier standard 
+				ImageView imageView1 = new ImageView();
+				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreParent);
+				// Modification des Pages Numerotées / Pré-Indexées
+				foreach (var imageView in imageViews)
+				{
+					if (imageView.Image.StatutActuel == (int)Enumeration.Image.SCANNEE)
+					{
+						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NumeroPage.ToString());
+						if (file == null)
+						{
+							throw new Exception("La Page N°" + imageView.Image.NumeroPage + " est introuvable ");
+						}
+					}
+				}
+				#endregion
+
+				#region CHARGEMENT DU BOUTON DE VALIDATION DE CONTROLE
+				using (var ct = new DocumatContext())
+				{
+					if (ct.Image.All(i => i.RegistreID == RegistreParent.RegistreID
+										&& i.StatutActuel == (int)Enumeration.Image.PHASE2))
+					{
+						btnValideCorrection.Visibility = Visibility.Visible;
+					}
+					else
+					{
+						btnValideCorrection.Visibility = Visibility.Collapsed;
+					}
+				}
+				#endregion
+
+				#region CHARGEMENT DE LA PAGE DE GARDE
+				// Chargement de la première page
+				currentImage = -1;
+				ChargerImage(currentImage);
+				#endregion
+
+				#region VERIFICATION DE L'AGENT 				
+				using (var ct = new DocumatContext())
+				{
+					if (MainParent.Utilisateur.Affectation != (int)Enumeration.AffectationAgent.ADMINISTRATEUR && MainParent.Utilisateur.Affectation != (int)Enumeration.AffectationAgent.SUPERVISEUR)
+					{
+						Models.Traitement traitementAttr = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreParent.RegistreID
+															&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH3_DEBUT);
+						if (traitementAttr != null)
+						{
+							Models.Traitement traitementRegistreAgent = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreParent.RegistreID
+													&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH3_DEBUT && t.AgentID == MainParent.Utilisateur.AgentID);
+							Models.Traitement traitementAutreAgent = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreParent.RegistreID
+													&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH3_DEBUT && t.AgentID != MainParent.Utilisateur.AgentID);
+
+							if (traitementAutreAgent != null)
+							{
+								Models.Agent agent = ct.Agent.FirstOrDefault(t => t.AgentID == traitementAutreAgent.AgentID);
+								MessageBox.Show("Ce Registre est en Cours traitement par l'agent : " + agent.Noms, "REGISTRE EN CORRECTION PH3", MessageBoxButton.OK, MessageBoxImage.Information);
+								this.Close();
+							}
+						}
+						else
+						{
+							if (MessageBox.Show("Voulez vous commencez la correction ?", "COMMNCER LE CORRECTION PH3", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+							{
+								DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreParent.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CORRECTION_PH3_DEBUT, "CORRECTION PH3 COMMENCER");
+							}
+							else
+							{
+								this.Close();
+							}
+						}
+					}
+				}
+				#endregion
+
+				ActualiserArborescence();
+				HeaderInfosGetter();
+				AllisLoad = true;
+			}
+			catch (Exception ex)
+            {
+				ex.ExceptionCatcher();
+            }
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -811,24 +912,23 @@ namespace DOCUMAT.Pages.Image
 			try
 			{
 				#region INSPECTION DU DOSSIER DE REGISTRE ET CREATION DE L'ABORESCENCE
-
 				// Récupération des images de registre ayant des erreurs
 				// Les Pages doivent être scannées de manière à respecter la nomenclature de fichier standard 
 				ImageView imageView1 = new ImageView();
-				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreViewParent.Registre);
+				List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreParent);
 
 				// Chargement de l'aborescence
 				// Récupération de la liste des images contenu dans le dossier du registre
-				var files = Directory.GetFiles(Path.Combine(DossierRacine, RegistreViewParent.Registre.CheminDossier));
+				var files = Directory.GetFiles(Path.Combine(DossierRacine, RegistreParent.CheminDossier));
 
 				// Affichage et configuration de la TreeView
-				registreAbre.Header = RegistreViewParent.Registre.QrCode;
-				registreAbre.Tag = RegistreViewParent.Registre.QrCode;
+				registreAbre.Header = RegistreParent.QrCode;
+				registreAbre.Tag = RegistreParent.QrCode;
 				registreAbre.FontWeight = FontWeights.Normal;
 				registreAbre.Foreground = Brushes.White;
 
 				// Définition de la lettre de référence pour ce registre
-				if (RegistreViewParent.Registre.Type == "R4")
+				if (RegistreParent.Type == "R4")
 					RefInitiale = "T";
 
 				foreach (var file in files)
@@ -891,96 +991,12 @@ namespace DOCUMAT.Pages.Image
 					}
 				}
 				FolderView.Items.Add(registreAbre);
+				// Définition de l'évènement de déroulement de l'aborescence
+				registreAbre.Expanded += RegistreAbre_Expanded;
 				#endregion
-
-				#region VERIFICATION DES PAGES SPECIALES
-				// Récupération des Pages Spéciaux : PAGE DE GARDE : numero : -1 ET PAGE D'OUVERTURE : numero : 0			
-				using (var ct = new DocumatContext())
-				{
-					//PAGE DE GARDE N°-1
-					if (ct.Image.FirstOrDefault(i => i.RegistreID == RegistreViewParent.Registre.RegistreID && i.NumeroPage == -1) == null)
-					{
-						throw new Exception("La PAGE DE GARDE est manquante !!!");
-					}
-
-					//PAGE D'OUVERTURE N°0
-					if (ct.Image.FirstOrDefault(i => i.RegistreID == RegistreViewParent.Registre.RegistreID && i.NumeroPage == 0) == null)
-					{
-						throw new Exception("La PAGE D'OUVERTURE est manquante !!!");
-					}
-				}
-				#endregion
-
-				#region VERIFICTION DES PAGES NUMEROTEES
-				// Modification des Pages Numerotées / Pré-Indexées
-				foreach (var imageView in imageViews)
-				{
-					if (imageView.Image.StatutActuel == (int)Enumeration.Image.SCANNEE)
-					{
-						FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == imageView.Image.NumeroPage.ToString());
-						if (file == null)
-						{
-							throw new Exception("La Page N°" + imageView.Image.NumeroPage + " est introuvable ");
-						}
-					}
-				}
-				#endregion
-
-				using (var ct = new DocumatContext())
-				{
-					if (ct.Image.All(i => i.RegistreID == RegistreViewParent.Registre.RegistreID
-										&& i.StatutActuel == (int)Enumeration.Image.PHASE2))
-					{
-						btnValideCorrection.Visibility = Visibility.Visible;
-					}
-					else
-					{
-						btnValideCorrection.Visibility = Visibility.Collapsed;
-					}
-				}
-
-				// Chargement de la première page
-				currentImage = -1;
-				ChargerImage(currentImage);
 
 				// Modification des information d'entête
 				HeaderInfosGetter();
-
-				#region VERIFICATION DE L'AGENT 				
-				using (var ct = new DocumatContext())
-				{
-					if (MainParent.Utilisateur.Affectation != (int)Enumeration.AffectationAgent.ADMINISTRATEUR && MainParent.Utilisateur.Affectation != (int)Enumeration.AffectationAgent.SUPERVISEUR)
-					{
-						Models.Traitement traitementAttr = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
-															&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH3_DEBUT);
-						if (traitementAttr != null)
-						{
-							Models.Traitement traitementRegistreAgent = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
-													&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH3_DEBUT && t.AgentID == MainParent.Utilisateur.AgentID);
-							Models.Traitement traitementAutreAgent = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreViewParent.Registre.RegistreID
-													&& t.TypeTraitement == (int)Enumeration.TypeTraitement.CORRECTION_PH3_DEBUT && t.AgentID != MainParent.Utilisateur.AgentID);
-
-							if (traitementAutreAgent != null)
-							{
-								Models.Agent agent = ct.Agent.FirstOrDefault(t => t.AgentID == traitementAutreAgent.AgentID);
-								MessageBox.Show("Ce Registre est en Cours traitement par l'agent : " + agent.Noms, "REGISTRE EN CORRECTION PH3", MessageBoxButton.OK, MessageBoxImage.Information);
-								this.Close();
-							}
-						}
-						else
-						{
-							if (MessageBox.Show("Voulez vous commencez la correction ?", "COMMNCER LE CORRECTION PH3", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-							{
-								DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreViewParent.Registre.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CORRECTION_PH3_DEBUT, "CORRECTION PH3 COMMENCER");
-							}
-							else
-							{
-								this.Close();
-							}
-						}
-					}
-				}
-				#endregion
 			}
 			catch (Exception ex)
 			{
@@ -988,7 +1004,15 @@ namespace DOCUMAT.Pages.Image
 			}
 		}
 
-		private void SupprimeSequence_Click(object sender, RoutedEventArgs e)
+        private void RegistreAbre_Expanded(object sender, RoutedEventArgs e)
+		{
+			if (!AllisLoad)
+			{
+				LoadAll();
+			}
+		}
+
+        private void SupprimeSequence_Click(object sender, RoutedEventArgs e)
 		{
             try
             {
@@ -1009,7 +1033,7 @@ namespace DOCUMAT.Pages.Image
                                     // Création de la correction
                                     Models.Correction correction = new Models.Correction()
                                     {
-                                        RegistreId = RegistreViewParent.Registre.RegistreID,
+                                        RegistreId = RegistreParent.RegistreID,
                                         ImageID = sequenceView.Sequence.ImageID,
                                         SequenceID = sequenceView.Sequence.SequenceID,
 
@@ -1034,7 +1058,7 @@ namespace DOCUMAT.Pages.Image
                                     ct.SaveChanges();
 
                                     // Enregistrement du Traitement
-                                    DocumatContext.AddTraitement(DocumatContext.TbSequence, sequenceView.Sequence.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH3 : SUPPRESSION SEQUENCE DE L'IMAGE ID N° : " + sequenceView.Sequence.ImageID);
+                                    DocumatContext.AddTraitement(DocumatContext.TbSequence, sequenceView.Sequence.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH3 : SUPPRESSION SEQUENCE IMAGE ID N° : " + sequenceView.Sequence.ImageID);
                                 }
                             }
 
@@ -1047,11 +1071,6 @@ namespace DOCUMAT.Pages.Image
             {
 				ex.ExceptionCatcher();
             }
-		}
-
-		private void dgSequence_LoadingRow(object sender, DataGridRowEventArgs e)
-		{
-
 		}
 
 		private void dgSequence_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1116,45 +1135,6 @@ namespace DOCUMAT.Pages.Image
 				}
 				#endregion				
 			}
-		}
-
-		private void dgSequence_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
-		{
-		}
-
-		private void btnNext_Click(object sender, RoutedEventArgs e)
-		{
-
-		}
-
-		private void BtnSave_Click_1(object sender, RoutedEventArgs e)
-		{
-
-		}
-
-		private void btnSave_Click_2(object sender, RoutedEventArgs e)
-		{
-
-		}
-
-		private void BtnEnd_Click(object sender, RoutedEventArgs e)
-		{
-
-		}
-
-		private void btnSave_Click_3(object sender, RoutedEventArgs e)
-		{
-
-		}
-
-		private void BtnCancel_Click(object sender, RoutedEventArgs e)
-		{
-
-		}
-
-		private void btnViderSequenceForm_Click(object sender, RoutedEventArgs e)
-		{
-
 		}
 
 		private void BtnModifierSequence_Click(object sender, RoutedEventArgs e)
@@ -1281,7 +1261,7 @@ namespace DOCUMAT.Pages.Image
 								//Création du correction Phase 1
 								Models.Correction correction = new Models.Correction()
 								{
-									RegistreId = RegistreViewParent.Registre.RegistreID,
+									RegistreId = RegistreParent.RegistreID,
 									ImageID = sequenceView.Sequence.ImageID,
 									SequenceID = sequenceView.Sequence.SequenceID,
 
@@ -1311,7 +1291,7 @@ namespace DOCUMAT.Pages.Image
 								tbListeReferences.Text = "";
 
 								// Enregistrement de L'action Agent
-								DocumatContext.AddTraitement(DocumatContext.TbSequence, UpSequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH2 : MODIFICATION DE LA SEQUENCE ID : " + UpSequence.SequenceID + " DE L'IMAGE ID : " + UpSequence.ImageID);
+								DocumatContext.AddTraitement(DocumatContext.TbSequence, UpSequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH2 : MODIFICATION DE LA SEQUENCE ID : " + UpSequence.SequenceID + " IMAGE ID : " + UpSequence.ImageID);
 
 								ActualiseDataCorriger();
 							}
@@ -1329,7 +1309,7 @@ namespace DOCUMAT.Pages.Image
 		private void BtnImageSuivante_Click(object sender, RoutedEventArgs e)
 		{
 			//on Récupère les images de Base de Données;
-			List<ImageView> images = CurrentImageView.GetSimpleViewsList(RegistreViewParent.Registre);
+			List<ImageView> images = CurrentImageView.GetSimpleViewsList(RegistreParent);
 
 			if ((currentImage + 2) == images.Count)
 			{
@@ -1441,11 +1421,6 @@ namespace DOCUMAT.Pages.Image
 			}
 		}
 
-		private void cbxSautOrdre_Unchecked(object sender, RoutedEventArgs e)
-		{
-
-		}
-
 		private void BtnTerminerImage_Click(object sender, RoutedEventArgs e)
 		{
             try
@@ -1463,13 +1438,13 @@ namespace DOCUMAT.Pages.Image
                             using (var ct = new DocumatContext())
                             {
                                 //Récupération de la demande de correction 
-                                Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID
+                                Models.Correction CorrectionOld = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreParent.RegistreID
                                                                     && c.SequenceID == null && c.ImageID == CurrentImageView.Image.ImageID);
 
                                 // Création d'une correction pour de l'image 
                                 Models.Correction correction = new Models.Correction()
                                 {
-                                    RegistreId = RegistreViewParent.Registre.RegistreID,
+                                    RegistreId = RegistreParent.RegistreID,
                                     ImageID = CurrentImageView.Image.ImageID,
                                     SequenceID = null,
 
@@ -1518,10 +1493,10 @@ namespace DOCUMAT.Pages.Image
                                 ct.SaveChanges();
 
                                 // Enregistrement du Traitement
-                                DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH3 : CORRECTION TERMINE DE L'IMAGE DU REGISTRE ID N° : " + RegistreViewParent.Registre.RegistreID);
+                                DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CORRECTION PH3 : CORRECTION TERMINE IMAGE DU REGISTRE ID N° : " + RegistreParent.RegistreID);
 
-                                this.BtnImageSuivante_Click(sender, e);
                                 ActualiserArborescence();
+                                this.BtnImageSuivante_Click(sender, e);
                             }
                         }
                         #endregion
@@ -1792,8 +1767,6 @@ namespace DOCUMAT.Pages.Image
 			}
 		}
 
-		private void Window_GotFocus(object sender, RoutedEventArgs e){}
-
 		private void btnValideCorrection_Click(object sender, RoutedEventArgs e)
 		{
             try
@@ -1805,11 +1778,11 @@ namespace DOCUMAT.Pages.Image
                     {
                         //Récupération de toutes les images du registre 
                         ImageView imageView = new ImageView();
-                        List<ImageView> imageViews = imageView.GetSimpleViewsList(RegistreViewParent.Registre);
+                        List<ImageView> imageViews = imageView.GetSimpleViewsList(RegistreParent);
 
-                        Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == RegistreViewParent.Registre.RegistreID);
+                        Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == RegistreParent.RegistreID);
 
-						Models.Correction correctionRegistre = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.StatutCorrection == 0 && c.PhaseCorrection == 3
+						Models.Correction correctionRegistre = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreParent.RegistreID && c.StatutCorrection == 0 && c.PhaseCorrection == 3
 													 && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
 													 || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1));
 
@@ -1818,7 +1791,7 @@ namespace DOCUMAT.Pages.Image
 							//Ajout de la correction avec le statut corriger
 							Models.Correction NewCorrection = new Models.Correction()
 							{
-								RegistreId = RegistreViewParent.Registre.RegistreID,
+								RegistreId = RegistreParent.RegistreID,
 								ImageID = null,
 								SequenceID = null,
 
@@ -1852,7 +1825,7 @@ namespace DOCUMAT.Pages.Image
 						}
 
                         // Récupération et modification de l'ancien statut du registre
-                        Models.StatutRegistre AncienStatut = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == RegistreViewParent.Registre.RegistreID
+                        Models.StatutRegistre AncienStatut = ct.StatutRegistre.FirstOrDefault(s => s.RegistreID == RegistreParent.RegistreID
                                                                 && s.Code == registre.StatutActuel);
                         AncienStatut.DateFin = AncienStatut.DateModif = DateTime.Now;
 
@@ -1860,7 +1833,7 @@ namespace DOCUMAT.Pages.Image
                         Models.StatutRegistre NewStatut = new StatutRegistre();
                         NewStatut.Code = (int)Enumeration.Registre.PHASE2;
                         NewStatut.DateCreation = NewStatut.DateDebut = NewStatut.DateModif = DateTime.Now;
-                        NewStatut.RegistreID = RegistreViewParent.Registre.RegistreID;
+                        NewStatut.RegistreID = RegistreParent.RegistreID;
                         ct.StatutRegistre.Add(NewStatut);
 
                         //Changement du statut du registre
@@ -1869,11 +1842,13 @@ namespace DOCUMAT.Pages.Image
                         ct.SaveChanges();
 
 						//Enregistrement de la tâche
-						DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreViewParent.Registre.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CORRECTION_PH3_TERMINE, "FIN CORRECTION PH3 DU REGISTRE ID N° " + RegistreViewParent.Registre.RegistreID);
+						DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreParent.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CORRECTION_PH3_TERMINE, "FIN CORRECTION PH3 DU REGISTRE ID N° " + RegistreParent.RegistreID);
 
-						MainParent.RefreshRegistrePhase2();
-                        this.Close();
-                    }
+						// Operation to remove the current registres from the registre List
+						MainParent.ListRegistreActuel.Remove(MainParent.ListRegistreActuel.FirstOrDefault(r => r.RegistreID == RegistreParent.RegistreID));
+						MainParent.dgRegistre.Items.Refresh();
+						this.Close();
+					}
                 }
             }
             catch (Exception ex)
@@ -1897,11 +1872,6 @@ namespace DOCUMAT.Pages.Image
 			{
 				((CheckBox)sender).IsChecked = true;
 			}
-		}
-
-		private void btnSupprimerImage_Click(object sender, RoutedEventArgs e)
-		{
-
 		}
 
 		private void btnImporterImage_Click(object sender, RoutedEventArgs e)
@@ -1949,7 +1919,7 @@ namespace DOCUMAT.Pages.Image
 						// Création d'un controle d'image avec un statut validé
 						Models.Correction correction = new Models.Correction()
                         {
-                            RegistreId = RegistreViewParent.Registre.RegistreID,
+                            RegistreId = RegistreParent.RegistreID,
                             ImageID = CurrentImageView.Image.ImageID,
                             SequenceID = null,
 
@@ -1998,7 +1968,7 @@ namespace DOCUMAT.Pages.Image
 						if (dgSequence.Items.Count == 0 && PanelRejetImage.Visibility == Visibility.Collapsed)
 						{
 							//Récupération de la demande de correction 
-							Models.Correction CorrectionOldImage = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID
+							Models.Correction CorrectionOldImage = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreParent.RegistreID
 																&& c.SequenceID == null && c.ImageID == CurrentImageView.Image.ImageID 
 																&& c.StatutCorrection == 1 && c.PhaseCorrection == 3);
 
@@ -2007,7 +1977,7 @@ namespace DOCUMAT.Pages.Image
 								// Création d'une correction pour de l'image 
 								Models.Correction correctionImage = new Models.Correction()
 								{
-									RegistreId = RegistreViewParent.Registre.RegistreID,
+									RegistreId = RegistreParent.RegistreID,
 									ImageID = CurrentImageView.Image.ImageID,
 									SequenceID = null,
 
@@ -2061,14 +2031,14 @@ namespace DOCUMAT.Pages.Image
 						}
 
 						// Récupération du rejet index propre au registre
-						Models.Correction correctionRegistre = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreViewParent.Registre.RegistreID && c.StatutCorrection == 1 && c.PhaseCorrection == 3
+						Models.Correction correctionRegistre = ct.Correction.FirstOrDefault(c => c.RegistreId == RegistreParent.RegistreID && c.StatutCorrection == 1 && c.PhaseCorrection == 3
 														  && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
 														  || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1));
 						if (correctionRegistre != null)
 						{
 							// Modification du Registre 
 							// Récupération du registre 
-							Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == RegistreViewParent.Registre.RegistreID);
+							Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == RegistreParent.RegistreID);
 
 							registre.Numero = tbxVolume.Text.Trim();
 							registre.NumeroDepotDebut = Int32.Parse(tbxNumDepotDebut.Text.Trim());
@@ -2081,7 +2051,7 @@ namespace DOCUMAT.Pages.Image
 							// Création d'une nouvelle correction
 							Models.Correction NewcorrectionRegistre = new Models.Correction()
 							{
-								RegistreId = RegistreViewParent.Registre.RegistreID,
+								RegistreId = RegistreParent.RegistreID,
 								ImageID = null,
 								SequenceID = null,
 
@@ -2128,7 +2098,6 @@ namespace DOCUMAT.Pages.Image
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-			double MyWindowWidth = 1600;
 			double MyWindowHeight = 900;
 			double dgSMaxHeight = 400;
 
@@ -2141,19 +2110,10 @@ namespace DOCUMAT.Pages.Image
 			{
 				dgSequence.MaxHeight = dgSMaxHeight + (MyWindowHeight - this.ActualHeight);
 			}
-
-			// Mettre à Jour la taille de la visionneuse
-			DocumentViewer.Height = borderDocument.ActualHeight;
-			PdfViewer.axAcroPDF1.Height = (int)borderDocument.ActualHeight;
-			PdfViewerPanel.Width = borderDocument.ActualWidth;
-			PdfViewer.axAcroPDF1.Width = (int)borderDocument.ActualWidth;
 		}
 
         private void borderDocument_SizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			// Mettre à Jour la taille de la visionneuse
-			PdfViewerPanel.Width = borderDocument.ActualWidth;
-			PdfViewer.axAcroPDF1.Width = (int)PdfViewerPanel.Width;
 		}
     }
 }

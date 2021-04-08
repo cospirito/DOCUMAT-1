@@ -12,7 +12,7 @@
         ResizeMode="NoResize"
         WindowStyle="ToolWindow"
         Background="SteelBlue"
-        Width="290">
+        Width="300">
     <StackPanel  Margin="10">
         <StackPanel HorizontalAlignment="Center"
                     Background="SteelBlue"
@@ -29,7 +29,7 @@
                 <TextBlock 
                     Foreground="White"
                     FontWeight="Bold"
-                    FontFamily="Agency Fb"
+                    FontFamily="{StaticResource AgencyFb}"
                     FontSize="17"
                     VerticalAlignment="Center">
                     - Page N° :
@@ -38,7 +38,7 @@
                         Foreground="White"
                         Width="50"
                         FontSize="17"                         
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         Margin="10 0 0 0"
                         VerticalAlignment="Center"
                         TextChanged="tbNumeroImageManquant_TextChanged"/>
@@ -53,7 +53,7 @@
                     Foreground="White"/>
                 <TextBlock 
                     Foreground="White"
-                    FontFamily="Agency Fb"
+                    FontFamily="{StaticResource AgencyFb}"
                     FontWeight="Bold"
                     FontSize="17"                         
                     VerticalAlignment="Center">
@@ -63,8 +63,9 @@
                         Foreground="White"
                         Width="50"
                         FontSize="17"                                                  
-                        FontFamily="Agency Fb"                         
+                        FontFamily="{StaticResource AgencyFb}"                         
                         Margin="10 0 0 0"
+                        Text="0"
                         VerticalAlignment="Center"
                         TextChanged="tbDebutSequenceManquant_TextChanged"/>
             </StackPanel>
@@ -78,7 +79,7 @@
                     Foreground="White"/>
                 <TextBlock 
                     Foreground="White"
-                    FontFamily="Agency Fb"
+                    FontFamily="{StaticResource AgencyFb}"
                     FontWeight="Bold"
                     FontSize="17"                                             
                     VerticalAlignment="Center">
@@ -88,8 +89,9 @@
                         Foreground="White"
                         Width="50"
                         FontSize="17"                                                  
-                        FontFamily="Agency Fb"                         
+                        FontFamily="{StaticResource AgencyFb}"                         
                         Margin="10 0 0 0"
+                        Text="0"                         
                         VerticalAlignment="Center"
                         TextChanged="tbFinSequenceManquant_TextChanged"/>
             </StackPanel>
@@ -103,7 +105,7 @@
                     Foreground="White"/>
                 <TextBlock 
                     Foreground="White"
-                    FontFamily="Agency Fb"
+                    FontFamily="{StaticResource AgencyFb}"
                     FontWeight="Bold"
                     FontSize="17"                                             
                     VerticalAlignment="Center">
@@ -112,7 +114,7 @@
                 <DatePicker x:Name="dtDateSequenceManquant"
                              Foreground="White"
                              Width="100"
-                             FontFamily="Agency Fb"
+                             FontFamily="{StaticResource AgencyFb}"
                              FontSize="17"                                                     
                              Margin="10 0 0 0"/>
             </StackPanel>

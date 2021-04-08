@@ -18,6 +18,29 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>\\192.168.2.5\REGISTRES\APP\DOCUMAT VERSION\DOCUMAT MAJ\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>true</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <UpdateUrl>\\192.168.2.5\REGISTRES\APP\DOCUMAT VERSION\DOCUMAT MAJ\</UpdateUrl>
+    <TargetCulture>fr-MA</TargetCulture>
+    <ProductName>Documat</ProductName>
+    <PublisherName>Finashore</PublisherName>
+    <SuiteName>Documat</SuiteName>
+    <MinimumRequiredVersion>1.2.1.7</MinimumRequiredVersion>
+    <ApplicationRevision>10</ApplicationRevision>
+    <ApplicationVersion>1.2.1.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <CreateDesktopShortcut>true</CreateDesktopShortcut>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -40,6 +63,28 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>ftp.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>3046CA6D31000BD7712803E70C5C7A16BEAF57E5</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>DOCUMAT_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BouncyCastle.Crypto, Version=1.8.5.0, Culture=neutral, PublicKeyToken=0e99375e54769942, processorArchitecture=MSIL">
@@ -119,6 +164,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Printing" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -133,6 +179,9 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="WpfAnimatedGif, Version=2.0.0.0, Culture=neutral, PublicKeyToken=9e7cd3b544a090dc, processorArchitecture=MSIL">
+      <HintPath>..\packages\WpfAnimatedGif.2.0.0\lib\net40\WpfAnimatedGif.dll</HintPath>
+    </Reference>
     <Reference Include="Zen.Barcode.Core, Version=3.1.0.0, Culture=neutral, PublicKeyToken=b5ae55aa76d2d9de, processorArchitecture=MSIL">
       <HintPath>..\packages\Zen.Barcode.Rendering.Framework.3.1.10729.1\lib\Zen.Barcode.Core.dll</HintPath>
     </Reference>
@@ -149,6 +198,8 @@
     <Compile Include="Converter\DateConverter.cs" />
     <Compile Include="Converter\HeaderToImageConverter.cs" />
     <Compile Include="Converter\ImageConverter.cs" />
+    <Compile Include="Converter\RowNumberConverter.cs" />
+    <Compile Include="DataModels\RegistreDataModel.cs" />
     <Compile Include="ExtendClass.cs" />
     <Compile Include="Impression\BordereauRegistre.xaml.cs">
       <DependentUpon>BordereauRegistre.xaml</DependentUpon>
@@ -156,16 +207,28 @@
     <Compile Include="Impression\QrCode.Print.xaml.cs">
       <DependentUpon>QrCode.Print.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202012140655111_AddNomCompletToServiceTable.cs" />
-    <Compile Include="Migrations\202012140655111_AddNomCompletToServiceTable.designer.cs">
-      <DependentUpon>202012140655111_AddNomCompletToServiceTable.cs</DependentUpon>
+    <Compile Include="Migrations\202103291559438_AgentMatchingTable.cs" />
+    <Compile Include="Migrations\202103291559438_AgentMatchingTable.designer.cs">
+      <DependentUpon>202103291559438_AgentMatchingTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202103291622248_setNullableId.cs" />
+    <Compile Include="Migrations\202103291622248_setNullableId.designer.cs">
+      <DependentUpon>202103291622248_setNullableId.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202103292350051_updateTableAgentMapping.cs" />
+    <Compile Include="Migrations\202103292350051_updateTableAgentMapping.designer.cs">
+      <DependentUpon>202103292350051_updateTableAgentMapping.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\AgentMatchingTable.cs" />
     <Compile Include="Models\Configs.cs" />
     <Compile Include="Models\Controle.cs" />
     <Compile Include="Models\Correction.cs" />
+    <Compile Include="Models\Facture.cs" />
     <Compile Include="Models\Livraison.cs" />
     <Compile Include="Models\ManquantImage.cs" />
     <Compile Include="Models\ManquantSequence.cs" />
+    <Compile Include="Models\MappageImage.cs" />
+    <Compile Include="Models\MappageSequence.cs" />
     <Compile Include="Models\Region.cs" />
     <Compile Include="Models\Sequence.cs" />
     <Compile Include="Models\TableModel.cs" />
@@ -205,6 +268,15 @@
     <Compile Include="Pages\Image\FormManquantImage.xaml.cs">
       <DependentUpon>FormManquantImage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Pages\Image\FormRenommage.xaml.cs">
+      <DependentUpon>FormRenommage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\FormTransfertSequence.xaml.cs">
+      <DependentUpon>FormTransfertSequence.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Image\GenererSequenceAuto.xaml.cs">
+      <DependentUpon>GenererSequenceAuto.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Image\ImageController.xaml.cs">
       <DependentUpon>ImageController.xaml</DependentUpon>
     </Compile>
@@ -225,9 +297,6 @@
     </Compile>
     <Compile Include="Pages\Image\ImageViewer.xaml.cs">
       <DependentUpon>ImageViewer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Pages\Image\PdfViewer.xaml.cs">
-      <DependentUpon>PdfViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\Image\SimpleViewer.xaml.cs">
       <DependentUpon>SimpleViewer.xaml</DependentUpon>
@@ -273,6 +342,7 @@
     <Compile Include="Webview.xaml.cs">
       <DependentUpon>Webview.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ZoomBorder.cs" />
     <Page Include="ApplicationLoader.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -345,6 +415,18 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Pages\Image\FormRenommage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\FormTransfertSequence.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\Image\GenererSequenceAuto.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\Image\ImageController.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -370,10 +452,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Image\ImageViewer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Pages\Image\PdfViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -453,8 +531,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Migrations\202012140655111_AddNomCompletToServiceTable.resx">
-      <DependentUpon>202012140655111_AddNomCompletToServiceTable.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202103291559438_AgentMatchingTable.resx">
+      <DependentUpon>202103291559438_AgentMatchingTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202103291622248_setNullableId.resx">
+      <DependentUpon>202103291622248_setNullableId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202103292350051_updateTableAgentMapping.resx">
+      <DependentUpon>202103292350051_updateTableAgentMapping.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -475,11 +559,16 @@
     <None Include="ASSETS\POLICES\lobster_[fr.allfont.net].ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Resource Include="Fonts\agency-fb_[fr.allfont.net].ttf" />
+    <Resource Include="Fonts\Androgyne_TB.otf" />
+    <Resource Include="Fonts\lobster_[fr.allfont.net].ttf" />
+    <None Include="DOCUMAT_TemporaryKey.pfx" />
     <None Include="Images\home.webp" />
     <None Include="packages.config" />
     <None Include="Polices\agency-fb_[fr.allfont.net].ttf" />
     <None Include="Polices\Androgyne_TB.otf" />
     <None Include="Polices\lobster_[fr.allfont.net].ttf" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -520,6 +609,9 @@
     <Resource Include="Images\warning.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\loader_in_slategray.gif" />
+    <Resource Include="Images\loader3_tr.gif" />
+    <Resource Include="Images\loader3.gif" />
     <None Include="ASSETS\ANIM\MainLoader.gif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -690,6 +782,10 @@
     <Resource Include="Images\folderError.png" />
     <Resource Include="Images\fileDelete.png" />
     <Resource Include="Images\checked-red.png" />
+    <None Include="ASSETS\ANIM\integrateLoader.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Resource Include="Images\emptypage.jpg" />
     <Content Include="Images\home5.svg" />
     <Resource Include="Images\home6.png" />
     <Resource Include="Images\home3.jpg" />
@@ -754,6 +850,18 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 et x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MaterialDesignThemes.3.1.0-ci981\build\MaterialDesignThemes.targets" Condition="Exists('..\packages\MaterialDesignThemes.3.1.0-ci981\build\MaterialDesignThemes.targets')" />

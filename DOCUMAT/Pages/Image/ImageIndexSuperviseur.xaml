@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DOCUMAT.Converter"          
+        xmlns:local1="clr-namespace:DOCUMAT"          
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:id="http://schemas.microsoft.com/expression/2010/drawing" xmlns:tool="clr-namespace:DOCUMAT"
         mc:Ignorable="d"
         Title="Supervision d'Indexation" 
@@ -12,10 +13,8 @@
         MinHeight="700"
         MinWidth="1024"
         WindowStartupLocation="CenterOwner"
-        Closed="Window_Closed"
         Loaded="Window_Loaded"
         Closing="Window_Closing"
-        GotFocus="Window_GotFocus"
         Background="SteelBlue" 
         SizeChanged="Window_SizeChanged">
     <Window.Resources>
@@ -26,31 +25,71 @@
             <MenuItem Header="Ajouter"
                           x:Name="AddSequence"
                           Icon="{materialDesign:PackIcon Kind=AddCircle}"
-                          Click="AddSequence_Click" />
+                          Click="AddSequence_Click"/>
             <MenuItem Header="Modifier"
                           Name="ModifSequence"
                           Icon="{materialDesign:PackIcon Kind=Edit}"
-                          Click="ModifSequence_Click" />
+                          Click="ModifSequence_Click"/>
+            <MenuItem Header="Génerer Dépôts"
+                              x:Name="GenererDepot"
+                              Icon="{materialDesign:PackIcon Kind=AutoAwesome}"
+                              Click="GenererDepot_Click"/>
+            <MenuItem Header="Transférer Dépôts"
+                              x:Name="TransfererDepot"
+                              Icon="{materialDesign:PackIcon Kind=TransferDown}"
+                              Click="TransfererDepot_Click"/>
             <MenuItem Header="Supprimer"
                           Name="SupprimeSequence"
                           Icon="{materialDesign:PackIcon Kind=remove}"
                           Click="SupprimeSequence_Click" />
         </ContextMenu>
-        <ContextMenu x:Key="cmAbo">
-            <MenuItem Header="Importer Image"
-                          x:Name="ImporteImage"
-                          Icon="{materialDesign:PackIcon Kind=FileImport}"
-                          Click="ImporteImage_Click" />
-            <Separator></Separator>
-            <MenuItem Header="Modifier Registre"
-                          Name="ModifierRegistre"
-                          Icon="{materialDesign:PackIcon Kind=Edit}"
-                          Click="ModifierRegistre_Click"/>
-            <Separator></Separator>
-            <MenuItem Header="Supprimer Select. Image "
-                          Name="SupprimerImage"
-                          Icon="{materialDesign:PackIcon Kind=remove}"
-                          Click="SupprimerImage_Click"/>
+        <ContextMenu x:Key="cmAbo"
+                     Background="SteelBlue">
+            <MenuItem Header="Registre"
+                      Background="SteelBlue">
+                <MenuItem Header="Actualiser / Charger"
+                          x:Name="RefrechAll"
+                          Background="SteelBlue"
+                          Icon="{materialDesign:PackIcon Kind=Refresh}"
+                          Click="RefrechAll_Click" />
+                <MenuItem Header="Modifier le Registre"
+                              Name="ModifierRegistre"
+                              Icon="{materialDesign:PackIcon Kind=Edit}"
+                              Click="ModifierRegistre_Click"/>
+                <MenuItem Header="Ouvrir le Dossier scan"   
+                          Name="OuvrirDossierScan"
+                          Icon="{materialDesign:PackIcon Kind=FolderOpen}"
+                          Click="OuvrirDossierScan_Click"/>
+                <MenuItem Header="Renommer Images"
+                          x:Name="RenommerForm"
+                          Icon="{materialDesign:PackIcon Kind=RenameBox}"
+                          Click="RenommerForm_Click" 
+                          Background="SteelBlue"/>
+            </MenuItem>
+            <Separator Background="White" Margin="10 0"></Separator>
+            <MenuItem Header="Image"
+                      Background="SteelBlue">
+                <MenuItem Header="Déclarer Manquant"
+                      x:Name="DeclareManquant"
+                      Background="SteelBlue"
+                      Icon="{materialDesign:PackIcon Kind=ImageOff}"
+                      Click="DeclareManquant_Click" />
+                <MenuItem Header="Importer une Image"
+                              x:Name="ImporteImage"
+                              Icon="{materialDesign:PackIcon Kind=FileImport}"
+                              Click="ImporteImage_Click" 
+                              Background="SteelBlue"/>
+                <MenuItem Header="Termine / Annuler"
+                              Name="TermineAnnule"
+                              Icon="{materialDesign:PackIcon Kind=CheckboxIntermediate}"
+                              Click="TermineAnnule_Click"
+                              Background="SteelBlue"/>
+                <MenuItem Header="Supprimer L'image"
+                              Name="SupprimerImage"
+                              Icon="{materialDesign:PackIcon Kind=remove}"
+                              Click="SupprimerImage_Click"
+                              Background="SteelBlue"/>
+            </MenuItem>
         </ContextMenu>
     </Window.Resources>
 
@@ -77,10 +116,26 @@
                                   MinWidth="200"
                                   />
             </Grid.ColumnDefinitions>
+            <GridSplitter Grid.Column ="0" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Right"                          
+                          VerticalAlignment="Stretch"/>
+            <GridSplitter Grid.Column ="2" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Stretch"/>
+            <GridSplitter Grid.Column ="3" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Stretch"/>
             <Border BorderBrush="SteelBlue" 
                     Grid.Column="0"
                     VerticalAlignment="Center"  
-                    BorderThickness="1"
+                    BorderThickness="2"
+                    Margin="0 0 3 0"
                     Focusable="True">
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="AgentImage"
@@ -91,7 +146,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="tbxAgentLogin"                         
                                 TextAlignment="Center"   
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 Text="Login"     
                                 FontWeight="Bold"
                                 FontSize="15"                                   
@@ -100,7 +155,7 @@
                                 />
                         <TextBlock x:Name="tbxAgentNoms"                         
                                 TextAlignment="Center"                                      
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="NOM ET PRENOMS"                                
@@ -109,7 +164,7 @@
                                 />
                         <TextBlock x:Name="tbxAgentType"                         
                                 TextAlignment="Center"                                      
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="TYPE AGENT"                                
@@ -122,7 +177,8 @@
             <Border BorderBrush="SteelBlue" 
                     Grid.Column="1"
                     VerticalAlignment="Center"  
-                    BorderThickness="1"
+                    BorderThickness="2"                    
+                    Margin="0"
                     Focusable="True">
                 <StackPanel Orientation="Horizontal">
                     <Image x:Name="AgentIndexImage"
@@ -133,7 +189,7 @@
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="tbxAgentIndexLogin"                         
                                 TextAlignment="Center"   
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 Text="Login"     
                                 FontWeight="Bold"
                                 FontSize="15"                                   
@@ -142,7 +198,7 @@
                                 />
                         <TextBlock x:Name="tbxAgentIndexNoms"                         
                                 TextAlignment="Center"                                      
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="NOM ET PRENOMS"                                
@@ -151,7 +207,7 @@
                                 />
                         <TextBlock x:Name="tbxAgentIndexType"                         
                                 TextAlignment="Center"                                      
-                                FontFamily="Androgyne"
+                                FontFamily="{StaticResource Androgyne}"
                                 FontSize="15"
                                 FontWeight="Bold"
                                 Text="TYPE AGENT"                                
@@ -162,33 +218,55 @@
                 </StackPanel>
             </Border>
             <Border BorderBrush="SteelBlue"
-                    BorderThickness="2"
+                    BorderThickness="2"                    
+                    Margin="3 0 0 0"
                     Grid.Column="2">
                 <StackPanel VerticalAlignment="Center" 
                             HorizontalAlignment="Center"
                             Orientation="Horizontal">
-                    <StackPanel VerticalAlignment="Center"
+                    <StackPanel VerticalAlignment="Top"
                                 HorizontalAlignment="Left">
-                        <TextBlock x:Name="tbxQrCode"                         
-                                    TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                        <TextBlock x:Name="tbxQrCode"     
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="Qrcode "     
                                     FontSize="15"
                                     Foreground="Black"                                                
                                     Margin="10 10 0 0"
                                     />
-                        <TextBlock x:Name="tbxService"                         
-                                    TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                        <TextBlock x:Name="tbxService"    
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="Servvice : "  
                                     FontSize="15"                               
                                     Foreground="Black"                                           
                                     Margin="10 10 0 0"
                                     />
-                        <TextBlock x:Name="tbxVersement"                         
-                                    TextAlignment="Center"
-                                    FontFamily="Androgyne"                           
+                        <TextBlock x:Name="tbxVersement"  
+                                    FontFamily="{StaticResource Androgyne}"                           
                                     Text="N° Versement : " 
+                                    FontSize="15"                               
+                                    Foreground="Black"                                                
+                                    Margin="10 10 0 0"
+                                    />
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Top"
+                                HorizontalAlignment="Left">
+                        <TextBlock x:Name="tbxNumVolume"   
+                                    FontFamily="{StaticResource Androgyne}"                           
+                                    Text="N° Volume "     
+                                    FontSize="15"
+                                    Foreground="Black"                                                
+                                    Margin="10 10 0 0"
+                                    />
+                        <TextBlock x:Name="tbxTypeRegistre"  
+                                    FontFamily="{StaticResource Androgyne}"                           
+                                    Text="Type  : "  
+                                    FontSize="15"                               
+                                    Foreground="Black"                                           
+                                    Margin="10 10 0 0"
+                                    />
+                        <TextBlock x:Name="tbxDepotFin"  
+                                    FontFamily="{StaticResource Androgyne}"                           
+                                    Text="N° Dépôt Fin : " 
                                     FontSize="15"                               
                                     Foreground="Black"                                                
                                     Margin="10 10 0 0"
@@ -198,7 +276,8 @@
             </Border>
             <Border BorderBrush="SteelBlue"
                     Grid.Column="3" 
-                    BorderThickness="1" >
+                    BorderThickness="2"
+                    Margin="3 0 0 0">
                 <StackPanel Orientation="Horizontal" 
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center">
@@ -221,7 +300,7 @@
                         <TextBlock 
                              Text="0%"
                              Name="TextIndicator"
-                             Foreground="SteelBlue" FontSize="20" FontFamily="Agency Fb" 
+                             Foreground="SteelBlue" FontSize="20" FontFamily="{StaticResource AgencyFb}" 
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center"/>
                     </Grid>
@@ -230,7 +309,7 @@
                          Text="Terminé : 0,0%"
                          FontSize="15"
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="SteelBlue"                                                
                          Margin="10 0 0 5"
                          />
@@ -238,7 +317,7 @@
                          Text="En instance : 0,0%"                              
                          FontSize="15"
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="Firebrick"                                                
                          Margin="10 0 0 5"
                          />
@@ -246,7 +325,7 @@
                          Text="Non Traité 0,0%"                          
                          FontSize="15"    
                          Focusable="False"
-                         FontFamily="Agency Fb"
+                         FontFamily="{StaticResource AgencyFb}"
                          Foreground="Black"                                                
                          Margin="10 0 0 5"
                          />
@@ -281,7 +360,6 @@
                               Foreground="White"
                               Margin="0 0 0 30">
                         <TreeView.Resources>
-
                             <Style TargetType="{x:Type TreeViewItem}">
                                 <Setter Property="HeaderTemplate">
                                     <Setter.Value>
@@ -309,16 +387,17 @@
                     BorderThickness="2" 
                     BorderBrush="white" 
                     Margin="0"
-                    x:Name="borderDocument"
-                    SizeChanged="borderDocument_SizeChanged">
-                <StackPanel>
-                    <WindowsFormsHost x:Name="PdfViewerPanel" >
-                        <tool:UserControl1 x:Name="PdfViewer"/>
-                    </WindowsFormsHost>
-                    <DocumentViewer Name="DocumentViewer"                                     
-                                    Background="SteelBlue"
-                                    BorderThickness="0" Margin="0">
-                    </DocumentViewer>
+                    x:Name="borderDocument">
+                <StackPanel x:Name="PanelViewer">
+                    <!--Doit être Convenablement rédimensionner avant d'être utiliser-->
+                    <local1:ZoomBorder x:Name="borderSimpleVIewer" 
+                                       ClipToBounds="True" 
+                                       Background="DarkGray"
+                                       Height="{Binding ActualHeight, ElementName=borderDocument}">
+                        <Image x:Name="PageImage"
+                               Margin="0">
+                        </Image>
+                    </local1:ZoomBorder>
                 </StackPanel>
             </Border>
 
@@ -326,16 +405,23 @@
             <Border Grid.Column="2"
                     BorderBrush="White"
                     BorderThickness="2"
-                    Margin="7 0 0 0">
+                    Margin="7 0 0 0"
+                    x:Name="BorderControle">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="35"></RowDefinition>
-                        <RowDefinition Height="50"></RowDefinition>
-                        <RowDefinition Height="30"></RowDefinition>
-                        <RowDefinition Height="auto" ></RowDefinition>
-                        <RowDefinition Height="330"></RowDefinition>
+                        <RowDefinition x:Name="FormIndexPart1" MaxHeight="35"></RowDefinition>
+                        <RowDefinition x:Name="FormIndexPart2" MaxHeight="50"></RowDefinition>
+                        <RowDefinition x:Name="FormIndexPart3" MaxHeight="30"></RowDefinition>
+                        <RowDefinition x:Name="gripDgSequence" Height="auto" ></RowDefinition>
+                        <RowDefinition x:Name="FormIndexPart4" MinHeight="200" MaxHeight="330"></RowDefinition>
                     </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0" 
+                    <GridSplitter 
+                          Grid.Row ="3" 
+                          Background="White" 
+                          Height="3"
+                          HorizontalAlignment="Stretch"                          
+                          VerticalAlignment="Bottom"/>
+                    <StackPanel Grid.Row="0" 
                                 Background="White"
                                 VerticalAlignment="Top">
                             <TextBlock Text="Formulaire d'indexation"
@@ -343,8 +429,8 @@
                                     FontSize="15"
                                     HorizontalAlignment="Center"
                                     FontWeight="Bold"
-                                    Margin="5"
-                                    />
+                                    FontFamily="{StaticResource AgencyFb}"
+                                    Margin="5"/>
                         </StackPanel>
                     
                         <StackPanel 
@@ -355,36 +441,60 @@
                             <TextBlock x:Name="tbxNomPage" 
                                         Foreground="White"
                                         FontSize="12"     
-                                        Text="PAGE :"
+                                        Text="PAGE : "
+                                        FontWeight="Bold"
                                         InputScope="Number"                        
-                                        Margin="10"/>       
+                                        Margin="15"/>       
                             <TextBlock x:Name="tbxNumeroPage" 
                                         Foreground="White"
                                         Text="N°"
-                                        FontSize="12"          
+                                        FontSize="12"        
+                                        FontWeight="Bold"                                       
                                         InputScope="Number"                        
-                                        Margin="10"/>
+                                        Margin="15"/>
                             <TextBlock x:Name="tbxDebSeq" 
                                         Foreground="White"
                                         Text="N° Debut : "
-                                        FontSize="12"          
+                                        FontSize="12"
+                                        FontWeight="Bold"                                       
                                         InputScope="Number"                        
-                                        Margin="10"/>
+                                        Margin="15"/>
                             <TextBlock x:Name="tbxFinSeq" 
                                         Foreground="White"
                                         Text="N° Fin : "
-                                        FontSize="12"          
+                                        FontSize="12" 
+                                        FontWeight="Bold"                                       
                                         InputScope="Number"                        
-                                        Margin="10"/>
+                                        Margin="15"/>
+                            <TextBlock  
+                                    x:Name="tbxPagePrecName"
+                                    Foreground="White"
+                                    Text="N° PAGE : 001 / "
+                                    FontSize="12"  
+                                    FontWeight="Bold"
+                                    VerticalAlignment="Center"
+                                    materialDesign:HintAssist.HelperText="N° Préc"
+                                    InputScope="Number"                        
+                                    Margin="0   10"/>
+                            <TextBox x:Name="tbPageName"
+                                    Visibility="Visible"
+                                    FontSize="12    "
+                                    Width="40"
+                                    FontWeight="Bold"
+                                    Foreground="White"
+                                    Margin="0 11"/>
                         </StackPanel>
 
                     <StackPanel Grid.Row="2" 
                                     Background="White"
-                                    VerticalAlignment="Top">
+                                    VerticalAlignment="Top"
+                                    Height="30">
                         <TextBlock Text="Séquences de l'image" 
                                    HorizontalAlignment="Center"
-                                   Padding="5" FontSize="12"
-                                   FontWeight="Bold"
+                                   Padding="5" 
+                                   FontSize="14"
+                                   FontWeight="Bold"                                   
+                                   FontFamily="{StaticResource AgencyFb}"
                                    Foreground="SteelBlue"/>
                     </StackPanel>
                     <DataGrid Grid.Row="3" 
@@ -396,11 +506,9 @@
                             HorizontalScrollBarVisibility="Auto"
                             IsReadOnly="True"  
                             CanUserSortColumns="False"
-                            RowDetailsVisibilityMode="VisibleWhenSelected"                         
-                            LoadingRow="dgSequence_LoadingRow"
-                            SelectionChanged="dgSequence_SelectionChanged"
+                            RowDetailsVisibilityMode="VisibleWhenSelected" 
                             AreRowDetailsFrozen="False"
-                            LoadingRowDetails="dgSequence_LoadingRowDetails">
+                            Margin="0 0 0 3">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="N° Ordre" Binding="{Binding strOrdre}" />
                                 <DataGridTextColumn Header="Date " Binding="{Binding strDate}" />
@@ -420,7 +528,8 @@
                             <StackPanel Background="White">
                                 <TextBlock Foreground="SteelBlue"
                                        FontWeight="Bold"
-                                       Padding="7"
+                                       Padding="7"                                           
+                                       FontFamily="{StaticResource AgencyFb}"
                                        HorizontalAlignment="Center"
                                        FontSize="12"> Champs D'Indexation</TextBlock>
                             </StackPanel>
@@ -429,7 +538,7 @@
                                     <TextBlock Text="N° Ordre : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"
                                        Margin="5 0 0 0"/>
@@ -448,28 +557,25 @@
                                     <TextBlock Text="IsSpecial : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"/>
-                                    <TextBox x:Name="tbIsSpecial" 
-                                    Foreground="White"
-                                    CharacterCasing="Lower"
-                                    InputScope="Number" 
-                                    Width="100"
-                                    MaxWidth="100"
-                                    FontSize="13"
-                                    Typography.NumeralAlignment="Proportional"
-                                    materialDesign:HintAssist.Hint="ex (bis_3)"
-                                    TextChanged="tbReference_TextChanged"
-                                    KeyUp="tbReference_KeyUp"
-                                    LostFocus="tbReference_LostFocus"
-                                    GotFocus="tbReference_GotFocus"
-                                             Margin="5 10 20 10"/>
-
+                                    <ComboBox x:Name="tbIsSpecial"                           
+                                        Foreground="White"
+                                        Width="90"
+                                        FontSize="17"                                                  
+                                        FontFamily="{StaticResource AgencyFb}"                         
+                                        Margin="5 10 20 10"
+                                        Text="1"
+                                        VerticalAlignment="Center">
+                                        <ComboBoxItem  IsSelected="True"></ComboBoxItem>
+                                        <ComboBoxItem>bis</ComboBoxItem>
+                                        <ComboBoxItem>doublon</ComboBoxItem>
+                                    </ComboBox>
                                     <TextBlock Text="Nb Refs Pré : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"/>
                                     <TextBox x:Name="tbNbRefPreindex" 
@@ -481,17 +587,14 @@
                                     Typography.NumeralAlignment="Proportional"
                                     materialDesign:HintAssist.Hint="00"
                                     TextChanged="tbNumeroOrdreSequence_TextChanged"
-                                    KeyUp="tbReference_KeyUp"
-                                    LostFocus="tbReference_LostFocus"
-                                    Margin="5 10 0 10"
-                                    GotFocus="tbReference_GotFocus"/>
+                                    Margin="5 10 0 10"/>
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Date Seq. : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"
                                        Margin="5 0 0 0"/>
@@ -503,32 +606,25 @@
                                         FontSize="13"
                                         Typography.NumeralAlignment="Proportional"
                                         materialDesign:HintAssist.Hint="DATE  "
-                                        TextChanged="tbDateSequence_TextChanged"
-                                        KeyUp="tbDateSequence_KeyUp"
-                                        LostFocus="tbDateSequence_LostFocus"
-                                        GotFocus="tbDateSequence_GotFocus"
                                         Margin="5 10 10 10"/>
 
                                     <TextBlock Text="Liste Refs. : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"
                                        Margin="7 0 0 0"/>
                                     <TextBox x:Name="tbReference" 
-                                Foreground="White"
-                                InputScope="Number" 
-                                MinWidth="200"
-                                MaxWidth="280"
-                                FontSize="13"
-                                Typography.NumeralAlignment="Proportional"
-                                materialDesign:HintAssist.Hint="ex (T111/1,T111/2)"
-                                TextChanged="tbReference_TextChanged"
-                                KeyUp="tbReference_KeyUp"
-                                LostFocus="tbReference_LostFocus"
-                                GotFocus="tbReference_GotFocus"
-                                Margin="5 10 0 10"/>
+                                    Foreground="White"
+                                    InputScope="Number" 
+                                    CharacterCasing="Upper"
+                                    MinWidth="200"
+                                    MaxWidth="280"
+                                    FontSize="13"
+                                    Typography.NumeralAlignment="Proportional"
+                                    materialDesign:HintAssist.Hint="ex (T111/1,T111/2)"
+                                    Margin="5 10 0 10"/>
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal" 
@@ -548,12 +644,12 @@
                                     Foreground="White"/>
                                     </Button>
                                     <Button Margin="5" 
-                                Background="{x:Null}"
-                                BorderBrush="white"
-                                BorderThickness="1"
-                                ToolTip="Annuler"
-                                x:Name="BtnAnnuleSequence"
-                                Click="BtnAnnuleSequence_Click">
+                                        Background="{x:Null}"
+                                        BorderBrush="white"
+                                        BorderThickness="1"
+                                        ToolTip="Annuler"
+                                        x:Name="BtnAnnuleSequence"
+                                        Click="BtnAnnuleSequence_Click">
                                         Annuler
                                     </Button>
                                 </StackPanel>
@@ -567,7 +663,7 @@
                                         Margin="0 0 0 10">
                                 <TextBlock x:Name="TbkIndicateurImage"                                
                                     Text="EN COURS"
-                                    FontSize="17"
+                                    FontSize="17"                                    
                                     FontWeight="Bold"
                                     Margin="0 5 0 0"                                    
                                     Foreground="SteelBlue"/>
@@ -576,8 +672,7 @@
                                           Foreground="SteelBlue" 
                                           BorderBrush="SteelBlue"
                                           Checked="cbxRetirerInstance_Checked"
-                                          Unchecked="cbxRetirerInstance_Unchecked"
-                                          />
+                                          Unchecked="cbxRetirerInstance_Unchecked"/>
                             </StackPanel>
                             <Border Margin="0 0 0 1" 
                                     BorderBrush="SteelBlue" 
@@ -598,7 +693,7 @@
                                                 FontSize="12"
                                                 MaxLines="2"
                                                 TextWrapping="Wrap"
-                                                materialDesign:HintAssist.Hint="Observation(précision)"
+                                                materialDesign:HintAssist.Hint="Dernier N° Ordre"
                                                 Margin="20 10 5 10"/>
                                     <Button x:Name="BtnRetirerInstance"
                                             Margin="5"
@@ -614,14 +709,13 @@
                         <StackPanel x:Name="ChampsImage"
                                     Orientation="Vertical"
                                     Margin="0 10 0 20">
-
                             <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Center"
                                     Margin="0 0 10 0">
                                 <TextBlock Text="Page N° : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"
                                        Margin="5 0 0 0"/>
@@ -637,11 +731,10 @@
                                     Margin="10 10 0 10"
                                     LostFocus="tbNumeroPage_LostFocus"
                                     TextChanged="tbNumeroOrdreSequence_TextChanged"/>
-
                                 <TextBlock Text="N° Deb. : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"
                                        Margin="25 0 0 0"/>
@@ -657,11 +750,10 @@
                                     Margin="10 10 0 10"
                                     LostFocus="tbNumeroDebutSequence_LostFocus"
                                     TextChanged="tbNumeroOrdreSequence_TextChanged"/>
-
                                 <TextBlock Text="N° Fin : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"
                                        Margin="25 0 0 0"/>
@@ -683,7 +775,7 @@
                                 <TextBlock Text="Date Deb. : " 
                                        VerticalAlignment="Center"
                                        FontWeight="Bold"
-                                       FontFamily="Agency Fb"
+                                       FontFamily="{StaticResource AgencyFb}"
                                        Foreground="White"
                                        FontSize="13"
                                        Margin="5 0 0 0"/>

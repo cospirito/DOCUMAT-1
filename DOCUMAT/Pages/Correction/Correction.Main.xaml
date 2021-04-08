@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:DOCUMAT.Pages.Correction"
       xmlns:src="clr-namespace:DOCUMAT.Converter"
+      xmlns:gif="http://wpfanimatedgif.codeplex.com"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d"     
       Loaded="Page_Loaded"
@@ -12,6 +13,7 @@
       SizeChanged="Page_SizeChanged">
     <Page.Resources>
         <src:DateConverter x:Key="DateConverter"/>
+        <src:RowNumberConverter x:Key="RowNumberConverter"/>
         <Style TargetType="DataGridRow">
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
@@ -38,10 +40,17 @@
 
     <Grid VerticalAlignment="Top" Margin="0 20">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1*" MinWidth="50"/>
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Margin="20 0 10 0">
+        <GridSplitter Grid.Column ="0" 
+                          Background="White" 
+                          Width="3"
+                          HorizontalAlignment="Right"                          
+                          VerticalAlignment="Stretch"/>
+        <StackPanel Grid.Column="0" 
+                    Margin="20 0 10 0"
+                    x:Name="PanelPhase">
             <Button
                         x:Name="BtnPhase1"
                         Height="100"
@@ -75,20 +84,32 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <!--Bouton d'interaction-->
-                <StackPanel x:Name="panelInteracBtn"
+                <StackPanel 
+                        x:Name="panelInteracBtn"
                         Grid.Row="0"
                         Orientation="Horizontal" Margin="20"
                         VerticalAlignment="Center">
-                    <Button Margin="10" 
-                                Background="{x:Null}"
-                                BorderBrush="CornflowerBlue"
-                                ToolTip="Actualiser"
-                                Name="btnRefresh" 
-                                Click="btnRefresh_Click" >
-                        <materialDesign:PackIcon Kind="Refresh"
-                                            Width="25"
-                                            Height="25"
-                                            Foreground="White"/>
+                    <Button Margin="10" Background="{x:Null}"
+                        BorderBrush="CornflowerBlue"
+                        ToolTip="Actualisé / Chargé"
+                        x:Name="BtnActualise"
+                        Click="btnRefresh_Click"
+                        KeyboardNavigation.AcceptsReturn="False"
+                        KeyboardNavigation.TabNavigation="None"
+                        KeyboardNavigation.ControlTabNavigation="None"
+                        KeyboardNavigation.DirectionalNavigation="None"
+                        KeyboardNavigation.IsTabStop="True">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh"
+                                                Width="25"
+                                                Height="25"
+                                                Foreground="White"/>
+                            <TextBlock> /</TextBlock>
+                            <materialDesign:PackIcon Kind="Download"
+                                                Width="25"
+                                                Height="25"
+                                                Foreground="White"/>
+                        </StackPanel>
                     </Button>
                     <TextBox x:Name="TbRechercher" 
                          materialDesign:HintAssist.Hint="RECHERCHER" 
@@ -109,6 +130,17 @@
                                             Height="25"
                                             Foreground="White"/>
                     </Button>
+                    <ComboBox x:Name="cbChoixRecherche" 
+                        Foreground="White"
+                        materialDesign:HintAssist.Hint="RECHERCHER PAR"
+                        materialDesign:HintAssist.HelperText="RECHERCHER PAR"                                                                                                      
+                        SelectedIndex="0"
+                        Margin="20 0">
+                        <ComboBoxItem Content="CODE REGISTRE"/>
+                        <ComboBoxItem Content="SERVICE" IsSelected="True" />
+                        <ComboBoxItem Content="REGION" />
+                        <ComboBoxItem Content="NUMERO VOLUME" />
+                    </ComboBox>
                     <ComboBox x:Name="cbChoixunite" 
                                 Foreground="White"
                                 MinWidth="100"
@@ -149,70 +181,68 @@
                     <Grid Margin="20 20 20 0" x:Name="gridViewPanelRegistre">
                         <StackPanel Grid.Column="1">
                             <DataGrid Name="dgRegistre" 
-                            AutoGenerateColumns="False" 
-                            VerticalScrollBarVisibility="Auto"
-                            HorizontalScrollBarVisibility="Auto"
-                            IsReadOnly="True"
-                            RowDetailsVisibilityMode="VisibleWhenSelected" 
-                            Margin="0,-2,0,2"
-                            LoadingRow="dgRegistre_LoadingRow"
-                            SelectionChanged="dgRegistre_SelectionChanged"
-                            AreRowDetailsFrozen="False"
-                            LoadingRowDetails="dgRegistre_LoadingRowDetails" Grid.ColumnSpan="2">
+                                      AutoGenerateColumns="False" 
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      IsReadOnly="True"
+                                      Height="400"   
+                                      RowDetailsVisibilityMode="VisibleWhenSelected" 
+                                      Margin="0,-2,0,2"
+                                      AreRowDetailsFrozen="False"
+                                      LoadingRowDetails="dgRegistre_LoadingRowDetails" Grid.ColumnSpan="2">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="N°" Binding="{Binding NumeroOrdre}" />
-                                    <DataGridTextColumn Header="QRCode " Binding="{Binding Registre.QrCode}" />
-                                    <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Registre.Numero}" />
-                                    <DataGridTextColumn Header="Service versant" Binding="{Binding  ServiceVersant.Nom}" />
-                                    <DataGridTextColumn Header="Region" Binding="{Binding  ServiceVersant.Region.Nom}" />
-                                    <DataGridTextColumn Header="pages attendues " Binding="{Binding Registre.NombrePage}" />
-                                    <DataGridTextColumn Header="pages scannées " Binding="{Binding NombreImageScan}" />
-                                    <DataGridTextColumn Header="pages enregistrées" Binding="{Binding NombreImageCompte}" />
-                                    <DataGridTextColumn Header="Type de registre" Binding="{Binding Registre.Type}" />
-                                    <DataGridTextColumn Header="Date Création" Binding="{Binding Registre.DateCreation, Converter={StaticResource DateConverter}}" />
+                                    <DataGridTextColumn Header="N°" IsReadOnly="True">
+                                        <DataGridTextColumn.Binding>
+                                            <MultiBinding Converter="{StaticResource RowNumberConverter}">
+                                                <Binding />
+                                                <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}" />
+                                            </MultiBinding>
+                                        </DataGridTextColumn.Binding>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="QRCode " Binding="{Binding QrCode}" />
+                                    <DataGridTextColumn Header="Numéro de volume" Binding="{Binding Numero}" />
+                                    <DataGridTextColumn Header="Service versant" Binding="{Binding  NomComplet}" />
+                                    <DataGridTextColumn Header="Region" Binding="{Binding  NomRegion}" />
+                                    <DataGridTextColumn Header="Type de registre" Binding="{Binding Type}" />
+                                    <DataGridTextColumn Header="Pages Déclarées" Binding="{Binding NombrePage}" />
                                 </DataGrid.Columns>
-
                                 <!--Details sur le versement-->
                                 <DataGrid.RowDetailsTemplate>
                                     <DataTemplate>
                                         <DockPanel>
                                             <Image DockPanel.Dock="Left" 
-                                                   x:Name="QrCode"
-                                                   Source="{Binding QrCode}" 
-                                                   Height="70"
-                                                   Width="70"
-                                                   Stretch="UniformToFill"
-                                                   Margin="10" />
+                                       x:Name="QrCode"
+                                       Source="{Binding QrCode}" 
+                                       Height="70"
+                                       Width="70"
+                                       Stretch="UniformToFill"
+                                       Margin="10" />
                                             <StackPanel Orientation="Vertical" Margin="10,10,10,10">
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="Numéro de Versement : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding Versement.NumeroVers}" Grid.Column="1" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding NumeroVers}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="Date de Versement : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding DateVers,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="Numéro dépôt du début : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding Registre.NumeroDepotDebut}" Grid.Column="1" Grid.Row="2" />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="Date de dépôt du début : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding Registre.DateDepotDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding NumeroDepotDebut}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
                                             </StackPanel>
                                             <StackPanel Orientation="Vertical" Margin="10,10,10,10">
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="Numéro de dépot de fin : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding Registre.NumeroDepotFin}" Grid.Column="1" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding NumeroDepotFin}" Grid.Column="1" Grid.Row="2" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Date de dépôt du début : " FontWeight="Bold" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding DateDepotDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="Date de dépôt de fin : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding Registre.DateDepotFin,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
-                                                </StackPanel>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="Date de changement du statut : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding StatutActuel.DateDebut,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding DateDepotFin,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
                                             </StackPanel>
                                             <StackPanel Orientation="Vertical" Margin="10,10,10,10">
@@ -222,11 +252,11 @@
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="Date de Création : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding Registre.DateCreation,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding DateCreationRegistre,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="Dernière modification : " FontWeight="Bold" Grid.Row="2" />
-                                                    <TextBlock Text="{Binding Registre.DateModif,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
+                                                    <TextBlock Text="{Binding DateModifRegistre,Converter={StaticResource DateConverter}}" Grid.Column="1" Grid.Row="2" />
                                                 </StackPanel>
                                             </StackPanel>
                                         </DockPanel>
@@ -236,6 +266,55 @@
                         </StackPanel>
                     </Grid>
                 </StackPanel>
+
+                <Grid x:Name="PanelLoader"
+                    Grid.Row="1"
+                    Background="White"
+                    Opacity="1"
+                    Visibility="Collapsed"
+                    Height="{Binding ActualHeight,ElementName=PanelData}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="2*"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="0"
+                        VerticalAlignment="Center"
+                        Background="White"
+                        Grid.Row="1">
+                        <Image gif:ImageBehavior.RepeatBehavior="Forever" 
+                       gif:ImageBehavior.AnimatedSource="/Images/Loader3.gif" 
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Height="70"/>
+                        <TextBlock  
+                        Margin="10"
+                        FontSize="20"
+                        FontStyle="Italic"
+                        FontWeight="Bold"
+                        Foreground="SteelBlue"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">Veuillez Patientez Svp ...</TextBlock>
+                        <Button Margin="5" 
+                        Background="{x:Null}"
+                        BorderBrush="PaleVioletRed"
+                        BorderThickness="0 1 0 1"
+                        Foreground="PaleVioletRed"
+                        Width="150"
+                        ToolTip="Clicker pour Annuler l'opéraion"
+                        x:Name="BtnAnnuleChargement"
+                        Click="BtnAnnuleChargement_Click">
+                            <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="LoadText">Annuler</TextBlock>
+                                <materialDesign:PackIcon
+                                x:Name="LoadIcon"
+                                Kind="RemoveCircle"
+                                Margin="7 2 0 0"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Border>
     </Grid>

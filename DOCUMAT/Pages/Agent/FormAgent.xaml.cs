@@ -39,7 +39,7 @@ namespace DOCUMAT.Pages.Agent
             Utilisateur = user;
         }
 
-        public FormAgent(Pages.Agent.GestionAgent mainAgent,Models.Agent agent, Models.Agent user) : this()
+        public FormAgent(Pages.Agent.GestionAgent mainAgent, Models.Agent agent, Models.Agent user) : this()
         {
             try
             {
@@ -49,7 +49,7 @@ namespace DOCUMAT.Pages.Agent
                 Utilisateur = user;
 
                 // Remplissage des données 
-                EditMode = true;               
+                EditMode = true;
                 tbMatricule.Text = agent.Matricule;
                 tbNom.Text = agent.Nom;
                 tbPrenoms.Text = agent.Prenom;
@@ -61,7 +61,7 @@ namespace DOCUMAT.Pages.Agent
                 pwMdp.Password = agent.Mdp;
                 pwMdpConfirme.Password = agent.Mdp;
                 CheminPhotoCharger = agent.CheminPhoto;
-                
+
                 if (!string.IsNullOrEmpty(agent.CheminPhoto))
                 {
                     ImgPhotoAgent.Source = new BitmapImage(new Uri(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"], agent.CheminPhoto)), new System.Net.Cache.RequestCachePolicy());
@@ -95,18 +95,18 @@ namespace DOCUMAT.Pages.Agent
             try
             {
                 // Limitation des droits du superviseur
-                if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
                 {
                     if (cbAffection.SelectedIndex == (int)Enumeration.AffectationAgent.ADMINISTRATEUR)
                     {
                         throw new Exception("Vous ne disposer pas des privilèges nécessaire pour affecter ce agent à cette tâche !!!");
                     }
-                    else if(cbAffection.SelectedIndex == (int)Enumeration.AffectationAgent.SUPERVISEUR && AgentAModif.AgentID != Utilisateur.AgentID)
+                    else if (cbAffection.SelectedIndex == (int)Enumeration.AffectationAgent.SUPERVISEUR && AgentAModif.AgentID != Utilisateur.AgentID)
                     {
                         throw new Exception("Vous ne disposer pas des privilèges nécessaire pour affecter ce agent à cette tâche !!!");
                     }
                 }
-    
+
                 //Quand aucune date n'est sélectionner définit la date par défaut à null 
                 DateTime? datNaiss;
                 if (dtNaissance.SelectedDate.HasValue)
@@ -117,8 +117,8 @@ namespace DOCUMAT.Pages.Agent
                 if (tbMatricule.Text != AgentAModif.Matricule || tbNom.Text != AgentAModif.Nom
                      || tbPrenoms.Text != AgentAModif.Prenom || tbLogin.Text != AgentAModif.Login
                      || datNaiss != AgentAModif.DateNaiss
-                     || pwMdp.Password != AgentAModif.Mdp || CheminPhotoCharger != AgentAModif.CheminPhoto 
-                     || cbAffection.SelectedIndex != AgentAModif.Affectation ||cbGenre.SelectedIndex != (int)Enum.Parse(typeof(Enumeration.Genre), AgentAModif.Genre)
+                     || pwMdp.Password != AgentAModif.Mdp || CheminPhotoCharger != AgentAModif.CheminPhoto
+                     || cbAffection.SelectedIndex != AgentAModif.Affectation || cbGenre.SelectedIndex != (int)Enum.Parse(typeof(Enumeration.Genre), AgentAModif.Genre)
                      || cbStatuMat.SelectedIndex != (int)Enum.Parse(typeof(Enumeration.StatutMatrimonial), AgentAModif.StatutMat))
                 {
                     if (pwMdp.Password != pwMdpConfirme.Password)
@@ -191,7 +191,7 @@ namespace DOCUMAT.Pages.Agent
                     if (pwMdp.Password != pwMdpConfirme.Password)
                         throw new Exception("Le Mot de Passe de Confirmation est différent du Mot de Passe");
 
-                    if(!string.IsNullOrWhiteSpace(CheminPhotoChargerOld))
+                    if (!string.IsNullOrWhiteSpace(CheminPhotoChargerOld))
                     {
                         // Définition du nom de la photo enregistré !!!
                         NomPhotoCharger = "" + DateTime.Now.Day + DateTime.Now.Month + DateTime.Now.Year + "_" + tbLogin.Text.Trim() + "_" + new Random().Next(0001, 9999) + ".jpg";
@@ -202,7 +202,7 @@ namespace DOCUMAT.Pages.Agent
                             throw new Exception("Recharger la photo SVP !!!");
 
                         //Déplacement du fichier dans le dossier de l'application   
-                        File.Copy(CheminPhotoChargerOld,Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"],CheminPhotoCharger));
+                        File.Copy(CheminPhotoChargerOld, Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"], CheminPhotoCharger));
                     }
 
                     //Quand aucune date n'est sélectionner définit la date par défaut à null 
@@ -231,7 +231,7 @@ namespace DOCUMAT.Pages.Agent
                     int agentId = AgentView.Add(agent);
 
                     // Enregistrement du traitement de l'agent 
-                    DocumatContext.AddTraitement(DocumatContext.TbAgent, agentId,Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
+                    DocumatContext.AddTraitement(DocumatContext.TbAgent, agentId, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
 
                     MessageBox.Show("Elément Ajouté", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
                     MainAgent.refreshListAgent();
@@ -252,7 +252,7 @@ namespace DOCUMAT.Pages.Agent
                 open.Filter = "Fichier image |*.jpg;*.png;*.tif";
                 open.Multiselect = false;
                 open.FilterIndex = 3;
-                var dir = new DirectoryInfo(Directory.GetCurrentDirectory() +"/" + ConfigurationManager.AppSettings["CheminDossier_AvatarTemplate"]);
+                var dir = new DirectoryInfo(Directory.GetCurrentDirectory() + "/" + ConfigurationManager.AppSettings["CheminDossier_AvatarTemplate"]);
                 if (Directory.Exists(dir.FullName))
                     open.InitialDirectory = dir.FullName;
 
@@ -265,7 +265,7 @@ namespace DOCUMAT.Pages.Agent
 
                     CheminPhotoCharger = open.FileNames[0];
                     CheminPhotoChargerOld = open.FileNames[0];
-                    ImgPhotoAgent.Source = new BitmapImage(new Uri(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"], CheminPhotoChargerOld)), new System.Net.Cache.RequestCachePolicy());                        
+                    ImgPhotoAgent.Source = new BitmapImage(new Uri(Path.Combine(ConfigurationManager.AppSettings["CheminDossier_Avatar"], CheminPhotoChargerOld)), new System.Net.Cache.RequestCachePolicy());
                 }
             }
             catch (Exception ex)
@@ -281,7 +281,7 @@ namespace DOCUMAT.Pages.Agent
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if(EditMode)
+            if (EditMode)
             {
                 // Droit de modification d'un superviseur vers un administrateur 
                 if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)

@@ -5,9 +5,11 @@ using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -19,8 +21,9 @@ namespace DOCUMAT.Pages.Inventaire
     public partial class Inventaire : Page
     {
         public Models.Agent Utilisateur = null;
-
         public string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
+        private readonly BackgroundWorker RefreshData = new BackgroundWorker();
+        public List<RegistreView> ListRegistreActuel = new List<RegistreView>();
 
         // Refresh dgRegistre
         public void RefreshVersement()
@@ -29,13 +32,11 @@ namespace DOCUMAT.Pages.Inventaire
             {
                 VersementView versementView = new VersementView();
                 dgVersement.ItemsSource = cbVersement.ItemsSource = versementView.GetVersViewsByService((int)cbService.SelectedValue);
-                //cbVersement.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
                 ex.ExceptionCatcher();
             }
-
         }
 
         public void RefreshRegistre()
@@ -45,7 +46,7 @@ namespace DOCUMAT.Pages.Inventaire
                 //Remplissage de la list de registre
                 RegistreView RegistreView = new RegistreView();
                 RegistreView.Versement = ((VersementView)cbVersement.SelectedItem).Versement;
-                dgRegistre.ItemsSource = RegistreView.GetRowOrder(RegistreView.GetViewsListByStatus((int)Enumeration.Registre.CREE).ToList());
+                dgRegistre.ItemsSource = RegistreView.GetViewsListByStatus((int)Enumeration.Registre.CREE).ToList();
             }
             catch (Exception ex)
             {
@@ -57,6 +58,9 @@ namespace DOCUMAT.Pages.Inventaire
         {
             InitializeComponent();
             Utilisateur = user;
+            RefreshData.WorkerSupportsCancellation = true;
+            RefreshData.DoWork += RefreshData_DoWork;
+            RefreshData.RunWorkerCompleted += RefreshData_RunWorkerCompleted;
 
             //Nouvelle RegionView
             RegionView regionView = new RegionView();
@@ -75,7 +79,7 @@ namespace DOCUMAT.Pages.Inventaire
             }
             else
             {
-                if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
                 {
                     menuItemVersement.IsEnabled = false;
                     menuItemRegistre.IsEnabled = true;
@@ -88,23 +92,46 @@ namespace DOCUMAT.Pages.Inventaire
             }
         }
 
+        private void RefreshData_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            ListRegistreActuel = e.Result as List<RegistreView>;
+            dgRegistre.ItemsSource = ListRegistreActuel;
+            PanelLoader.Visibility = Visibility.Collapsed;
+            panelInteracBtn.IsEnabled = true;
+        }
+
+        private void RefreshData_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Définition de la methode de récupération des données 
+            try
+            {
+                //Remplissage de la list de registre
+                RegistreView RegistreView = new RegistreView();
+                RegistreView.Versement = (Models.Versement)e.Argument;
+                e.Result = RegistreView.GetViewsListByStatus((int)Enumeration.Registre.CREE).ToList();
+                Thread.Sleep(2000);
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
         private void cbRegion_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.Count != 0)
+            if (e.AddedItems.Count != 0)
             {
                 ServiceView serviceView = new ServiceView();
                 cbService.ItemsSource = serviceView.GetViewsList((int)cbRegion.SelectedValue);
-                //cbService.SelectedIndex = 0;
-            }           
+            }
         }
 
         private void cbService_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.Count != 0)
+            if (e.AddedItems.Count != 0)
             {
                 VersementView versementView = new VersementView();
                 dgVersement.ItemsSource = cbVersement.ItemsSource = versementView.GetVersViewsByService((int)cbService.SelectedValue);
-                //cbVersement.SelectedIndex = 0;
             }
             else
             {
@@ -115,9 +142,9 @@ namespace DOCUMAT.Pages.Inventaire
 
         private void AfficherRegistre_Click(object sender, RoutedEventArgs e)
         {
-            if(AfficherRegistre.IsChecked == true)
+            if (AfficherRegistre.IsChecked == true)
             {
-                if(cbVersement.SelectedItem != null)
+                if (cbVersement.SelectedItem != null)
                 {
                     gridViewPanelVersement.Visibility = Visibility.Collapsed;
                     gridViewPanelRegistre.Visibility = Visibility.Visible;
@@ -125,7 +152,20 @@ namespace DOCUMAT.Pages.Inventaire
                     cbRegion.IsEnabled = false;
                     cbService.IsEnabled = false;
                     cbVersement.IsEnabled = false;
-                    RefreshRegistre();
+
+                    try
+                    {
+                        RefreshData.RunWorkerAsync(((VersementView)cbVersement.SelectedItem).Versement);
+                        PanelLoader.Visibility = Visibility.Visible;
+                        panelInteracBtn.IsEnabled = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        //ex.ExceptionCatcher();
+                        RefreshData.CancelAsync();
+                        PanelLoader.Visibility = Visibility.Collapsed;
+                        panelInteracBtn.IsEnabled = true;
+                    }
                 }
             }
             else
@@ -141,12 +181,12 @@ namespace DOCUMAT.Pages.Inventaire
 
         private void AddVersement_Click(object sender, RoutedEventArgs e)
         {
-            if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
             {
                 if (cbService.SelectedItem != null)
                 {
                     this.IsEnabled = false;
-                    Versement.FormVersement versement = new Versement.FormVersement((ServiceView)cbService.SelectedItem,this,Utilisateur);
+                    Versement.FormVersement versement = new Versement.FormVersement((ServiceView)cbService.SelectedItem, this, Utilisateur);
                     versement.Show();
                 }
             }
@@ -202,7 +242,7 @@ namespace DOCUMAT.Pages.Inventaire
                             // Enregistrement du traitement de l'agent 
                             foreach (int id in VersementIds)
                             {
-                                DocumatContext.AddTraitement(DocumatContext.TbVersement, id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION);
+                                DocumatContext.AddTraitement(DocumatContext.TbVersement, id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION,"SUPPRESSION D'UN VERSEMENT");
                             }
                             dgVersement.ItemsSource = cbVersement.ItemsSource = versementView1.GetVersViewsByService((int)cbService.SelectedValue);
                             versementView1.Dispose();
@@ -223,17 +263,21 @@ namespace DOCUMAT.Pages.Inventaire
         private void AddRegistre_Click(object sender, RoutedEventArgs e)
         {
             this.IsEnabled = false;
-            FormRegistre formRegistre = new FormRegistre((VersementView)cbVersement.SelectedItem,this);            
+            FormRegistre formRegistre = new FormRegistre(((VersementView)cbVersement.SelectedItem).Versement, this);
             formRegistre.Show();
         }
 
         private void EditRegistre_Click(object sender, RoutedEventArgs e)
         {
-            if(dgRegistre.SelectedItems.Count == 1)
+            if (dgRegistre.SelectedItems.Count == 1)
             {
-                this.IsEnabled = false;
-                FormRegistre formRegistre = new FormRegistre((VersementView)cbVersement.SelectedItem,(RegistreView)dgRegistre.SelectedItem, this);
-                formRegistre.Show();
+                using (var ct = new DocumatContext())
+                {
+                    Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == ((RegistreView)dgRegistre.SelectedItem).Registre.RegistreID);
+                    this.IsEnabled = false;
+                    FormRegistre formRegistre = new FormRegistre(((VersementView)cbVersement.SelectedItem).Versement, registre, this);
+                    formRegistre.Show();
+                }
             }
         }
 
@@ -256,10 +300,10 @@ namespace DOCUMAT.Pages.Inventaire
                         }
                         registreView.context.SaveChanges();
 
-                        foreach(int id in RegistreIds)
+                        foreach (int id in RegistreIds)
                         {
                             // Enregistrement du traitement de l'agent 
-                            DocumatContext.AddTraitement(DocumatContext.TbRegistre, id,Utilisateur.AgentID,(int)Enumeration.TypeTraitement.SUPPRESSION);
+                            DocumatContext.AddTraitement(DocumatContext.TbRegistre, id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION);
                         }
                         MessageBox.Show("Suppression éffectuée", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
                         RefreshRegistre();
@@ -276,15 +320,6 @@ namespace DOCUMAT.Pages.Inventaire
             }
         }
 
-        private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
-        {
-            //Définition de la colonne des numéros d'odre
-            // En plus il faut que EnableRowVirtualization="False"
-            RegistreView view = (RegistreView)e.Row.Item;
-            view.NumeroOrdre = e.Row.GetIndex() + 1;
-            e.Row.Item = view;
-        }
-
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
         {
             try
@@ -297,23 +332,20 @@ namespace DOCUMAT.Pages.Inventaire
                 var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
                 ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
             }
-            catch (Exception ex)
-            {
-                ex.ExceptionCatcher();
-            }
+            catch (Exception ex) { }
         }
 
         private void dgVersement_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            cbVersement.SelectedItem = (VersementView)dgVersement.SelectedItem;            
+            cbVersement.SelectedItem = (VersementView)dgVersement.SelectedItem;
         }
 
         private void cbVersement_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             dgVersement.SelectedItem = (VersementView)cbVersement.SelectedItem;
-            if(cbVersement.SelectedItem == null)
+            if (cbVersement.SelectedItem == null)
             {
-                AfficherRegistre.IsEnabled = false;        
+                AfficherRegistre.IsEnabled = false;
             }
             else
             {
@@ -323,7 +355,7 @@ namespace DOCUMAT.Pages.Inventaire
 
         private void btnAjouterNouveau_Click(object sender, RoutedEventArgs e)
         {
-            if(gridViewPanelRegistre.Visibility == Visibility.Visible)
+            if (gridViewPanelRegistre.Visibility == Visibility.Visible)
             {
                 AddRegistre_Click(null, null);
             }
@@ -335,11 +367,23 @@ namespace DOCUMAT.Pages.Inventaire
 
         private void voirBordereau_Click(object sender, RoutedEventArgs e)
         {
-            if(dgVersement.SelectedItems.Count == 1)
+            try
             {
-                Models.Versement versement = ((VersementView)dgVersement.SelectedItem).Versement;
-                Pages.Image.SimpleViewer simpleViewer = new Image.SimpleViewer(Path.Combine(DossierRacine,versement.cheminBordereau));
-                simpleViewer.Show();
+                if (dgVersement.SelectedItems.Count == 1)
+                {
+                    Models.Versement versement = ((VersementView)dgVersement.SelectedItem).Versement;
+                    Pages.Image.SimpleViewer simpleViewer = new Image.SimpleViewer(Path.Combine(DossierRacine, versement.cheminBordereau));
+                    simpleViewer.Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (dgVersement.SelectedItems.Count == 1)
+                {
+                    MessageBox.Show("Adobe Reader n'est pas Installé sur cette machine pour permettre la lecture du  fichier, le pdf sera ouvert par la lecteuse par défault", "Adobe Reader Introuvable", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Models.Versement versement = ((VersementView)dgVersement.SelectedItem).Versement;
+                    System.Diagnostics.Process.Start(Path.Combine(DossierRacine, versement.cheminBordereau));
+                }
             }
         }
 
@@ -351,13 +395,13 @@ namespace DOCUMAT.Pages.Inventaire
                 int StandardDgHeight = 450;
                 if (e.NewSize.Height < StandardHeight)
                 {
-                    dgVersement.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height)*2/3);
-                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height)*2/3);
+                    dgVersement.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height) * 2 / 3);
+                    dgRegistre.MaxHeight = StandardDgHeight - ((StandardHeight - e.NewSize.Height) * 2 / 3);
                 }
                 else
                 {
-                    dgVersement.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight)*2/3);
-                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight)*2/3);
+                    dgVersement.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight) * 2 / 3);
+                    dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight) * 2 / 3);
                 }
             }
         }
@@ -374,16 +418,9 @@ namespace DOCUMAT.Pages.Inventaire
             {
                 if (dgRegistre.SelectedItems.Count == 1)
                 {
-                    if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
-                    {
-                        // Affichage de l'impression du code barre
-                        Impression.BordereauRegistre bordereauRegistre = new Impression.BordereauRegistre(((RegistreView)dgRegistre.SelectedItem).Registre);
-                        bordereauRegistre.Show();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Vous n'avez pas les privilège nécèssaire pour effectuér cette opération !!!","AVERTISSEMENT",MessageBoxButton.OK,MessageBoxImage.Warning);
-                    }
+                    // Affichage de l'impression du code barre
+                    Impression.BordereauRegistre bordereauRegistre = new Impression.BordereauRegistre(((RegistreView)dgRegistre.SelectedItem).Registre);
+                    bordereauRegistre.Show();
                 }
             }
             catch (Exception ex)
@@ -398,33 +435,26 @@ namespace DOCUMAT.Pages.Inventaire
             {
                 if (dgRegistre.SelectedItems.Count == 1)
                 {
-                    if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
-                    {
-                        RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
-                        DirectoryInfo RegistreDossier = new DirectoryInfo(Path.Combine(DossierRacine, registreView.Registre.CheminDossier));
-                        OpenFileDialog openFileDialog = new OpenFileDialog();
-                        var dlg = new CommonOpenFileDialog();
-                        dlg.Title = "Dossier de Scan du Registre : " + registreView.Registre.QrCode;
-                        dlg.IsFolderPicker = false;
-                        //dlg.InitialDirectory = currentDirectory;
-                        dlg.AddToMostRecentlyUsedList = false;
-                        dlg.AllowNonFileSystemItems = false;
-                        //dlg.DefaultDirectory = currentDirectory;
-                        //dlg.FileOk += Dlg_FileOk;
-                        dlg.EnsureFileExists = true;
-                        dlg.EnsurePathExists = true;
-                        dlg.EnsureReadOnly = false;
-                        dlg.EnsureValidNames = true;
-                        dlg.Multiselect = true;
-                        dlg.ShowPlacesList = true;
-                        dlg.InitialDirectory = RegistreDossier.FullName;
+                    RegistreView registreView = (RegistreView)dgRegistre.SelectedItem;
+                    DirectoryInfo RegistreDossier = new DirectoryInfo(Path.Combine(DossierRacine, registreView.Registre.CheminDossier));
+                    OpenFileDialog openFileDialog = new OpenFileDialog();
+                    var dlg = new CommonOpenFileDialog();
+                    dlg.Title = "Dossier de Scan du Registre : " + registreView.Registre.QrCode;
+                    dlg.IsFolderPicker = false;
+                    //dlg.InitialDirectory = currentDirectory;
+                    dlg.AddToMostRecentlyUsedList = false;
+                    dlg.AllowNonFileSystemItems = false;
+                    //dlg.DefaultDirectory = currentDirectory;
+                    //dlg.FileOk += Dlg_FileOk;
+                    dlg.EnsureFileExists = true;
+                    dlg.EnsurePathExists = true;
+                    dlg.EnsureReadOnly = false;
+                    dlg.EnsureValidNames = true;
+                    dlg.Multiselect = true;
+                    dlg.ShowPlacesList = true;
+                    dlg.InitialDirectory = RegistreDossier.FullName;
 
-                        if (dlg.ShowDialog() == CommonFileDialogResult.Ok) { }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Vous n'avez pas les privilège nécèssaire pour effectuér cette opération !!!", "AVERTISSEMENT", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
+                    if (dlg.ShowDialog() == CommonFileDialogResult.Ok) { }
                 }
             }
             catch (Exception ex)

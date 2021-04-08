@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace DOCUMAT.Models
 {
@@ -27,8 +20,8 @@ namespace DOCUMAT.Models
         public int NombreR3 { get; set; }
         [Required(ErrorMessage = "Le Champ Nombre de registre R4 ne peut être vide")]
         public int NombreR4 { get; set; }
-        [Required(ErrorMessage ="Aucune region n'est spécifiée")]
+        [Required(ErrorMessage = "Aucune region n'est spécifiée")]
         public int RegionID { get; set; }
-        public virtual Region Region { get; set;}
+        public virtual Region Region { get; set; }
     }
 }

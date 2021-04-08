@@ -1,6 +1,8 @@
 ﻿using DOCUMAT.Models;
 using DOCUMAT.ViewModels;
 using System;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -14,8 +16,9 @@ namespace DOCUMAT.Pages.Registre
     /// </summary>
     public partial class FormRegistre : Window
     {
-        VersementView VersementViewParent;
-        RegistreView RegistreViewParent;
+        string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
+        Models.Versement VersementParent;
+        Models.Registre RegistreParent;
         Inventaire.Inventaire WindowsParent;
         Models.Agent Utilisateur;
         bool EditMode = false;
@@ -27,46 +30,70 @@ namespace DOCUMAT.Pages.Registre
             dtDepotDebut.Language = XmlLanguage.GetLanguage("fr-FR");
         }
 
-        public FormRegistre(VersementView versementView,RegistreView registreView, Inventaire.Inventaire parent) : this()
+        public FormRegistre(Models.Versement versement, Models.Registre registre, Inventaire.Inventaire parent) : this()
         {
-            EditMode = true;
-            VersementViewParent = versementView;
-            RegistreViewParent = registreView;
-            WindowsParent = parent;
-            Utilisateur = parent.Utilisateur;
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    EditMode = true;
+                    VersementParent = versement;
+                    RegistreParent = registre;
+                    WindowsParent = parent;
+                    Utilisateur = parent.Utilisateur;
 
-            // Remplissage des éléments du formulaire
-            tbNombrePageDeclarer.Text = registreView.Registre.NombrePageDeclaree.ToString();
-            tbNombrePage.Text = registreView.Registre.NombrePage.ToString();
-            tbNumeroDepotDebut.Text = registreView.Registre.NumeroDepotDebut.ToString();
-            tbNumeroDepotFin.Text = registreView.Registre.NumeroDepotFin.ToString();
-            tbNumeroVolume.Text = registreView.Registre.Numero.ToString();
-            tbObservation.Text = registreView.Registre.Observation;
-            Livraison livraison = versementView.context.Livraison.FirstOrDefault(l => l.LivraisonID == versementView.Versement.LivraisonID);
-            tbService.Text = versementView.context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).NomComplet;
-            tbVersement.Text = versementView.Versement.NumeroVers.ToString();
-            dtDepotDebut.SelectedDate = RegistreViewParent.Registre.DateDepotDebut;
-            dtDepotFin.SelectedDate = RegistreViewParent.Registre.DateDepotFin;
+                    // Remplissage des éléments du formulaire
+                    tbNombrePageDeclarer.Text = registre.NombrePageDeclaree.ToString();
+                    tbNombrePage.Text = registre.NombrePage.ToString();
+                    tbNumeroDepotDebut.Text = registre.NumeroDepotDebut.ToString();
+                    tbNumeroDepotFin.Text = registre.NumeroDepotFin.ToString();
+                    tbNumeroVolume.Text = registre.Numero.ToString();
+                    tbObservation.Text = registre.Observation;
+                    Livraison livraison = ct.Livraison.FirstOrDefault(l => l.LivraisonID == versement.LivraisonID);
+                    tbService.Text = ct.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).NomComplet;
+                    tbVersement.Text = versement.NumeroVers.ToString();
+                    dtDepotDebut.SelectedDate = registre.DateDepotDebut;
+                    dtDepotFin.SelectedDate = registre.DateDepotFin;
 
-            if (RegistreViewParent.Registre.Type == "R3")
-                cbTypeRegistre.SelectedIndex = 0;
-            else
-                cbTypeRegistre.SelectedIndex = 1;
+                    if (registre.Type == "R3")
+                    {
+                        cbTypeRegistre.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        cbTypeRegistre.SelectedIndex = 1;
+                    }
 
-            cbTypeRegistre.IsEnabled = false;                
-            tbNumeroVolume.IsEnabled = false;                
+                    cbTypeRegistre.IsEnabled = false;
+                    tbNumeroVolume.IsEnabled = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
-        public FormRegistre(VersementView versementView,Inventaire.Inventaire parent):this()
-        {            
-            EditMode = false;
-            VersementViewParent = versementView;
-            WindowsParent = parent;
-            Utilisateur = parent.Utilisateur;
-            Livraison livraison = versementView.context.Livraison.FirstOrDefault(l=>l.LivraisonID == versementView.Versement.LivraisonID);
-            tbService.Text = versementView.context.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).NomComplet;
-            tbVersement.Text = versementView.Versement.NumeroVers.ToString();
-            dtDepotDebut.SelectedDate = dtDepotFin.SelectedDate = DateTime.Now;           
+        public FormRegistre(Models.Versement versement, Inventaire.Inventaire parent) : this()
+        {
+            try
+            {
+                using (var ct = new DocumatContext())
+                {
+                    EditMode = false;
+                    VersementParent = versement;
+                    WindowsParent = parent;
+                    Utilisateur = parent.Utilisateur;
+                    Livraison livraison = ct.Livraison.FirstOrDefault(l => l.LivraisonID == versement.LivraisonID);
+                    tbService.Text = ct.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).NomComplet;
+                    tbVersement.Text = versement.NumeroVers.ToString();
+                    dtDepotDebut.SelectedDate = dtDepotFin.SelectedDate = DateTime.Now;
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
         }
 
         /// <summary>
@@ -74,34 +101,40 @@ namespace DOCUMAT.Pages.Registre
         /// </summary>
         /// <param name="registreView"></param>
         /// <param name="user"></param>
-        public FormRegistre(RegistreView registreView, Models.Agent user):this()
+        public FormRegistre(Models.Registre registre, Models.Agent user) : this()
         {
             EditMode = true;
-            VersementViewParent = new VersementView();
-            VersementViewParent.Versement = registreView.Versement;
-            RegistreViewParent = registreView;
+            VersementParent = new Models.Versement();
+            VersementParent = registre.Versement;
+            RegistreParent = registre;
             Utilisateur = user;
 
             // Remplissage des éléments du formulaire
-            tbNombrePageDeclarer.Text = registreView.Registre.NombrePageDeclaree.ToString();
-            tbNombrePage.Text = registreView.Registre.NombrePage.ToString();
-            tbNumeroDepotDebut.Text = registreView.Registre.NumeroDepotDebut.ToString();
-            tbNumeroDepotFin.Text = registreView.Registre.NumeroDepotFin.ToString();
-            tbNumeroVolume.Text = registreView.Registre.Numero.ToString();
-            tbObservation.Text = registreView.Registre.Observation;
-            using(var ct = new DocumatContext())
-            {
-                Livraison livraison = ct.Livraison.FirstOrDefault(l => l.LivraisonID == registreView.Versement.LivraisonID);
-                tbService.Text = ct.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).Nom;
-                tbVersement.Text = registreView.Versement.NumeroVers.ToString();
-            }
-            dtDepotDebut.SelectedDate = RegistreViewParent.Registre.DateDepotDebut;
-            dtDepotFin.SelectedDate = RegistreViewParent.Registre.DateDepotFin;
+            tbNombrePageDeclarer.Text = registre.NombrePageDeclaree.ToString();
+            tbNombrePage.Text = registre.NombrePage.ToString();
+            tbNumeroDepotDebut.Text = registre.NumeroDepotDebut.ToString();
+            tbNumeroDepotFin.Text = registre.NumeroDepotFin.ToString();
+            tbNumeroVolume.Text = registre.Numero.ToString();
+            tbObservation.Text = registre.Observation;
 
-            if (RegistreViewParent.Registre.Type == "R3")
+            using (var ct = new DocumatContext())
+            {
+                Models.Versement versement = ct.Versement.FirstOrDefault(v => v.VersementID == RegistreParent.VersementID);
+                Livraison livraison = ct.Livraison.FirstOrDefault(l => l.LivraisonID == versement.LivraisonID);
+                tbService.Text = ct.Service.FirstOrDefault(s => s.ServiceID == livraison.ServiceID).Nom;
+                tbVersement.Text = versement.NumeroVers.ToString();
+            }
+            dtDepotDebut.SelectedDate = registre.DateDepotDebut;
+            dtDepotFin.SelectedDate = registre.DateDepotFin;
+
+            if (RegistreParent.Type == "R3")
+            {
                 cbTypeRegistre.SelectedIndex = 0;
+            }
             else
+            {
                 cbTypeRegistre.SelectedIndex = 1;
+            }
 
             cbTypeRegistre.IsEnabled = false;
             tbNumeroVolume.IsEnabled = false;
@@ -119,7 +152,7 @@ namespace DOCUMAT.Pages.Registre
 
         private void btnAnnule_Click(object sender, RoutedEventArgs e)
         {
-            if(WindowsParent != null)
+            if (WindowsParent != null)
             {
                 WindowsParent.IsEnabled = true;
             }
@@ -128,7 +161,7 @@ namespace DOCUMAT.Pages.Registre
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            if(!EditMode)
+            if (!EditMode)
             {
                 AjouterRegistre();
             }
@@ -141,11 +174,11 @@ namespace DOCUMAT.Pages.Registre
         private void ModifierRegistre()
         {
             try
-            {                
+            {
                 //Création du Dossier de registre dans le dossier de service                                       
                 Models.Registre registre = new Models.Registre();
                 RegistreView registreView = new RegistreView();
-                registreView.GetView(RegistreViewParent.Registre.RegistreID);
+                registreView.GetView(RegistreParent.RegistreID);
                 registre.DateModif = DateTime.Now;
                 registre.DateDepotDebut = dtDepotDebut.SelectedDate.Value;
                 registre.DateDepotFin = dtDepotFin.SelectedDate.Value;
@@ -153,39 +186,69 @@ namespace DOCUMAT.Pages.Registre
 
                 int NombrePageD = 0;
                 if (Int32.TryParse(tbNombrePageDeclarer.Text, out NombrePageD))
+                {
                     registre.NombrePageDeclaree = NombrePageD;
+                }
 
                 int NombrePage = 0;
-                if(Int32.TryParse(tbNombrePage.Text, out NombrePage))
+                if (Int32.TryParse(tbNombrePage.Text, out NombrePage))
+                {
                     registre.NombrePage = NombrePage;
+                }
                 else
+                {
                     throw new Exception("Nombre de Page Incorrecte !");
+                }
 
                 if (tbNumeroVolume.Text != "")
+                {
                     registre.Numero = tbNumeroVolume.Text;
+                }
                 else
-                    throw new Exception("Numero de Volume Incorrecte !");                  
+                {
+                    throw new Exception("Numero de Volume Incorrecte !");
+                }
 
                 int NumeroDepotDebut = 0;
                 if (Int32.TryParse(tbNumeroDepotDebut.Text, out NumeroDepotDebut))
+                {
                     registre.NumeroDepotDebut = NumeroDepotDebut;
+                }
                 else
+                {
                     throw new Exception("Numero dépôt début Incorrecte !");
+                }
 
                 int NumeroDepotFin = 0;
                 if (Int32.TryParse(tbNumeroDepotFin.Text, out NumeroDepotFin))
+                {
                     registre.NumeroDepotFin = NumeroDepotFin;
+                }
                 else
+                {
                     throw new Exception("Numero dépôt fin Incorrecte !");
-               
+                }
+
                 registreView.Update(registre);
 
                 // Enregistrement du traitement de l'agent 
-                DocumatContext.AddTraitement(DocumatContext.TbRegistre, registreView.Registre.RegistreID, Utilisateur.AgentID,(int)Enumeration.TypeTraitement.MODIFICATION);
+                DocumatContext.AddTraitement(DocumatContext.TbRegistre, registreView.Registre.RegistreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION);
+
+                // Suppression du Bordereau du Registre 
+                string BordereauRegistre = System.IO.Path.Combine(DossierRacine, registreView.Registre.CheminDossier, $"Bordereau{registreView.Registre.QrCode}.xps");
+
+                try
+                {
+                    if (File.Exists(BordereauRegistre))
+                    {
+                        File.Delete(BordereauRegistre);
+                    }
+                }
+                catch (Exception ein) { };
 
                 MessageBox.Show("Registre Modifié !!!", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
-                
-                if(WindowsParent != null)
+
+                if (WindowsParent != null)
                 {
                     WindowsParent.RefreshRegistre();
                 }
@@ -201,7 +264,7 @@ namespace DOCUMAT.Pages.Registre
         {
             try
             {
-                if(MessageBox.Show("Les champs \"Type de registre\" et \"Numéro Volume\" ne pourront plus être modifié utlérieurement, voulez-vous enregistrer ce registre ?","ATTENTION",MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show("Les champs \"Type de registre\" et \"Numéro Volume\" ne pourront plus être modifié utlérieurement, voulez-vous enregistrer ce registre ?", "ATTENTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     //Création du Dossier de registre dans le dossier de service                       
                     RegistreView registreView = new RegistreView();
@@ -209,16 +272,16 @@ namespace DOCUMAT.Pages.Registre
                     // Vérification du nombre de Registre de Type 'R3 ou R4' enregistrée
                     if (((ComboBoxItem)cbTypeRegistre.SelectedItem).Content.ToString() == "R3")
                     {
-                        if(VersementViewParent.Versement.NombreRegistreR3 < (registreView.context.Registre.Where(r=>r.VersementID == VersementViewParent.Versement.VersementID && r.Type == "R3").Count() + 1 ))
+                        if (VersementParent.NombreRegistreR3 < (registreView.context.Registre.Where(r => r.VersementID == VersementParent.VersementID && r.Type == "R3").Count() + 1))
                         {
-                            throw new Exception("Le nombre de Registre R3 doit être doit être de " + VersementViewParent.Versement.NombreRegistreR3);
+                            throw new Exception("Le nombre de Registre R3 doit être doit être de " + VersementParent.NombreRegistreR3);
                         }
                     }
                     else
                     {
-                        if (VersementViewParent.Versement.NombreRegistreR4 < (registreView.context.Registre.Where(r => r.VersementID == VersementViewParent.Versement.VersementID && r.Type == "R4").Count() + 1))
+                        if (VersementParent.NombreRegistreR4 < (registreView.context.Registre.Where(r => r.VersementID == VersementParent.VersementID && r.Type == "R4").Count() + 1))
                         {
-                            throw new Exception("Le nombre de Registre R4 doit être doit être de " + VersementViewParent.Versement.NombreRegistreR4);
+                            throw new Exception("Le nombre de Registre R4 doit être doit être de " + VersementParent.NombreRegistreR4);
                         }
                     }
 
@@ -257,13 +320,13 @@ namespace DOCUMAT.Pages.Registre
                     /*registreView.Registre.QrCode = "Defaut";*/ // Sera changer après l'ajout du registre
                     registreView.Registre.StatutActuel = 0; // Sera changer après l'ajout du registre
                     registreView.Registre.Type = ((ComboBoxItem)cbTypeRegistre.SelectedItem).Content.ToString();
-                    registreView.Registre.VersementID = VersementViewParent.Versement.VersementID;
+                    registreView.Registre.VersementID = VersementParent.VersementID;
                     int registreID = registreView.AddRegistre();
 
                     // Enregistrement du traitement de l'agent 
-                    DocumatContext.AddTraitement(DocumatContext.TbRegistre,registreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
+                    DocumatContext.AddTraitement(DocumatContext.TbRegistre, registreID, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
 
-                    if(WindowsParent != null)
+                    if (WindowsParent != null)
                     {
                         WindowsParent.RefreshRegistre();
                     }
@@ -284,7 +347,7 @@ namespace DOCUMAT.Pages.Registre
 
         private void tbNumeroVolume_TextChanged(object sender, TextChangedEventArgs e)
         {
-            
+
         }
 
         private void tbNombrePageDeclarer_TextChanged(object sender, TextChangedEventArgs e)
@@ -349,7 +412,6 @@ namespace DOCUMAT.Pages.Registre
 
         private void tbObservation_TextChanged(object sender, TextChangedEventArgs e)
         {
-
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -358,8 +420,10 @@ namespace DOCUMAT.Pages.Registre
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(WindowsParent != null)
+            if (WindowsParent != null)
+            {
                 WindowsParent.IsEnabled = true;
+            }
         }
     }
 }

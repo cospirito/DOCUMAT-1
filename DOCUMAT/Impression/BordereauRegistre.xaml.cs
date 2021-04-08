@@ -60,7 +60,7 @@ namespace DOCUMAT.Impression
             {
                 // Chargement du formulaire du code barre
                 string[] cheminServices = Registre.CheminDossier.Split(new char[2] { '/', '\\' });
-                string CheminService = cheminServices[1] + "/" + cheminServices[2];
+                string CheminService = "/" + cheminServices[1] + "/" + cheminServices[2];
 
                 Zen.Barcode.Code128BarcodeDraw barcode = Zen.Barcode.BarcodeDrawFactory.Code128WithChecksum;
                 Zen.Barcode.Code128BarcodeDraw barcodeChemin = Zen.Barcode.BarcodeDrawFactory.Code128WithChecksum;

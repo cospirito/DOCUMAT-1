@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:DOCUMAT.Pages.Agent"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:src="clr-namespace:DOCUMAT.Converter"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com" 
         mc:Ignorable="d"
         Title="Gestion des Agents" 
         Height="600" 
@@ -13,9 +14,10 @@
         Width="900"
         Loaded="Page_Loaded"
         Background="SteelBlue">
-    
+
     <Window.Resources>
         <src:DateConverter x:Key="DateConverter"/>
+        <src:RowNumberConverter x:Key="RowNumberConverter"/>
         <ContextMenu x:Key="cmButton">
             <MenuItem Header="Ajouter"
                       Icon="{materialDesign:PackIcon Kind=AddCircle}"
@@ -34,20 +36,38 @@
         </ContextMenu>
     </Window.Resources>
 
-    <StackPanel x:Name="Service_Space" CanVerticallyScroll="True">
+    <Grid x:Name="Service_Space" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
         <!--Bouton d'interaction-->
         <StackPanel x:Name="panelInteracBtn"
-                    Orientation="Horizontal" Margin="10">
+                    Orientation="Horizontal" 
+                    Margin="10"
+                    Grid.Row="0">
             <Button Margin="10" Background="{x:Null}"
-                    BorderBrush="white"
-                    BorderThickness="1 0 0 0"
-                    ToolTip="Actualiser"
-                    Name="btnRefresh" 
-                    Click="btnRefresh_Click" >
-                <materialDesign:PackIcon Kind="Refresh"
+                        BorderBrush="White"
+                        BorderThickness="1 0 1 0"
+                        ToolTip="Actualisé / Chargé"
+                        x:Name="BtnActualise"
+                        Click="BtnActualise_Click"
+                        KeyboardNavigation.AcceptsReturn="False"
+                        KeyboardNavigation.TabNavigation="None"
+                        KeyboardNavigation.ControlTabNavigation="None"
+                        KeyboardNavigation.DirectionalNavigation="None"
+                        KeyboardNavigation.IsTabStop="True">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Refresh"
+                                            Width="25"
+                                            Height="25"
+                                            Foreground="White"/>
+                    <TextBlock>/</TextBlock>
+                    <materialDesign:PackIcon Kind="Download"
                                         Width="25"
                                         Height="25"
                                         Foreground="White"/>
+                </StackPanel>
             </Button>
             <TextBox x:Name="TbRechercher" 
                      materialDesign:HintAssist.Hint="RECHERCHER" 
@@ -72,15 +92,15 @@
             </Button>
         </StackPanel>
 
-
         <!--Grid View des services-->
-        <Grid Margin="20" x:Name="gridViewPanelAgent" >
+        <Grid Margin="20" 
+              x:Name="gridViewPanelAgent"
+              Grid.Row="1">
             <DataGrid Name="dgAgent" 
                           AutoGenerateColumns="False" 
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
-                          IsReadOnly="True"
-                          MaxHeight="400" 
+                          IsReadOnly="True" 
                           RowDetailsVisibilityMode="VisibleWhenSelected" 
                           Margin="0,-2,0,2"
                           LoadingRow="dgAgent_LoadingRow" 
@@ -100,7 +120,14 @@
                     </Style>
                 </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTextColumn  Header="N°" Binding="{Binding NumeroOrdre}"/>
+                    <DataGridTextColumn Header="N°" IsReadOnly="True">
+                        <DataGridTextColumn.Binding>
+                            <MultiBinding Converter="{StaticResource RowNumberConverter}">
+                                <Binding />
+                                <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}" />
+                            </MultiBinding>
+                        </DataGridTextColumn.Binding>
+                    </DataGridTextColumn>
                     <DataGridTextColumn  Header="Id" Binding="{Binding Agent.Id}" Visibility="Collapsed" />
                     <DataGridTextColumn  Header="Matricule" Binding="{Binding Agent.Matricule}" />
                     <DataGridTextColumn  Header="Nom de l'agent" Binding="{Binding Agent.Nom}" />
@@ -158,7 +185,29 @@
                     </DataTemplate>
                 </DataGrid.RowDetailsTemplate>
             </DataGrid>
+            <StackPanel 
+                    x:Name="PanelLoader"
+                    Grid.Row="1"
+                    Background="White"
+                    Opacity="1"
+                    Height="250"
+                    Visibility="Collapsed">
+                <StackPanel Margin="20 70 20 0"
+                        VerticalAlignment="Center">
+                    <Image gif:ImageBehavior.RepeatBehavior="Forever" 
+                       gif:ImageBehavior.AnimatedSource="/Images/Loader3.gif" 
+                       VerticalAlignment="Center"
+                       Height="70"/>
+                    <TextBlock  
+                    Margin="10"
+                    FontSize="20"
+                    FontStyle="Italic"
+                    FontWeight="Bold"
+                    Foreground="SteelBlue"
+                    HorizontalAlignment="Center">Veuillez Patientez Svp ...</TextBlock>
+                </StackPanel>
+            </StackPanel>
         </Grid>
-    </StackPanel>
+    </Grid>
 
 </Window>

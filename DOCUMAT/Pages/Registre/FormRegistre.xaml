@@ -27,7 +27,7 @@
             <TextBlock x:Name="txbFormHeader" 
                     Text="FORMULAIRE DE REGISTRE"
                     Foreground="White"
-                    FontFamily="Agency FB"
+                    FontFamily="{StaticResource AgencyFb}"
                     FontWeight="Bold"
                     TextDecorations="underline"
                     HorizontalAlignment="Center"

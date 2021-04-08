@@ -12,7 +12,7 @@
         MinWidth="900"
         ResizeMode="CanResizeWithGrip"
         SizeChanged="Window_SizeChanged"
-        Loaded="Window_Loaded"       
+        Loaded="Window_Loaded" 
         Closing="Window_Closing">
     <Window.Resources>
         <Storyboard x:Key="MenuOpen">
@@ -44,7 +44,7 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="20">
                         <Image Source="/Images/ftp.png"/>
                         <TextBlock Text="DOCUMAT - DEMATERIALISATION DE REGISTRE" 
-                           FontSize="25" FontFamily="Agency Fb"
+                           FontSize="25" FontFamily="{StaticResource AgencyFb}"
                            Foreground="CornflowerBlue" 
                            VerticalAlignment="Center" Margin="10 0 0 0"/>
                     </StackPanel>
@@ -60,7 +60,7 @@
                         Background="{x:Null}" 
                         BorderBrush="{x:Null}"
                         Foreground="CornflowerBlue"
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         HorizontalAlignment="Center"
                         Click="Button_Click"
                         MouseEnter="Button_MouseEnter"
@@ -71,7 +71,7 @@
                         Content="INVENTAIRE" Height="50" 
                         Background="{x:Null}" BorderBrush="{x:Null}"
                         HorizontalAlignment="Center"                      
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         Foreground="CornflowerBlue"                        
                         Click="Button_Click"
                         MouseEnter="Button_MouseEnter"
@@ -82,7 +82,7 @@
                         Background="{x:Null}" BorderBrush="{x:Null}"
                         HorizontalAlignment="Center" 
                         Foreground="CornflowerBlue"                                              
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         Click="Button_Click"
                         MouseEnter="Button_MouseEnter"
                         MouseLeave="Button_MouseLeave"/>
@@ -94,7 +94,7 @@
                         Background="{x:Null}" BorderBrush="{x:Null}"
                         HorizontalAlignment="Center" 
                         Foreground="CornflowerBlue"                                              
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         Click="Button_Click"
                         MouseEnter="Button_MouseEnter"
                         MouseLeave="Button_MouseLeave"/>
@@ -104,7 +104,7 @@
                         Background="{x:Null}" BorderBrush="{x:Null}"
                         HorizontalAlignment="Center" 
                         Foreground="CornflowerBlue"                       
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         Click="Button_Click"
                         MouseEnter="Button_MouseEnter"
                         MouseLeave="Button_MouseLeave"/>
@@ -114,7 +114,7 @@
                         Background="{x:Null}" BorderBrush="{x:Null}"
                         HorizontalAlignment="Center" 
                         Foreground="CornflowerBlue"                       
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         Click="Button_Click"
                         MouseEnter="Button_MouseEnter"
                         MouseLeave="Button_MouseLeave"/>
@@ -124,7 +124,7 @@
                         Background="{x:Null}" BorderBrush="{x:Null}"
                         HorizontalAlignment="Center" 
                         Foreground="CornflowerBlue"                       
-                        FontFamily="Agency Fb"
+                        FontFamily="{StaticResource AgencyFb}"
                         Click="Button_Click"
                         MouseEnter="Button_MouseEnter"
                         MouseLeave="Button_MouseLeave"/>
@@ -198,7 +198,7 @@
                                        FontSize="17"
                                        TextWrapping="NoWrap"
                                        Foreground="SteelBlue"
-                                       FontFamily="Agency Fb"/>
+                                       FontFamily="{StaticResource AgencyFb}"/>
                             <TextBlock x:Name="tbxTypeUser"
                                        Text="NON DEFINI"
                                        TextAlignment="Center"
@@ -206,7 +206,7 @@
                                        FontStyle="Italic"
                                        TextWrapping="NoWrap"
                                        Foreground="SteelBlue"
-                                       FontFamily="Agency Fb"/>
+                                       FontFamily="{StaticResource AgencyFb}"/>
                         </StackPanel>
                     </Grid>
                     <ListView Grid.Row="1" x:Name="optionPanel"
@@ -222,7 +222,7 @@
                                                Text="Configuration" 
                                                VerticalAlignment="Center" 
                                                FontSize="20"
-                                               FontFamily="Agency Fb"/>
+                                               FontFamily="{StaticResource AgencyFb}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem x:Name="BtnGestionAgent" 
@@ -236,7 +236,7 @@
                                                Text="Comptes" 
                                                VerticalAlignment="Center" 
                                                FontSize="20"
-                                               FontFamily="Agency Fb"/>
+                                               FontFamily="{StaticResource AgencyFb}"/>
                             </StackPanel>
                         </ListViewItem>
                         <Separator BorderBrush="White" BorderThickness="1">
@@ -261,7 +261,7 @@
                                                Text="Disp. Indexation" 
                                                VerticalAlignment="Center" 
                                                FontSize="20"
-                                               FontFamily="Agency Fb"/>
+                                               FontFamily="{StaticResource AgencyFb}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem x:Name="BtnDispatchControle" 
@@ -281,7 +281,7 @@
                                                Text="Disp. Contrôle" 
                                                VerticalAlignment="Center" 
                                                FontSize="20"
-                                               FontFamily="Agency Fb"/>
+                                               FontFamily="{StaticResource AgencyFb}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem x:Name="BtnDispatchCorrection" 
@@ -301,7 +301,7 @@
                                                Text="Disp. Correction" 
                                                VerticalAlignment="Center" 
                                                FontSize="20"
-                                               FontFamily="Agency Fb"/>
+                                               FontFamily="{StaticResource AgencyFb}"/>
                             </StackPanel>
                         </ListViewItem>
                         <Separator BorderBrush="White" BorderThickness="1">
@@ -319,7 +319,7 @@
                                                Text="Déconnecter" 
                                                VerticalAlignment="Center" 
                                                FontSize="20"
-                                               FontFamily="Agency Fb"/>
+                                               FontFamily="{StaticResource AgencyFb}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Padding="15" x:Name="BtnFermer" 
@@ -332,7 +332,7 @@
                                                Text="Quitter" 
                                                VerticalAlignment="Center" 
                                                FontSize="20"
-                                               FontFamily="Agency Fb"/>
+                                               FontFamily="{StaticResource AgencyFb}"/>
                             </StackPanel>
                         </ListViewItem>
                     </ListView>

@@ -164,7 +164,7 @@
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    FontSize="20"
-                                   FontFamily="Agency Fb"/>
+                                   FontFamily="{StaticResource AgencyFb}"/>
                     </StackPanel>
                     <ListView ScrollViewer.HorizontalScrollBarVisibility="Auto"
                               Height="500" x:Name="ListAgentSelected">

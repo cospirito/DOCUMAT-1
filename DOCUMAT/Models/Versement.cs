@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DOCUMAT.Models
 {
@@ -10,7 +8,7 @@ namespace DOCUMAT.Models
         public int VersementID { get; set; }
         public int NumeroVers { get; set; }
         public string NomAgentVersant { get; set; }
-        public string PrenomsAgentVersant { get; set; }        
+        public string PrenomsAgentVersant { get; set; }
         public DateTime DateVers { get; set; }
         public string cheminBordereau { get; set; }
         public int LivraisonID { get; set; }

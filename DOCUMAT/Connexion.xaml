@@ -24,7 +24,7 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Grid.ColumnSpan="2">
-                <TextBlock Text="AUTHENTIFICATION " Margin="125,50,100,10" FontFamily="Androgyne" 
+                <TextBlock Text="AUTHENTIFICATION " Margin="125,50,100,10" FontFamily="{StaticResource Androgyne}" 
                            FontSize="15" Foreground="CornflowerBlue"                           
                            />
                 <TextBox x:Name="login" Padding="5" Margin="86,0,69,10" 
@@ -43,7 +43,7 @@
                          />
                 <Button Content="Se Connecter" FontSize="20" Padding="5" Margin="100 25" Background="{x:Null}" 
                     x:Name="btn_seconnecter" 
-                    FontFamily="Androgyne"
+                    FontFamily="{StaticResource Androgyne}"
                     Foreground="CornflowerBlue" Cursor="Hand" Click="btn_seconnecter_Click" Height="50"/>
             </StackPanel>
         </Grid>

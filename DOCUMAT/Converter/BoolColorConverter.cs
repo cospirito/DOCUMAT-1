@@ -15,7 +15,7 @@ namespace DOCUMAT.Converter
             //{
             //    return brush;
             //}
-                        
+
             //if ((bool)value)
             //{
             //    return new SolidColorBrush(Colors.White);

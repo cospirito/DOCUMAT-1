@@ -1,11 +1,14 @@
-﻿using DOCUMAT.Models;
+﻿using DOCUMAT.DataModels;
+using DOCUMAT.Models;
 using DOCUMAT.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Media;
 
 namespace DOCUMAT.Pages.Indexation
 {
@@ -15,52 +18,190 @@ namespace DOCUMAT.Pages.Indexation
     public partial class Indexation : Page
     {
         public Models.Agent Utilisateur;
-
-        #region FONCTIONS
-            public void RefreshRegistre()
-            {
-                try
-                {
-                    if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
-                    {
-                        //Remplissage de la list de registre
-                        RegistreView registreView = new RegistreView();
-                        dgRegistre.ItemsSource = registreView.GetViewsList().Where(r=>r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE);
-                    }
-                    else
-                    {
-                        //Remplissage de la list de registre
-                        RegistreView registreView = new RegistreView();
-                        List<RegistreView> registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
-                        List<Traitement> traitementsAgent = registreView.context.Traitement.Where(t => t.AgentID == Utilisateur.AgentID
-                                                        && t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper() && t.TypeTraitement == (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION).ToList();
-                        var jointure = from rv in registreViews
-                                       join t in traitementsAgent on rv.Registre.RegistreID equals t.TableID
-                                       select rv;
-
-                        dgRegistre.ItemsSource = jointure;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ex.ExceptionCatcher();
-                }
-            }
-        #endregion
+        string DossierRacine = ConfigurationManager.AppSettings["CheminDossier_Scan"];
+        private readonly BackgroundWorker RefreshData = new BackgroundWorker();
+        public List<RegistreDataModel> ListRegistreActuel = new List<RegistreDataModel>();
+        int parRecup = Int32.Parse(ConfigurationManager.AppSettings["perRecup"]);
 
         public Indexation()
         {
             InitializeComponent();
+            RefreshData.WorkerSupportsCancellation = true;
+            RefreshData.WorkerReportsProgress = true;
+            RefreshData.DoWork += RefreshData_DoWork;
+            RefreshData.RunWorkerCompleted += RefreshData_RunWorkerCompleted;
+            RefreshData.Disposed += RefreshData_Disposed;
+            RefreshData.ProgressChanged += RefreshData_ProgressChanged;
         }
 
-        public Indexation(Models.Agent user):this()
+        private void RefreshData_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            #region SET PROGRESSION 
+            // Affichage de la progression
+            double widthPro = (BtnAnnuleChargement.ActualWidth * e.ProgressPercentage) / 100;
+
+            if (e.ProgressPercentage > 97)
+            {
+                BtnAnnuleChargement.BorderBrush = Brushes.LightGreen;
+                BtnAnnuleChargement.Foreground = Brushes.White;
+            }
+
+            if (e.ProgressPercentage > 40)
+            {
+                BtnAnnuleChargement.Foreground = Brushes.White;
+            }
+
+            if (e.ProgressPercentage > 2)
+            {
+                LoadText.Text = e.ProgressPercentage.ToString();
+                LoadIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Percent;
+                BtnAnnuleChargement.BorderThickness = new Thickness(widthPro, 1, 0, 1);
+            }
+            #endregion
+        }
+
+        private void RefreshData_Disposed(object sender, EventArgs e)
+        {
+            try
+            {
+                PanelLoader.Visibility = Visibility.Collapsed;
+                PanelData.Visibility = Visibility.Visible;
+                panelInteracBtn.IsEnabled = true;
+
+                #region RESET PROGRESSION 
+                // Affichage de la progression
+                LoadText.Text = "Annuler";
+                LoadIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.RemoveCircle;
+                BtnAnnuleChargement.BorderThickness = new Thickness(0, 1, 0, 1);
+                BtnAnnuleChargement.Foreground = Brushes.PaleVioletRed;
+                BtnAnnuleChargement.BorderBrush = Brushes.PaleVioletRed;
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
+        private void RefreshData_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            try
+            {
+                ListRegistreActuel = e.Result as List<RegistreDataModel>;
+                dgRegistre.ItemsSource = ListRegistreActuel;
+                PanelLoader.Visibility = Visibility.Collapsed;
+                PanelData.Visibility = Visibility.Visible;
+                panelInteracBtn.IsEnabled = true;
+
+                #region RESET PROGRESSION 
+                // Affichage de la progression
+                LoadText.Text = "Annuler";
+                LoadIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.RemoveCircle;
+                BtnAnnuleChargement.BorderThickness = new Thickness(0, 1, 0, 1);
+                BtnAnnuleChargement.Foreground = Brushes.PaleVioletRed;
+                BtnAnnuleChargement.BorderBrush = Brushes.PaleVioletRed;
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
+        private void RefreshData_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Définition de la methode de récupération des données 
+            try
+            {
+                Models.Agent user = (Models.Agent)e.Argument;
+                if (user.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || user.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                {
+                    using (var ct = new DocumatContext())
+                    {
+                        int nbRecup = 1;
+                        // récupération du nombre total de registres au statut scanné
+                        int nbLigne = ct.Database.SqlQuery<int>($"SELECT COUNT(RegistreID) FROM Registres WHERE StatutActuel = {(int)Enumeration.Registre.SCANNE}").FirstOrDefault();
+
+                        // Liste à récupérer
+                        List<RegistreDataModel> registreDataModels = new List<RegistreDataModel>();
+                        if (nbLigne > parRecup)
+                        {
+                            nbRecup = (int)Math.Ceiling(((float)nbLigne / (float)parRecup));
+                        }
+
+                        for (int i = 0; i < nbRecup; i++)
+                        {
+                            if (RefreshData.CancellationPending == false)
+                            {
+                                int limitId = (registreDataModels.Count == 0) ? 0 : registreDataModels.LastOrDefault().RegistreID;
+                                registreDataModels.AddRange(RegistreView.GetRegistreData(limitId, parRecup, (int)Enumeration.Registre.SCANNE).ToList());
+                                RefreshData.ReportProgress((int)Math.Ceiling(((float)i / (float)nbRecup) * 100));
+                            }
+                            else
+                            {
+                                e.Result = registreDataModels;
+                                return;
+                            }
+                        }
+
+                        //Remplissage de la list de registre
+                        e.Result = registreDataModels;
+                    }
+                }
+                else
+                {
+                    using (var ct = new DocumatContext())
+                    {
+                        int nbRecup = 1;
+                        // Nombre d'index du Registres 
+                        string reqAllreg = $"SELECT COUNT(RG.RegistreID) "+
+                                           $"FROM REGISTRES RG " +
+                                           $"INNER JOIN VERSEMENTS VS ON VS.VersementID = RG.VersementID " +
+                                           $"INNER JOIN LIVRAISONS LV ON LV.LivraisonID = VS.LivraisonID " +
+                                           $"INNER JOIN SERVICES SV ON SV.ServiceID = LV.ServiceID " +
+                                           $"INNER JOIN REGIONS RE ON RE.RegionID = SV.RegionID " +
+                                           $"INNER JOIN TRAITEMENTS TR ON TR.TableID = RG.RegistreID "+
+                                           $"WHERE Lower(TR.TableSelect) = Lower('Registres') AND TR.TypeTraitement = {(int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION} " +
+                                           $"AND TR.AgentID = {user.AgentID}  AND RG.StatutActuel = {(int)Enumeration.Registre.SCANNE}";
+                        // récupération du nombre total de registres au statut scanné
+                        int nbLigne = ct.Database.SqlQuery<int>(reqAllreg).FirstOrDefault();
+
+                        // Liste à récupérer
+                        List<RegistreDataModel> registreDataModels = new List<RegistreDataModel>();
+                        if (nbLigne > parRecup)
+                        {
+                            nbRecup = (int)Math.Ceiling(((float)nbLigne / (float)parRecup));
+                        }
+
+                        for (int i = 0; i < nbRecup; i++)
+                        {
+                            if (RefreshData.CancellationPending == false)
+                            {
+                                int limitId = (registreDataModels.Count == 0) ? 0 : registreDataModels.LastOrDefault().RegistreID;
+                                registreDataModels.AddRange(RegistreView.GetRegistreDataByTraitbyAgent(Utilisateur.AgentID, (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION, limitId, parRecup, (int)Enumeration.Registre.SCANNE).ToList());
+                                RefreshData.ReportProgress((int)Math.Ceiling(((float)i / (float)nbRecup) * 100));
+                            }
+                            else
+                            {
+                                e.Result = registreDataModels;
+                                return;
+                            }
+                        }
+
+                        //Remplissage de la list de registre
+                        e.Result = registreDataModels;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ExceptionCatcher();
+            }
+        }
+
+        public Indexation(Models.Agent user) : this()
         {
             Utilisateur = user;
-        }
-
-        private void dgRegistre_LoadingRow(object sender, DataGridRowEventArgs e)
-        {
-            ((RegistreView)e.Row.Item).NumeroOrdre = e.Row.GetIndex() + 1;
         }
 
         private void dgRegistre_LoadingRowDetails(object sender, DataGridRowDetailsEventArgs e)
@@ -70,10 +211,46 @@ namespace DOCUMAT.Pages.Indexation
                 // Chargement de l'image du Qrcode de la ligne
                 Zen.Barcode.CodeQrBarcodeDraw qrcode = Zen.Barcode.BarcodeDrawFactory.CodeQr;
                 var element = e.DetailsElement.FindName("QrCode");
-                RegistreView registre = (RegistreView)e.Row.Item;
-                var image = qrcode.Draw(registre.Registre.QrCode, 40);
+                RegistreDataModel registre = (RegistreDataModel)e.Row.Item;
+                var image = qrcode.Draw(registre.QrCode, 40);
                 var imageConvertie = image.ConvertDrawingImageToWPFImage(null, null);
                 ((System.Windows.Controls.Image)element).Source = imageConvertie.Source;
+            }
+            catch (Exception ex) { }
+        }
+
+        private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                if (TbRechercher.Text != "")
+                {
+                    List<RegistreDataModel> registreData = ListRegistreActuel as List<RegistreDataModel>;
+
+                    switch (cbChoixRecherche.SelectedIndex)
+                    {
+                        case 0:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreData.Where(r => r.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 1:
+                            // Récupération des registre par service
+                            dgRegistre.ItemsSource = registreData.Where(r => r.NomComplet.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 2:
+                            // Récupération des registre par Région
+                            dgRegistre.ItemsSource = registreData.Where(r => r.NomRegion.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                        case 3:
+                            // Récupération des registre par code registre
+                            dgRegistre.ItemsSource = registreData.Where(r => r.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
+                            break;
+                    }
+                }
+                else
+                {
+                    dgRegistre.ItemsSource = ListRegistreActuel;
+                }
             }
             catch (Exception ex)
             {
@@ -81,28 +258,22 @@ namespace DOCUMAT.Pages.Indexation
             }
         }
 
-        private void TbRechercher_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            
-        }
-
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             ContextMenu cm = this.FindResource("cmRegistre") as ContextMenu;
             dgRegistre.ContextMenu = cm;
-            RefreshRegistre();
             MenuItem menuItemIndexation = (MenuItem)cm.Items.GetItemAt(0);
             MenuItem menuItemSupervision = (MenuItem)cm.Items.GetItemAt(1);
 
-            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR 
+            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR
                 || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
             {
                 menuItemSupervision.IsEnabled = true;
-                menuItemIndexation.IsEnabled = false;
+                menuItemIndexation.IsEnabled = true;
             }
             else
             {
-                if(Utilisateur.Affectation == (int)Enumeration.AffectationAgent.INDEXATION)
+                if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.INDEXATION)
                 {
                     menuItemIndexation.IsEnabled = true;
                 }
@@ -116,15 +287,23 @@ namespace DOCUMAT.Pages.Indexation
 
         private void IndexerImage_Click(object sender, RoutedEventArgs e)
         {
-            if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.INDEXATION)
+            if (dgRegistre.SelectedItems.Count == 1)
             {
-                if (dgRegistre.SelectedItems.Count == 1)
+                try
                 {
-                    Image.ImageViewer imageViewer = new Image.ImageViewer((RegistreView)dgRegistre.SelectedItem, this);
-                    this.IsEnabled = false;
-                    imageViewer.Show();
+                    using (var ct = new DocumatContext())
+                    {
+                        Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == ((RegistreDataModel)dgRegistre.SelectedItem).RegistreID);
+                        Image.ImageViewer imageViewer = new Image.ImageViewer(registre, this);
+                        this.IsEnabled = false;
+                        imageViewer.Show();
+                    }
                 }
-            }
+                catch (Exception ex)
+                {
+                    ex.ExceptionCatcher();
+                }
+            }            
         }
 
         private void BtnRechercher_Click(object sender, RoutedEventArgs e)
@@ -133,84 +312,31 @@ namespace DOCUMAT.Pages.Indexation
             {
                 if (TbRechercher.Text != "")
                 {
-                    RegistreView RegistreView = new RegistreView();
-                    List<RegistreView> registreViews = new List<RegistreView>();
-                    if (Utilisateur.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || Utilisateur.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
-                    {
-                        //Remplissage de la list de registre
-                        RegistreView registreView = new RegistreView();
-                        registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
-                    }
-                    else
-                    {
-                        //Remplissage de la list de registre
-                        RegistreView registreView = new RegistreView();
-                        registreViews = registreView.GetViewsList().Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
-                        List<Traitement> traitementsAgent = registreView.context.Traitement.Where(t => t.AgentID == Utilisateur.AgentID
-                                                        && t.TableSelect.ToUpper() == DocumatContext.TbRegistre.ToUpper() && t.TypeTraitement == (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION).ToList();
-                        var jointure = from rv in registreViews
-                                       join t in traitementsAgent on rv.Registre.RegistreID equals t.TableID
-                                       select rv;
-
-                        registreViews = jointure.ToList();
-                    }
+                    List<RegistreDataModel> registreData = ListRegistreActuel as List<RegistreDataModel>;
 
                     switch (cbChoixRecherche.SelectedIndex)
                     {
-
                         case 0:
                             // Récupération des registre par code registre
-                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper()));
+                            dgRegistre.ItemsSource = registreData.Where(r => r.QrCode.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
                             break;
                         case 1:
                             // Récupération des registre par service
-                            List<Models.Service> Services1 = RegistreView.context.Service.ToList();
-                            List<Models.Livraison> Livraisons1 = RegistreView.context.Livraison.ToList();
-                            List<Models.Versement> Versements1 = RegistreView.context.Versement.ToList();
-                            List<RegistreView> registreViews1 = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
-
-                            var jointure1 = from r in registreViews1
-                                            join v in Versements1 on r.Registre.VersementID equals v.VersementID into table1
-                                            from v in table1.ToList()
-                                            join l in Livraisons1 on v.LivraisonID equals l.LivraisonID into table2
-                                            from l in table2.ToList()
-                                            join s in Services1 on l.ServiceID equals s.ServiceID
-                                            where s.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                            select r;
-                            dgRegistre.ItemsSource = jointure1;
+                            dgRegistre.ItemsSource = registreData.Where(r => r.NomComplet.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
                             break;
                         case 2:
-                            // Récupération des registre par service
-                            List<Models.Region> Region2 = RegistreView.context.Region.ToList();
-                            List<Models.Service> Services2 = RegistreView.context.Service.ToList();
-                            List<Models.Livraison> Livraisons2 = RegistreView.context.Livraison.ToList();
-                            List<Models.Versement> Versements2 = RegistreView.context.Versement.ToList();
-                            List<RegistreView> registreViews2 = registreViews.Where(r => r.Registre.StatutActuel == (int)Enumeration.Registre.SCANNE).ToList();
-
-                            var jointure2 = from r in registreViews2
-                                            join v in Versements2 on r.Registre.VersementID equals v.VersementID into table1
-                                            from v in table1.ToList()
-                                            join l in Livraisons2 on v.LivraisonID equals l.LivraisonID into table2
-                                            from l in table2.ToList()
-                                            join s in Services2 on l.ServiceID equals s.ServiceID into table3
-                                            from s in table3.ToList()
-                                            join rg in Region2 on s.RegionID equals rg.RegionID
-                                            where rg.Nom.ToUpper().Contains(TbRechercher.Text.ToUpper())
-                                            select r;
-                            dgRegistre.ItemsSource = jointure2;
+                            // Récupération des registre par Région
+                            dgRegistre.ItemsSource = registreData.Where(r => r.NomRegion.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
                             break;
                         case 3:
                             // Récupération des registre par code registre
-                            dgRegistre.ItemsSource = registreViews.Where(r => r.Registre.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper()));
-                            break;
-                        default:
-                            RefreshRegistre();
+                            dgRegistre.ItemsSource = registreData.Where(r => r.Numero.ToUpper().Contains(TbRechercher.Text.ToUpper())).ToList();
                             break;
                     }
                 }
                 else
                 {
-                    RefreshRegistre();
+                    dgRegistre.ItemsSource = ListRegistreActuel;
                 }
             }
             catch (Exception ex)
@@ -219,14 +345,21 @@ namespace DOCUMAT.Pages.Indexation
             }
         }
 
-        private void BtnRechercher_PreviewKeyUp(object sender, KeyEventArgs e)
-        {
-            return;
-        }
-
         private void BtnActualise_Click(object sender, RoutedEventArgs e)
         {
-            RefreshRegistre();
+            try
+            {
+                RefreshData.RunWorkerAsync(Utilisateur);
+                PanelLoader.Visibility = Visibility.Visible;
+                panelInteracBtn.IsEnabled = false;
+            }
+            catch (Exception ex)
+            {
+                //ex.ExceptionCatcher();
+                RefreshData.CancelAsync();
+                PanelLoader.Visibility = Visibility.Collapsed;
+                panelInteracBtn.IsEnabled = true;
+            }
         }
 
         private void SuperviserIndexation_Click(object sender, RoutedEventArgs e)
@@ -236,9 +369,20 @@ namespace DOCUMAT.Pages.Indexation
             {
                 if (dgRegistre.SelectedItems.Count == 1)
                 {
-                    Image.ImageIndexSuperviseur image = new Image.ImageIndexSuperviseur((RegistreView)dgRegistre.SelectedItem, this);
-                    this.IsEnabled = false;
-                    image.Show();
+                    try
+                    {
+                        using (var ct = new DocumatContext())
+                        {
+                            Models.Registre registre = ct.Registre.FirstOrDefault(r => r.RegistreID == ((RegistreDataModel)dgRegistre.SelectedItem).RegistreID);
+                            Image.ImageIndexSuperviseur image = new Image.ImageIndexSuperviseur(registre, this);
+                            this.IsEnabled = false;
+                            image.Show();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.ExceptionCatcher();
+                    }
                 }
             }
         }
@@ -257,6 +401,15 @@ namespace DOCUMAT.Pages.Indexation
                 {
                     dgRegistre.MaxHeight = StandardDgHeight + ((e.NewSize.Height - StandardHeight) * 2 / 3);
                 }
+            }
+        }
+
+        private void BtnAnnuleChargement_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Voulez vous vraiment annuler l'opération ?", "Annuler", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                == MessageBoxResult.Yes)
+            {
+                RefreshData.CancelAsync();
             }
         }
     }

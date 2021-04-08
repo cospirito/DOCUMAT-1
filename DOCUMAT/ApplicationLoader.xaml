@@ -4,10 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DOCUMAT"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         Title="ApplicationLoader" 
-        Top="2"
-        Topmost="True"
         WindowStartupLocation="CenterScreen"
         Height="160" 
         Width="400"
@@ -24,17 +23,15 @@
                     Height="77"/>
             <TextBlock x:Name="txbTitre"
                     Text="DOCUMAT"
-                    FontSize="40" FontFamily="Agency Fb"
+                    FontSize="40" FontFamily="{StaticResource AgencyFb}"
                     Foreground="CornflowerBlue" 
                     VerticalAlignment="Center" Margin="30 0 0 0"/>
         </StackPanel>
         <StackPanel Margin="100 0 10 0">
-            <MediaElement x:Name="myGif" 
-                MediaEnded="myGif_MediaEnded" 
-                UnloadedBehavior="Manual"  
-                Source="/Resources/loader.gif"
-                LoadedBehavior="Play" 
-                Stretch="None"/>
+            <Image x:Name="loaderGif" gif:ImageBehavior.RepeatBehavior="Forever" 
+                       gif:ImageBehavior.AnimatedSource="/Images/Loader.gif" 
+                       VerticalAlignment="Center"
+                       Height="30"/>
         </StackPanel>
     </StackPanel>
 </Window>

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DOCUMAT.Models
+﻿namespace DOCUMAT.Models
 {
     public class Enumeration
     {
@@ -14,7 +8,7 @@ namespace DOCUMAT.Models
             INVENTAIRE,
             SCANNE,
             INDEXATION,
-            CONTROLE,            
+            CONTROLE,
             CORRECTION,
             SUPERVISEUR,
             ADMINISTRATEUR
@@ -43,7 +37,6 @@ namespace DOCUMAT.Models
             PHASE3,
             TERMINE,
         }
-
 
         // L'odre ne doit pas être changé
         public enum Genre

@@ -210,22 +210,22 @@ namespace DOCUMAT.Pages.Image
         /// </summary>
         private void ActualiserArborescence()
         {
-            // Définition des types d'icon dans l'aborescence en fonction des statuts des images
-            // récupération de la liste des Images
-            ImageView imageView1 = new ImageView();
-            // Récupération de la liste des manquants pour ce registre
-            List<Models.ManquantImage> manquantImages = imageView1.context.ManquantImage.Where(m => m.IdRegistre == RegistreParent.RegistreID).ToList();
-            // Liste des Images de ce registre
-            List<Models.Image> images = imageView1.context.Image.Where(i => i.RegistreID == RegistreParent.RegistreID).ToList();
-            // Liste des Controles pour ce registres 
-            List<Models.Controle> controles = imageView1.context.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseControle == 1).ToList();
-            // Liste des Corrections pour ce registres
-            List<Models.Correction> corrections = imageView1.context.Correction.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 1).ToList();
-
-            // Définition des types d'icon dans l'aborescence en fonction des statuts des images
-            foreach (TreeViewItem item in registreAbre.Items)
+            using (var ct = new DocumatContext())
             {
-                using (var ct = new DocumatContext())
+                // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                // récupération de la liste des Images
+                ImageView imageView1 = new ImageView();
+                // Récupération de la liste des manquants pour ce registre
+                List<Models.ManquantImage> manquantImages = ct.ManquantImage.Where(m => m.IdRegistre == RegistreParent.RegistreID).ToList();
+                // Liste des Images de ce registre
+                List<Models.Image> images = ct.Image.Where(i => i.RegistreID == RegistreParent.RegistreID).ToList();
+                // Liste des Controles pour ce registres 
+                List<Models.Controle> controles = ct.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseControle == 1).ToList();
+                // Liste des Corrections pour ce registres
+                List<Models.Correction> corrections = ct.Correction.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 1).ToList();
+
+                // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                foreach (TreeViewItem item in registreAbre.Items)
                 {
                     // Recherche des manquants
                     Models.ManquantImage manquantImage = manquantImages.FirstOrDefault(m => m.IdRegistre == RegistreParent.RegistreID
@@ -242,7 +242,7 @@ namespace DOCUMAT.Pages.Image
                             if (image1.StatutActuel == (int)Enumeration.Image.PHASE1)
                             {
                                 if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-                                   && c.PhaseControle == 1 && c.StatutControle == 0) != null)
+                                    && c.PhaseControle == 1 && c.StatutControle == 0) != null)
                                 {
                                     if (image1.NumeroPage != -1)
                                     {
@@ -251,8 +251,8 @@ namespace DOCUMAT.Pages.Image
                                     else
                                     {
                                         if (controles.Any(c => c.RegistreId == RegistreParent.RegistreID && c.StatutControle == 1 && c.PhaseControle == 1
-                                                               && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
-                                                               || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)))
+                                                                && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
+                                                                || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)))
                                         {
                                             if (corrections.Any(c => c.RegistreId == RegistreParent.RegistreID && c.StatutCorrection == 0 && c.PhaseCorrection == 1
                                                                 && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
@@ -274,7 +274,7 @@ namespace DOCUMAT.Pages.Image
                                 else
                                 {
                                     if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-                                         && c.PhaseControle == 1 && c.StatutControle == 1 && c.ASupprimer == 1) != null)
+                                            && c.PhaseControle == 1 && c.StatutControle == 1 && c.ASupprimer == 1) != null)
                                     {
                                         item.Tag = "fileDelele";
                                     }
@@ -294,7 +294,7 @@ namespace DOCUMAT.Pages.Image
                             item.Tag = "image.png";
                         }
                     }
-                }
+                } 
             }
         }
 
@@ -366,79 +366,79 @@ namespace DOCUMAT.Pages.Image
                                 }
 
                                 //Préparation du chemin de l'image et déplacement de l'image dans le dossier parent
-                                if (imageView.context.Image.FirstOrDefault(i => i.NumeroPage == manquantImage.NumeroPage) != null)
+                                using (var ct = new DocumatContext())
                                 {
-                                    using (var ct = new DocumatContext())
-                                    {
-                                        string Destination = Path.Combine(DossierRacine, RegistreParent.CheminDossier
-                                                            , newfichier + fichierSource.Extension);
-                                        //Copy du fichier dans le dossier du registre
-                                        File.Copy(fichierSource.FullName, Destination, true);
-                                        //Ajout de l'image avec le statut scanné
-                                        Models.Image image = new Models.Image()
+                                        if (ct.Image.FirstOrDefault(i => i.NumeroPage == manquantImage.NumeroPage) != null)
                                         {
-                                            RegistreID = RegistreParent.RegistreID,
-                                            NomPage = newfichier,
-                                            NumeroPage = manquantImage.NumeroPage,
-                                            CheminImage = Destination,
-                                            Taille = fichierSource.Length,
-                                            Type = fichierSource.Extension.Substring(1).ToUpper(),
-                                            DateScan = fichierSource.CreationTime,
-                                            StatutActuel = (int)Enumeration.Image.CREEE,
-                                            DebutSequence = manquantImage.DebutSequence,
-                                            FinSequence = manquantImage.FinSequence,
-                                            DateDebutSequence = DateTime.Parse(manquantImage.DateSequenceDebut.Value.ToString()),
-                                            DateCreation = DateTime.Now,
-                                            DateModif = DateTime.Now,
-                                        };
-                                        ct.Image.Add(image);
-                                        ct.SaveChanges();
+                                            string Destination = Path.Combine(DossierRacine, RegistreParent.CheminDossier
+                                                                , newfichier + fichierSource.Extension);
+                                            //Copy du fichier dans le dossier du registre
+                                            File.Copy(fichierSource.FullName, Destination, true);
+                                            //Ajout de l'image avec le statut scanné
+                                            Models.Image image = new Models.Image()
+                                            {
+                                                RegistreID = RegistreParent.RegistreID,
+                                                NomPage = newfichier,
+                                                NumeroPage = manquantImage.NumeroPage,
+                                                CheminImage = Destination,
+                                                Taille = fichierSource.Length,
+                                                Type = fichierSource.Extension.Substring(1).ToUpper(),
+                                                DateScan = fichierSource.CreationTime,
+                                                StatutActuel = (int)Enumeration.Image.CREEE,
+                                                DebutSequence = manquantImage.DebutSequence,
+                                                FinSequence = manquantImage.FinSequence,
+                                                DateDebutSequence = DateTime.Parse(manquantImage.DateSequenceDebut.Value.ToString()),
+                                                DateCreation = DateTime.Now,
+                                                DateModif = DateTime.Now,
+                                            };
+                                            ct.Image.Add(image);
+                                            ct.SaveChanges();
 
-                                        //Création de statut image scanné
-                                        Models.StatutImage statutImageScan = new StatutImage()
-                                        {
-                                            ImageID = image.ImageID,
-                                            Code = (int)Enumeration.Image.SCANNEE,
-                                            DateCreation = DateTime.Now,
-                                            DateModif = DateTime.Now,
-                                            DateFin = DateTime.Now,
-                                            DateDebut = DateTime.Now,
-                                        };
-                                        ct.StatutImage.Add(statutImageScan);
-                                        ct.SaveChanges();
+                                            //Création de statut image scanné
+                                            Models.StatutImage statutImageScan = new StatutImage()
+                                            {
+                                                ImageID = image.ImageID,
+                                                Code = (int)Enumeration.Image.SCANNEE,
+                                                DateCreation = DateTime.Now,
+                                                DateModif = DateTime.Now,
+                                                DateFin = DateTime.Now,
+                                                DateDebut = DateTime.Now,
+                                            };
+                                            ct.StatutImage.Add(statutImageScan);
+                                            ct.SaveChanges();
 
-                                        //Création du statut crée
-                                        Models.StatutImage statutImageCre = new StatutImage()
-                                        {
-                                            ImageID = image.ImageID,
-                                            Code = (int)Enumeration.Image.CREEE,
-                                            DateCreation = DateTime.Now,
-                                            DateModif = DateTime.Now,
-                                            DateFin = DateTime.Now,
-                                            DateDebut = DateTime.Now,
-                                        };
-                                        ct.StatutImage.Add(statutImageCre);
-                                        ct.SaveChanges();
+                                            //Création du statut crée
+                                            Models.StatutImage statutImageCre = new StatutImage()
+                                            {
+                                                ImageID = image.ImageID,
+                                                Code = (int)Enumeration.Image.CREEE,
+                                                DateCreation = DateTime.Now,
+                                                DateModif = DateTime.Now,
+                                                DateFin = DateTime.Now,
+                                                DateDebut = DateTime.Now,
+                                            };
+                                            ct.StatutImage.Add(statutImageCre);
+                                            ct.SaveChanges();
 
-                                        //Modification du manquant
-                                        ManquantImage UpManquant = ct.ManquantImage.FirstOrDefault(m => m.ManquantImageID == manquantImage.ManquantImageID);
-                                        UpManquant.IdImage = image.ImageID;
-                                        UpManquant.DateModif = DateTime.Now;
-                                        UpManquant.DateCorrectionManquant = DateTime.Now;
-                                        ct.SaveChanges();
+                                            //Modification du manquant
+                                            ManquantImage UpManquant = ct.ManquantImage.FirstOrDefault(m => m.ManquantImageID == manquantImage.ManquantImageID);
+                                            UpManquant.IdImage = image.ImageID;
+                                            UpManquant.DateModif = DateTime.Now;
+                                            UpManquant.DateCorrectionManquant = DateTime.Now;
+                                            ct.SaveChanges();
 
-                                        // Enregistrement du Traitement
-                                        DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH1 : IMAGE MANQUANT AJOUTER");
+                                            // Enregistrement du Traitement
+                                            DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH1 : IMAGE MANQUANT AJOUTER");
 
-                                        //Chargement de la nouvelle image ajouté
-                                        currentImage = manquantImage.NumeroPage;
-                                        LoadAborescence();
-                                        ChargerImage(currentImage);
+                                            //Chargement de la nouvelle image ajouté
+                                            currentImage = manquantImage.NumeroPage;
+                                            LoadAborescence();
+                                            ChargerImage(currentImage);
                                     }
-                                }
-                                else
-                                {
-                                    throw new Exception("Une image ayant le même numéro de page existe déja !!!");
+                                    else
+                                    {
+                                        throw new Exception("Une image ayant le même numéro de page existe déja !!!");
+                                    }
                                 }
                             }
                             else
@@ -748,43 +748,46 @@ namespace DOCUMAT.Pages.Image
                     else
                     {
                         throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
-                    } 
+                    }
                     #endregion
 
                     #region RECUPERATION DES SEQUENCES DE L'IMAGE
-                    // On vide le Dictionary des séquences de l'image précédente
-                    ListeSequences.Clear();
-                    // Récupération des sequences déja renseignées
-                    List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
+                    using (var ct = new DocumatContext())
+                    {
+                        // On vide le Dictionary des séquences de l'image précédente
+                        ListeSequences.Clear();
+                        // Récupération des sequences déja renseignées
+                        List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
 
-                    //Récupération des contrôles de séquences rejetés
-                    List<SequenceView> sequenceViews = SequenceView.GetViewsList(sequences).Where(s => s.En_Correction == true).ToList();
-                    List<SequenceView> manquantSequences = SequenceView.GetManquants(CurrentImageView.Image).Where(s => s.En_Correction == true).ToList();
-                    sequenceViews.AddRange(manquantSequences);
-                    dgSequence.Visibility = Visibility.Visible;
-                    dgSequenceIndex.Visibility = Visibility.Collapsed;
-                    if (sequenceViews.Count() > 0)
-                    {
-                        dgSequence.ItemsSource = sequenceViews;
-                        dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
-                        tbNumeroOrdreSequence.IsEnabled = false;
-                        tbDateSequence.IsEnabled = false;
-                        tbReference.IsEnabled = false;
-                        cbxBisOrdre.IsEnabled = false;
-                        cbxDoublonOrdre.IsEnabled = false;
-                        BtnModifierSequence.IsEnabled = false;
-                        BtnSupprimerSequence.IsEnabled = false;
-                    }
-                    else
-                    {
-                        dgSequence.ItemsSource = null;
-                        tbNumeroOrdreSequence.IsEnabled = false;
-                        tbDateSequence.IsEnabled = false;
-                        tbReference.IsEnabled = false;
-                        cbxBisOrdre.IsEnabled = false;
-                        cbxDoublonOrdre.IsEnabled = false;
-                        BtnModifierSequence.IsEnabled = false;
-                        BtnSupprimerSequence.IsEnabled = false;
+                        //Récupération des contrôles de séquences rejetés
+                        List<SequenceView> sequenceViews = SequenceView.GetViewsList(sequences).Where(s => s.En_Correction == true).ToList();
+                        List<SequenceView> manquantSequences = SequenceView.GetManquants(CurrentImageView.Image).Where(s => s.En_Correction == true).ToList();
+                        sequenceViews.AddRange(manquantSequences);
+                        dgSequence.Visibility = Visibility.Visible;
+                        dgSequenceIndex.Visibility = Visibility.Collapsed;
+                        if (sequenceViews.Count() > 0)
+                        {
+                            dgSequence.ItemsSource = sequenceViews;
+                            dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+                            tbNumeroOrdreSequence.IsEnabled = false;
+                            tbDateSequence.IsEnabled = false;
+                            tbReference.IsEnabled = false;
+                            cbxBisOrdre.IsEnabled = false;
+                            cbxDoublonOrdre.IsEnabled = false;
+                            BtnModifierSequence.IsEnabled = false;
+                            BtnSupprimerSequence.IsEnabled = false;
+                        }
+                        else
+                        {
+                            dgSequence.ItemsSource = null;
+                            tbNumeroOrdreSequence.IsEnabled = false;
+                            tbDateSequence.IsEnabled = false;
+                            tbReference.IsEnabled = false;
+                            cbxBisOrdre.IsEnabled = false;
+                            cbxDoublonOrdre.IsEnabled = false;
+                            BtnModifierSequence.IsEnabled = false;
+                            BtnSupprimerSequence.IsEnabled = false;
+                        } 
                     }
                     #endregion
 

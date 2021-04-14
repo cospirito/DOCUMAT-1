@@ -23,7 +23,6 @@ namespace DOCUMAT.ViewModels
 
 
         //Propriété de la Base de Donnée
-        public DocumatContext context { get; set; }
         public Image Image { get; set; }
         public Registre Registre { get; set; }
 
@@ -35,55 +34,63 @@ namespace DOCUMAT.ViewModels
         public ImageView()
         {
             Image = new Image();
-            context = new DocumatContext();
         }
 
         public void Add()
         {
-            if (context.Image.FirstOrDefault(i => i.NumeroPage == Image.NumeroPage && i.ImageID != Image.ImageID) == null)
+            using (var ct = new DocumatContext())
             {
-                FileInfo fileInfo = new FileInfo(Image.CheminImage);
-                if (fileInfo.Exists)
+                if (ct.Image.FirstOrDefault(i => i.NumeroPage == Image.NumeroPage && i.ImageID != Image.ImageID) == null)
                 {
-                    string newFile = fileInfo.Name.Replace(fileInfo.Name.Remove(fileInfo.Name.Length - 4), Image.NumeroPage.ToString());
-                    if (newFile.Trim().ToUpper() != fileInfo.Name.Trim().ToUpper())
+                    FileInfo fileInfo = new FileInfo(Image.CheminImage);
+                    if (fileInfo.Exists)
                     {
-                        Microsoft.VisualBasic.FileIO.FileSystem.RenameFile(fileInfo.FullName, newFile);
-                        Image.CheminImage = fileInfo.FullName.Replace(fileInfo.Name, newFile);
+                        string newFile = fileInfo.Name.Replace(fileInfo.Name.Remove(fileInfo.Name.Length - 4), Image.NumeroPage.ToString());
+                        if (newFile.Trim().ToUpper() != fileInfo.Name.Trim().ToUpper())
+                        {
+                            Microsoft.VisualBasic.FileIO.FileSystem.RenameFile(fileInfo.FullName, newFile);
+                            Image.CheminImage = fileInfo.FullName.Replace(fileInfo.Name, newFile);
+                        }
+                        ct.Image.Add(Image);
+                        ct.SaveChanges();
+
+                        //Création du statut d'image
+                        Models.StatutImage statutImage = new Models.StatutImage();
+                        statutImage.ImageID = Image.ImageID;
+                        statutImage.Code = (int)Models.Enumeration.Image.CREEE;
+                        statutImage.DateCreation = DateTime.Now;
+                        statutImage.DateDebut = DateTime.Now;
+                        statutImage.DateFin = DateTime.Now;
+                        statutImage.DateModif = DateTime.Now;
+
+                        ct.StatutImage.Add(statutImage);
+                        ct.SaveChanges();
                     }
-                    context.Image.Add(Image);
-                    context.SaveChanges();
-
-                    //Création du statut d'image
-                    Models.StatutImage statutImage = new Models.StatutImage();
-                    statutImage.ImageID = Image.ImageID;
-                    statutImage.Code = (int)Models.Enumeration.Image.CREEE;
-                    statutImage.DateCreation = DateTime.Now;
-                    statutImage.DateDebut = DateTime.Now;
-                    statutImage.DateFin = DateTime.Now;
-                    statutImage.DateModif = DateTime.Now;
-
-                    context.StatutImage.Add(statutImage);
-                    context.SaveChanges();
                 }
-            }
-            else
-            {
-                throw new Exception("Une image ayant le même numéro de page existe déja !!!");
+                else
+                {
+                    throw new Exception("Une image ayant le même numéro de page existe déja !!!");
+                } 
             }
         }
 
         public Models.Image AddPreIndex()
         {
-            context.Image.Add(Image);
-            context.SaveChanges();
-            return Image;
+            using (var ct = new DocumatContext())
+            {
+                ct.Image.Add(Image);
+                ct.SaveChanges();
+                return Image; 
+            }
         }
 
         public void AddSequencesPreIndex(List<Sequence> sequences)
         {
-            context.Sequence.AddRange(sequences);
-            context.SaveChanges();
+            using (var ct = new DocumatContext())
+            {
+                ct.Sequence.AddRange(sequences);
+                ct.SaveChanges(); 
+            }
         }
 
         public void Dispose()
@@ -98,18 +105,21 @@ namespace DOCUMAT.ViewModels
 
         public List<ImageView> GetSimpleViewsList(Registre registre)
         {
-            Registre = registre;
-            List<ImageView> imageViews = new List<ImageView>();
-            List<Image> images = context.Image.Where(i => i.RegistreID == registre.RegistreID).ToList();
-
-            foreach(var image in images)
+            using (var ct = new DocumatContext())
             {
-                ImageView imageView = new ImageView();
-                imageView.Image = image;
-                imageView.Registre = registre;
-                imageViews.Add(imageView);
+                Registre = registre;
+                List<ImageView> imageViews = new List<ImageView>();
+                List<Image> images = ct.Image.Where(i => i.RegistreID == registre.RegistreID).ToList();
+
+                foreach (var image in images)
+                {
+                    ImageView imageView = new ImageView();
+                    imageView.Image = image;
+                    imageView.Registre = registre;
+                    imageViews.Add(imageView);
+                }
+                return imageViews; 
             }
-            return imageViews;
         }
 
         public List<ImageView> GetViewsList(Registre registre)
@@ -134,7 +144,10 @@ namespace DOCUMAT.ViewModels
                     imageView.NumeroScan = -1;
 
                 // Récupération des éléments de Bd s'il existe
-                imageView.Image = context.Image.FirstOrDefault(i => i.RegistreID == registre.RegistreID && i.NumeroPage == numeroScan);
+                using (var ct = new DocumatContext())
+                {
+                    imageView.Image = ct.Image.FirstOrDefault(i => i.RegistreID == registre.RegistreID && i.NumeroPage == numeroScan);
+                }
 
                 // Mise à jour du statut si l'image est ajouutée dans la BD
                 if (imageView.Image != null)
@@ -167,47 +180,50 @@ namespace DOCUMAT.ViewModels
 
         public bool Update(Image UpImage)
         {
-            Image = context.Image.FirstOrDefault(i => i.ImageID == UpImage.ImageID);
-            FileInfo fileInfo = new FileInfo(UpImage.CheminImage);
-            int numeroPage = 0;
-            if (Int32.TryParse(fileInfo.Name.Remove(fileInfo.Name.Length - 4), out numeroPage))
+            using (var ct = new DocumatContext())
             {
-                if (numeroPage != UpImage.NumeroPage)
+                Image = ct.Image.FirstOrDefault(i => i.ImageID == UpImage.ImageID);
+                FileInfo fileInfo = new FileInfo(UpImage.CheminImage);
+                int numeroPage = 0;
+                if (Int32.TryParse(fileInfo.Name.Remove(fileInfo.Name.Length - 4), out numeroPage))
                 {
-                    if (context.Image.FirstOrDefault(i => i.NumeroPage == UpImage.NumeroPage && i.ImageID != UpImage.ImageID) == null)
+                    if (numeroPage != UpImage.NumeroPage)
                     {
-                        if (File.Exists(fileInfo.FullName))
+                        if (ct.Image.FirstOrDefault(i => i.NumeroPage == UpImage.NumeroPage && i.ImageID != UpImage.ImageID) == null)
                         {
-                            if (numeroPage != UpImage.NumeroPage)
+                            if (File.Exists(fileInfo.FullName))
                             {
+                                if (numeroPage != UpImage.NumeroPage)
+                                {
 
-                                string newFile = fileInfo.Name.Replace(numeroPage.ToString(), UpImage.NumeroPage.ToString());
-                                Microsoft.VisualBasic.FileIO.FileSystem.RenameFile(fileInfo.FullName, newFile);
-                                Image.NumeroPage = UpImage.NumeroPage;
-                                Image.CheminImage = fileInfo.FullName.Replace(fileInfo.Name, newFile);
+                                    string newFile = fileInfo.Name.Replace(numeroPage.ToString(), UpImage.NumeroPage.ToString());
+                                    Microsoft.VisualBasic.FileIO.FileSystem.RenameFile(fileInfo.FullName, newFile);
+                                    Image.NumeroPage = UpImage.NumeroPage;
+                                    Image.CheminImage = fileInfo.FullName.Replace(fileInfo.Name, newFile);
+                                }
+                                Image.DateModif = UpImage.DateModif;
+                                ct.SaveChanges();
+                                return true;
                             }
-                            Image.DateModif = UpImage.DateModif;
-                            context.SaveChanges();
-                            return true;
+                            else
+                            {
+                                throw new Exception("L'image est manqante, elle a été supprimer ou rénomer, veuillez vérifier dans le dossier !!!");
+                            }
                         }
                         else
                         {
-                            throw new Exception("L'image est manqante, elle a été supprimer ou rénomer, veuillez vérifier dans le dossier !!!");
+                            throw new Exception("Une image ayant le même numéro de page à été enregistrer !!!");
                         }
                     }
                     else
                     {
-                        throw new Exception("Une image ayant le même numéro de page à été enregistrer !!!");
+                        throw new Exception("Aucun changemennt effectué !!!");
                     }
                 }
                 else
                 {
-                    throw new Exception("Aucun changemennt effectué !!!");
-                }
-            }
-            else
-            {
-                throw new Exception("Le numéro de page entré n'est pas valide !!!");
+                    throw new Exception("Le numéro de page entré n'est pas valide !!!");
+                } 
             }
         }        
     }

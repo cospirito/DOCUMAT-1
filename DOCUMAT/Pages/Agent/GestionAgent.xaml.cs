@@ -124,24 +124,27 @@ namespace DOCUMAT.Pages.Agent
                     if (MessageBox.Show("Voulez-vous vraiment supprimer cet élément ?", "ATTENTION", MessageBoxButton.YesNo, MessageBoxImage.Question)
                         == MessageBoxResult.Yes)
                     {
-                        AgentView agentView = new AgentView();
-                        List<int> agentIds = new List<int>();
- 
-                        foreach (AgentView item in dgAgent.SelectedItems)
+                        using (var ct = new DocumatContext())
                         {
-                            agentIds.Add(item.Agent.AgentID);
-                            agentView.context.SessionTravails.RemoveRange(agentView.context.SessionTravails.Where(st => st.AgentID == item.Agent.AgentID));
-                            agentView.context.Agent.Remove(agentView.context.Agent.FirstOrDefault(a => a.AgentID == item.Agent.AgentID));
-                        }
-                        agentView.context.SaveChanges();
+                            AgentView agentView = new AgentView();
+                            List<int> agentIds = new List<int>();
 
-                        foreach(int id in agentIds)
-                        {
-                            // Enregistrement du traitement de l'agent 
-                            DocumatContext.AddTraitement(DocumatContext.TbAgent,id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION);
+                            foreach (AgentView item in dgAgent.SelectedItems)
+                            {
+                                agentIds.Add(item.Agent.AgentID);
+                                ct.SessionTravails.RemoveRange(ct.SessionTravails.Where(st => st.AgentID == item.Agent.AgentID));
+                                ct.Agent.Remove(ct.Agent.FirstOrDefault(a => a.AgentID == item.Agent.AgentID));
+                            }
+                            ct.SaveChanges(); 
+
+                            foreach(int id in agentIds)
+                            {
+                                // Enregistrement du traitement de l'agent 
+                                DocumatContext.AddTraitement(DocumatContext.TbAgent,id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION);
+                            }
+                            refreshListAgent();
+                            MessageBox.Show("Suppression éffectuée", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
-                        refreshListAgent();
-                        MessageBox.Show("Suppression éffectuée", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 else

@@ -38,53 +38,59 @@ namespace DOCUMAT.Pages.Versement
 
         public FormVersement(ServiceView serviceView, VersementView versement, Inventaire.Inventaire parent, Models.Agent user) : this()
         {
-            EditMode = true;
-            WindowsParent = parent;
-            VersementViewParent = versement;
-            Utilisateur = user;
-            cbLivraison.SelectedItem = versement.context.Livraison.FirstOrDefault(l => l.LivraisonID == versement.Versement.LivraisonID);
-            cbLivraison.IsEnabled = false;
-            btnAddLivraison.IsEnabled = false;
-            ServiceViewParent = serviceView;
-
-            // Remplissage des champs 
-            tbNumeroVers.Text = versement.Versement.NumeroVers.ToString();
-            dtVers.SelectedDate = versement.Versement.DateVers;
-            tbService.Text = serviceView.Service.NomComplet;
-            tbNomAgentVersant.Text = versement.Versement.NomAgentVersant;
-            tbPrenomsAgentVersant.Text = versement.Versement.PrenomsAgentVersant;
-            tbNombreR3.Text = versement.Versement.NombreRegistreR3.ToString();
-            tbNombreR4.Text = versement.Versement.NombreRegistreR4.ToString();
-            cbLivraison.ItemsSource = serviceView.context.Livraison.Where(l => l.ServiceID == serviceView.Service.ServiceID).ToList();
-            cbLivraison.DisplayMemberPath = "Numero";
-            cbLivraison.SelectedValuePath = "LivraisonID";
-            cbLivraison.SelectedValue = versement.Versement.LivraisonID;
-
-            if (user.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || user.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+            using (var ct = new DocumatContext())
             {
-                tbNumeroVers.IsEnabled = true;
-            }
-            else
-            {
-                tbNumeroVers.IsEnabled = false;
+                EditMode = true;
+                WindowsParent = parent;
+                VersementViewParent = versement;
+                Utilisateur = user;
+                cbLivraison.SelectedItem = ct.Livraison.FirstOrDefault(l => l.LivraisonID == versement.Versement.LivraisonID);
+                cbLivraison.IsEnabled = false;
+                btnAddLivraison.IsEnabled = false;
+                ServiceViewParent = serviceView;
+
+                // Remplissage des champs 
+                tbNumeroVers.Text = versement.Versement.NumeroVers.ToString();
+                dtVers.SelectedDate = versement.Versement.DateVers;
+                tbService.Text = serviceView.Service.NomComplet;
+                tbNomAgentVersant.Text = versement.Versement.NomAgentVersant;
+                tbPrenomsAgentVersant.Text = versement.Versement.PrenomsAgentVersant;
+                tbNombreR3.Text = versement.Versement.NombreRegistreR3.ToString();
+                tbNombreR4.Text = versement.Versement.NombreRegistreR4.ToString();
+                cbLivraison.ItemsSource = ct.Livraison.Where(l => l.ServiceID == serviceView.Service.ServiceID).ToList();
+                cbLivraison.DisplayMemberPath = "Numero";
+                cbLivraison.SelectedValuePath = "LivraisonID";
+                cbLivraison.SelectedValue = versement.Versement.LivraisonID;
+
+                if (user.Affectation == (int)Enumeration.AffectationAgent.ADMINISTRATEUR || user.Affectation == (int)Enumeration.AffectationAgent.SUPERVISEUR)
+                {
+                    tbNumeroVers.IsEnabled = true;
+                }
+                else
+                {
+                    tbNumeroVers.IsEnabled = false;
+                } 
             }
         }
 
         public FormVersement(ServiceView serviceView, Inventaire.Inventaire parent, Models.Agent user) : this()
         {
-            EditMode = false;
-            WindowsParent = parent;
-            Utilisateur = user;
+            using (var ct = new DocumatContext())
+            {
+                EditMode = false;
+                WindowsParent = parent;
+                Utilisateur = user;
 
-            // Chargement des composantes déja connu
-            ServiceViewParent = serviceView;
-            dtVers.SelectedDate = DateTime.Now;
-            tbService.Text = serviceView.Service.NomComplet;
-            dtLivraison.SelectedDate = DateTime.Now;
-            cbLivraison.ItemsSource = serviceView.context.Livraison.Where(l => l.ServiceID == serviceView.Service.ServiceID).ToList();
-            cbLivraison.DisplayMemberPath = "Numero";
-            cbLivraison.SelectedValuePath = "LivraisonID";
-            cbLivraison.SelectedIndex = 0;
+                // Chargement des composantes déja connu
+                ServiceViewParent = serviceView;
+                dtVers.SelectedDate = DateTime.Now;
+                tbService.Text = serviceView.Service.NomComplet;
+                dtLivraison.SelectedDate = DateTime.Now;
+                cbLivraison.ItemsSource = ct.Livraison.Where(l => l.ServiceID == serviceView.Service.ServiceID).ToList();
+                cbLivraison.DisplayMemberPath = "Numero";
+                cbLivraison.SelectedValuePath = "LivraisonID";
+                cbLivraison.SelectedIndex = 0; 
+            }
         }
 
         private void cbLivraison_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -102,34 +108,37 @@ namespace DOCUMAT.Pages.Versement
                     int numeroLivraison = 0;
                     if (Int32.TryParse(tbNumeroLivraison.Text, out numeroLivraison))
                     {
-                        livraison.Numero = numeroLivraison;
-                        livraison.DateCreation = livraison.DateModif = DateTime.Now;
-                        livraison.DateLivraison = dtLivraison.SelectedDate.Value;
-                        livraison.ServiceID = ServiceViewParent.Service.ServiceID;
-                        VersementView vm = new VersementView();
-                        int idLivraison = vm.AddLivraison(livraison);
-                        if (idLivraison == 0)
+                        using (var ct = new DocumatContext())
                         {
-                            if (MessageBox.Show("Cet élément existe déja, Voulez vous mettre à jour la date de livraison", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                            livraison.Numero = numeroLivraison;
+                            livraison.DateCreation = livraison.DateModif = DateTime.Now;
+                            livraison.DateLivraison = dtLivraison.SelectedDate.Value;
+                            livraison.ServiceID = ServiceViewParent.Service.ServiceID;
+                            VersementView vm = new VersementView();
+                            int idLivraison = vm.AddLivraison(livraison);
+                            if (idLivraison == 0)
                             {
-                                vm.UpLivraison(livraison);
-                                DocumatContext.AddTraitement(DocumatContext.TbLivraison, vm.Versement.Livraison.LivraisonID, WindowsParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION);
-                                cbLivraison.ItemsSource = vm.context.Livraison.Where(l => l.ServiceID == ServiceViewParent.Service.ServiceID).ToList();
-                                cbLivraison.SelectedIndex = cbLivraison.Items.Count - 1;
-                                MessageBox.Show("Livraison Modifié", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
+                                if (MessageBox.Show("Cet élément existe déja, Voulez vous mettre à jour la date de livraison", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                                {
+                                    vm.UpLivraison(livraison);
+                                    DocumatContext.AddTraitement(DocumatContext.TbLivraison, vm.Versement.Livraison.LivraisonID, WindowsParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION);
+                                    cbLivraison.ItemsSource = ct.Livraison.Where(l => l.ServiceID == ServiceViewParent.Service.ServiceID).ToList();
+                                    cbLivraison.SelectedIndex = cbLivraison.Items.Count - 1;
+                                    MessageBox.Show("Livraison Modifié", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
+                                }
+                                formLivraison.Visibility = Visibility.Collapsed;
+                                formVersement.Visibility = Visibility.Visible;
                             }
-                            formLivraison.Visibility = Visibility.Collapsed;
-                            formVersement.Visibility = Visibility.Visible;
-                        }
-                        else
-                        {
-                            // Enregistrement du traitement 
-                            DocumatContext.AddTraitement(DocumatContext.TbLivraison, idLivraison, WindowsParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
-                            cbLivraison.ItemsSource = vm.context.Livraison.Where(l => l.ServiceID == ServiceViewParent.Service.ServiceID).ToList();
-                            cbLivraison.SelectedIndex = cbLivraison.Items.Count - 1;
-                            formLivraison.Visibility = Visibility.Collapsed;
-                            formVersement.Visibility = Visibility.Visible;
-                            MessageBox.Show("Livraison Ajouté", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
+                            else
+                            {
+                                // Enregistrement du traitement 
+                                DocumatContext.AddTraitement(DocumatContext.TbLivraison, idLivraison, WindowsParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION);
+                                cbLivraison.ItemsSource = ct.Livraison.Where(l => l.ServiceID == ServiceViewParent.Service.ServiceID).ToList();
+                                cbLivraison.SelectedIndex = cbLivraison.Items.Count - 1;
+                                formLivraison.Visibility = Visibility.Collapsed;
+                                formVersement.Visibility = Visibility.Visible;
+                                MessageBox.Show("Livraison Ajouté", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
+                            } 
                         }
                     }
                 }
@@ -242,10 +251,13 @@ namespace DOCUMAT.Pages.Versement
                         // Création du Dossier de Service
                         VersementView versementView = new VersementView();
 
-                        // Vérification de l'unicité du numero de versement 
-                        if (versementView.context.Versement.Any(v => v.NumeroVers == numeroVers && v.LivraisonID == (int)cbLivraison.SelectedValue))
+                        using (var ct = new DocumatContext())
                         {
-                            throw new Exception("Ce numero de versement est déja utilisé !!!");
+                            // Vérification de l'unicité du numero de versement 
+                            if (ct.Versement.Any(v => v.NumeroVers == numeroVers && v.LivraisonID == (int)cbLivraison.SelectedValue))
+                            {
+                                throw new Exception("Ce numero de versement est déja utilisé !!!");
+                            } 
                         }
 
                         DossierService = nomDossierRacine + @"/" + ServiceViewParent.Service.CheminDossier.Trim();

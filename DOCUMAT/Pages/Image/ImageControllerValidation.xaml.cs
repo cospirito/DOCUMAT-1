@@ -126,7 +126,7 @@ namespace DOCUMAT.Pages.Image
 					using (var ct = new DocumatContext())
 					{
 						// Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
-						List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID
+						List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID
 						&& s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
 
 						if (sequences.Count != 0)
@@ -453,20 +453,20 @@ namespace DOCUMAT.Pages.Image
 		{
             try
             {
-                // Définition des types d'icon dans l'aborescence en fonction des statuts des images
-                // récupération de la liste des Images
-                ImageView imageView1 = new ImageView();
-                // Liste des Images de ce registre
-                List<Models.Image> images = imageView1.context.Image.Where(i => i.StatutActuel >= (int)Enumeration.Image.PHASE1 && i.RegistreID == RegistreParent.RegistreID).ToList();
-                // Liste des Controles pour ce registres 
-                List<Models.Controle> controles = imageView1.context.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID).ToList();
-				// Liste des Corrections pour ce registres
-				List<Models.Correction> corrections = imageView1.context.Correction.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3).ToList();
-
-				// Définition des types d'icon dans l'aborescence en fonction des statuts des images
-				foreach (TreeViewItem item in registreAbre.Items)
+                using (var ct = new DocumatContext())
                 {
-                    using (var ct = new DocumatContext())
+                    // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                    // récupération de la liste des Images
+                    ImageView imageView1 = new ImageView();
+                    // Liste des Images de ce registre
+                    List<Models.Image> images = ct.Image.Where(i => i.StatutActuel >= (int)Enumeration.Image.PHASE1 && i.RegistreID == RegistreParent.RegistreID).ToList();
+                    // Liste des Controles pour ce registres 
+                    List<Models.Controle> controles = ct.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID).ToList();
+                    // Liste des Corrections pour ce registres
+                    List<Models.Correction> corrections = ct.Correction.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3).ToList();
+
+                    // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                    foreach (TreeViewItem item in registreAbre.Items)
                     {
                         Models.Image image1 = images.FirstOrDefault(i => i.NomPage.ToLower() == item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower());
                         if (image1 != null)
@@ -481,8 +481,8 @@ namespace DOCUMAT.Pages.Image
                                 else
                                 {
                                     if (controles.Any(c => c.StatutControle == 1 && c.PhaseControle == 3
-                                                                   && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
-                                                                   || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)))
+                                                                    && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
+                                                                    || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)))
                                     {
                                         item.Tag = "instance";
                                     }
@@ -493,13 +493,13 @@ namespace DOCUMAT.Pages.Image
                                 }
                             }
                             else if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-                                 && c.PhaseControle == 3 && c.StatutControle == 1) != null)
+                                    && c.PhaseControle == 3 && c.StatutControle == 1) != null)
                             {
                                 if (corrections.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null && c.PhaseCorrection == 3
-                                 && c.StatutCorrection == 0) != null)
+                                    && c.StatutCorrection == 0) != null)
                                 {
                                     if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-                                         && c.PhaseControle == 4) != null)
+                                            && c.PhaseControle == 4) != null)
                                     {
                                         item.Tag = "valide";
                                     }
@@ -518,8 +518,8 @@ namespace DOCUMAT.Pages.Image
                             if (image1.NumeroPage == -1)
                             {
                                 List<Models.Correction> correctionspg = corrections.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3
-                                                               && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
-                                                               || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)).ToList();
+                                                                && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
+                                                                || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)).ToList();
                                 if (correctionspg.Count > 0)
                                 {
                                     if (correctionspg.Any(c => c.StatutCorrection == 0))
@@ -546,7 +546,7 @@ namespace DOCUMAT.Pages.Image
                         {
                             item.Tag = "image.png";
                         }
-                    }
+                    } 
                 }
             }
             catch (Exception ex)

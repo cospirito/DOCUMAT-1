@@ -270,19 +270,22 @@ namespace DOCUMAT.Pages.Registre
                     RegistreView registreView = new RegistreView();
 
                     // Vérification du nombre de Registre de Type 'R3 ou R4' enregistrée
-                    if (((ComboBoxItem)cbTypeRegistre.SelectedItem).Content.ToString() == "R3")
+                    using (var ct = new DocumatContext())
                     {
-                        if (VersementParent.NombreRegistreR3 < (registreView.context.Registre.Where(r => r.VersementID == VersementParent.VersementID && r.Type == "R3").Count() + 1))
+                        if (((ComboBoxItem)cbTypeRegistre.SelectedItem).Content.ToString() == "R3")
                         {
-                            throw new Exception("Le nombre de Registre R3 doit être doit être de " + VersementParent.NombreRegistreR3);
+                            if (VersementParent.NombreRegistreR3 < (ct.Registre.Where(r => r.VersementID == VersementParent.VersementID && r.Type == "R3").Count() + 1))
+                            {
+                                throw new Exception("Le nombre de Registre R3 doit être doit être de " + VersementParent.NombreRegistreR3);
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (VersementParent.NombreRegistreR4 < (registreView.context.Registre.Where(r => r.VersementID == VersementParent.VersementID && r.Type == "R4").Count() + 1))
+                        else
                         {
-                            throw new Exception("Le nombre de Registre R4 doit être doit être de " + VersementParent.NombreRegistreR4);
-                        }
+                            if (VersementParent.NombreRegistreR4 < (ct.Registre.Where(r => r.VersementID == VersementParent.VersementID && r.Type == "R4").Count() + 1))
+                            {
+                                throw new Exception("Le nombre de Registre R4 doit être doit être de " + VersementParent.NombreRegistreR4);
+                            }
+                        } 
                     }
 
                     registreView.Registre.DateCreation = DateTime.Now;

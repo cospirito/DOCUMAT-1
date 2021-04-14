@@ -78,10 +78,10 @@ namespace DOCUMAT.Models
         public static void AddTraitement(string Table, int TabeID, int AgentId, int TypeTraitement,string Observation = null,DateTime? dateCreation = null,
                                          DateTime? dateModif = null)
         {
-            using (var ct = new Models.DocumatContext())
+            using (var ct = new DocumatContext())
             {
                 // Ajout d'un traitement Manuel
-                ct.Database.ExecuteSqlCommand($"INSERT INTO {DocumatContext.TbTraitement} ([TableID],[AgentID],[TypeTraitement]," +
+                ct.Database.ExecuteSqlCommand($"INSERT INTO {TbTraitement} ([TableID],[AgentID],[TypeTraitement]," +
                     $"[TableSelect],[Observation],[DateCreation],[DateModif]) VALUES ({TabeID},{AgentId},{TypeTraitement}" +
                     $",'{Table}','{Observation}',GETDATE(),GETDATE());");
             }

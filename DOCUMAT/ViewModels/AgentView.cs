@@ -14,7 +14,6 @@ namespace DOCUMAT.ViewModels
         public int NumeroOrdre { get; set; }
         public Models.Agent Agent { get; set; }
         public object Affectation { get; private set; }
-        public DocumatContext context { get; set; }
 
         //Nom de l'image local
         public string cheminLocalPhoto { get; private set; }
@@ -22,12 +21,6 @@ namespace DOCUMAT.ViewModels
         public AgentView()
         {
             Agent = new Agent();
-            context = new DocumatContext();
-        }
-
-        public void Dispose()
-        {
-            context.Dispose();
         }
 
         public static int Add(Models.Agent agent)
@@ -50,12 +43,19 @@ namespace DOCUMAT.ViewModels
 
         public bool GetView(int Id)
         {
-            Agent = context.Agent.FirstOrDefault(a => a.AgentID == Id);
+            using (var ct = new DocumatContext())
+            {
+                Agent = ct.Agent.FirstOrDefault(a => a.AgentID == Id);
 
-            if (Agent != null)
-                return true;
-            else
-                throw new Exception("L'agent est introuvable !!!");
+                if (Agent != null)
+                {
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("L'agent est introuvable !!!");
+                } 
+            }
         }
 
         public static int Update(Models.Agent agent)

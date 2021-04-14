@@ -10,13 +10,11 @@ namespace DOCUMAT.ViewModels
     class RegionView : IView<RegionView, Region>
     {
         public int NumeroOrdre { get; set; }
-        public DocumatContext context { get; set; }
 
         public Region Region { get; set; }
 
         public RegionView()
         {
-            context = new DocumatContext();
             Region = new Region();
         }
 
@@ -27,7 +25,6 @@ namespace DOCUMAT.ViewModels
 
         public void Dispose()
         {
-            context.Dispose();
         }
 
         public bool GetView(int Id)
@@ -37,17 +34,20 @@ namespace DOCUMAT.ViewModels
 
         public List<RegionView> GetViewsList()
         {
-            List<Region> regions = context.Region.ToList();
-            List<RegionView> regionViews = new List<RegionView>();
-
-            foreach(var region in regions)
+            using (var ct = new DocumatContext())
             {
-                RegionView regionView = new RegionView();
-                regionView.Region = region;
-                regionViews.Add(regionView);
-            }
+                List<Region> regions = ct.Region.ToList();
+                List<RegionView> regionViews = new List<RegionView>();
 
-            return regionViews;
+                foreach (var region in regions)
+                {
+                    RegionView regionView = new RegionView();
+                    regionView.Region = region;
+                    regionViews.Add(regionView);
+                }
+
+                return regionViews; 
+            }
         }
 
         public bool Update(Region UpElement)

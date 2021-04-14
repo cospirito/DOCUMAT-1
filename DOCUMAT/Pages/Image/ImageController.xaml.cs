@@ -64,7 +64,12 @@ namespace DOCUMAT.Pages.Image
             try
             {
                 ImageView imageView1 = new ImageView();
-                Models.Image image = imageView1.context.Image.FirstOrDefault(i => i.NumeroPage == currentImage && i.RegistreID == RegistreParent.RegistreID);
+                Models.Image image = null;
+                
+                using (var ct = new DocumatContext())
+                {
+                    image = ct.Image.FirstOrDefault(i => i.NumeroPage == currentImage && i.RegistreID == RegistreParent.RegistreID);
+                }
 
                 if (image != null)
                 {
@@ -100,7 +105,15 @@ namespace DOCUMAT.Pages.Image
                     else
                     {
                         tbxNomPage.Text = "PAGE : " + image.NomPage;
-                        tbxNumeroPage.Text = "N° " + image.NumeroPage.ToString() + "/ " + imageView1.context.Database.SqlQuery<int>($"SELECT TOP 1 NumeroPage FROM Images WHERE RegistreID = {RegistreParent.RegistreID} ORDER BY NumeroPage DESC").FirstOrDefault();
+
+                        int NumeroPageLast = RegistreParent.NombrePage;
+
+                        using (var ct = new DocumatContext())
+                        {
+                            NumeroPageLast = ct.Database.SqlQuery<int>($"SELECT TOP 1 NumeroPage FROM Images WHERE RegistreID = {RegistreParent.RegistreID} ORDER BY NumeroPage DESC").FirstOrDefault();
+                        }
+
+                        tbxNumeroPage.Text = "N° " + image.NumeroPage.ToString() + "/ " + NumeroPageLast;
                     }
 
                     //Reinitialisation de l'affichage
@@ -109,32 +122,35 @@ namespace DOCUMAT.Pages.Image
                     ImageSide.IsExpanded = false;
                     cbxRejetImage.IsChecked = false;
                     cbxSupprimerImage.IsChecked = false;
-                    cbxRejetScan.IsChecked = false; 
+                    cbxRejetScan.IsChecked = false;
                     #endregion
 
                     #region RECUPERATION DES SEQUENCES DE L'IMAGE
-                    //On réinitialise les Manquants
-                    tbManqueSequences.Text = "";
-                    // On vide le Dictionary des séquences de l'image précédente
-                    ListeSequences.Clear();
-                    // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
-                    List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == image.ImageID
-                    && s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
-                    if (sequences.Count != 0)
+                    using (var ct = new DocumatContext())
                     {
-                        //dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
-                        //Ajout des séquences dans le Dictionary					
-                        foreach (var seq in SequenceView.GetViewsList(sequences))
+                        //On réinitialise les Manquants
+                        tbManqueSequences.Text = "";
+                        // On vide le Dictionary des séquences de l'image précédente
+                        ListeSequences.Clear();
+                        // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
+                        List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == image.ImageID
+                        && s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
+                        if (sequences.Count != 0)
                         {
-                            ListeSequences.Add(seq.Sequence.SequenceID, seq);
-                        }
+                            //dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+                            //Ajout des séquences dans le Dictionary					
+                            foreach (var seq in SequenceView.GetViewsList(sequences))
+                            {
+                                ListeSequences.Add(seq.Sequence.SequenceID, seq);
+                            }
 
-                        dgSequence.ItemsSource = ListeSequences.Values.ToList();
-                    }
-                    else
-                    {
-                        dgSequence.ItemsSource = null;
-                        //throw new Exception("Cette image n'as pas de séquences !!!");
+                            dgSequence.ItemsSource = ListeSequences.Values.ToList();
+                        }
+                        else
+                        {
+                            dgSequence.ItemsSource = null;
+                            //throw new Exception("Cette image n'as pas de séquences !!!");
+                        } 
                     }
                     #endregion
 
@@ -241,6 +257,24 @@ namespace DOCUMAT.Pages.Image
             catch (Exception ex)
             {
                 ex.ExceptionCatcher();
+            }
+        }
+        
+        public void checksControleEnd()
+        {
+            using (var ct = new DocumatContext())
+            {
+                #region CHARGEMENT DU BOUTON DE VALIDATION
+                //Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
+                if (!ct.Image.Any(i => i.StatutActuel == (int)Enumeration.Image.INDEXEE && i.RegistreID == RegistreParent.RegistreID))
+                {
+                    btnValideControle.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    btnValideControle.Visibility = Visibility.Collapsed;
+                }
+                #endregion
             }
         }
 
@@ -552,8 +586,6 @@ namespace DOCUMAT.Pages.Image
 
                 foreach (TreeViewItem item in registreAbre.Items)
                 {
-                    using (var ct = new DocumatContext())
-                    {
                         int NumeroAbr = 0;
                         string[] headerTitle = item.Header.ToString().Split('.');
 
@@ -616,7 +648,6 @@ namespace DOCUMAT.Pages.Image
                                 }
                             }
                         }
-                    }
                 }
             }
             catch (Exception ex)
@@ -629,20 +660,23 @@ namespace DOCUMAT.Pages.Image
         {
             try
             {
-                Models.Registre registre = (Models.Registre)e.Argument;
-                // Définition des types d'icon dans l'aborescence en fonction des statuts des images
-                // récupération de la liste des Images
-                ImageView imageView1 = new ImageView();
-                // Récupération de la liste des manquants pour ce registre
-                List<Models.ManquantImage> manquantImages = imageView1.context.ManquantImage.Where(m => m.IdRegistre == registre.RegistreID).ToList();
-                // Liste des Images de ce registre
-                List<Models.Image> images = imageView1.context.Image.Where(i => i.StatutActuel == (int)Enumeration.Image.PHASE1 && i.RegistreID == registre.RegistreID).ToList();
-                // Liste des Controles pour ce registres 
-                List<Models.Controle> controles = imageView1.context.Controle.Where(c => c.RegistreId == registre.RegistreID && c.PhaseControle == 1).ToList();
+                using (var ct = new DocumatContext())
+                {
+                    Models.Registre registre = (Models.Registre)e.Argument;
+                    // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                    // récupération de la liste des Images
+                    ImageView imageView1 = new ImageView();
+                    // Récupération de la liste des manquants pour ce registre
+                    List<Models.ManquantImage> manquantImages = ct.ManquantImage.Where(m => m.IdRegistre == registre.RegistreID).ToList();
+                    // Liste des Images de ce registre
+                    List<Models.Image> images = ct.Image.Where(i => i.StatutActuel == (int)Enumeration.Image.PHASE1 && i.RegistreID == registre.RegistreID).ToList();
+                    // Liste des Controles pour ce registres 
+                    List<Models.Controle> controles = ct.Controle.Where(c => c.RegistreId == registre.RegistreID && c.PhaseControle == 1).ToList();
 
-                // tableau des Resultats 
-                object[] obs = new object[] { manquantImages , images , controles};
-                e.Result = obs;
+                    // tableau des Resultats 
+                    object[] obs = new object[] { manquantImages, images, controles };
+                    e.Result = obs; 
+                }
             }
             catch (Exception ex)
             {
@@ -735,13 +769,11 @@ namespace DOCUMAT.Pages.Image
                 // Récupération des Arguments registres
                 Models.Registre registre = (Models.Registre)e.Argument;
 
-                //Obtention de la liste des images du registre dans la base de données 
-                ImageView imageView1 = new ImageView();
-                List<ImageView> imageViews = imageView1.GetSimpleViewsList(registre);
-
                 //Calcule des Index
                 using (var ct = new DocumatContext())
                 {
+                    int? NbImageRegistre = ct.Database.SqlQuery<int?>($"SELECT  COUNT(DISTINCT ImageID) FROM Images WHERE RegistreID = {RegistreParent.RegistreID} ").FirstOrDefault();
+
                     // Nombre d'index du Registres 
                     //Récupération des index de toutes les séquences (References compté 1 fois )  
                     string reqAllIndex = "SELECT SUM(val) FROM( SELECT " +
@@ -820,9 +852,9 @@ namespace DOCUMAT.Pages.Image
                     NbIndexRejet = (NbIndexRejet == null) ? 0 : NbIndexRejet;
                     NbRejetImage = (NbRejetImage == null) ? 0 : NbRejetImage;
                     NbImageASupp = (NbImageASupp == null) ? 0 : NbImageASupp;
-
+                    NbImageRegistre = (NbImageRegistre == null) ? 0 : NbImageRegistre;
                     // Tableau des Resultats
-                    int?[] result = new int?[] { NbIndex, NbIndexRejet, NbRejetImage, NbImageASupp, imageViews.Count };
+                    int?[] result = new int?[] { NbIndex, NbIndexRejet, NbRejetImage, NbImageASupp, NbImageRegistre};
                     e.Result = result;
                 }
             }
@@ -1026,6 +1058,7 @@ namespace DOCUMAT.Pages.Image
                 // Chargement Async des infos du header
                 HeaderInfosGetter();
                 AllisLoad = true;
+                checksControleEnd();
             }
             catch (Exception ex)
             {
@@ -1433,17 +1466,7 @@ namespace DOCUMAT.Pages.Image
                         // Chanrgement des indicateurs du header
                         HeaderInfosGetter();
 
-                        #region CHARGEMENT DU BOUTON DE VALIDATION
-                        //Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
-                        if (ct.Image.All(i => i.StatutActuel == (int)Enumeration.Image.PHASE1))
-                        {
-                            btnValideControle.Visibility = Visibility.Visible;
-                        }
-                        else
-                        {
-                            btnValideControle.Visibility = Visibility.Collapsed;
-                        }
-                        #endregion
+                        checksControleEnd();
 
                         // Charger l'élément suivant 
                         this.btnSuivant_Click(sender, e);
@@ -1579,7 +1602,7 @@ namespace DOCUMAT.Pages.Image
                 {
                     ImageView imageView1 = new ImageView();
                     //Si toute les images sont marqué en phase 1 
-                    if (ct.Image.All(i => i.StatutActuel == (int)Enumeration.Image.PHASE1))
+                    if (!ct.Image.Any(i => i.StatutActuel == (int)Enumeration.Image.INDEXEE && i.RegistreID == RegistreParent.RegistreID))
                     {
                         //On demande une autorisation
                         if (MessageBox.Show("Voulez vous terminer le contrôle de ce registre ?", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question)
@@ -1899,7 +1922,7 @@ namespace DOCUMAT.Pages.Image
                         ct.SaveChanges();
 
                         //Enregistrement de la tâche
-                        DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CONTROLE PH1 : CONTROLE DE LA PAGE DE GARDE DU REGISTRE ID N° " + RegistreParent.RegistreID);
+                        DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "#IMAGE_CONTROLE");
 
                         //Contrôle des rejets index du Registre 
                         int StatutRegistre = 0, NumVolume = 0, NumDepotDebut = 0, DateDepotDebut = 0,
@@ -2011,7 +2034,7 @@ namespace DOCUMAT.Pages.Image
                         ct.SaveChanges();
 
                         //Enregistrement de la tâche
-                        DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreParent.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "CONTROLE PH1 : CONTROLE DES INDEX DU REGISTRE");
+                        DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreParent.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "#INDEX_REGISTRE_CONTROLE");
                         
                         #region Actualisation instantanée de l'icon de L'Abo
                         //Actualisation de l'icon dans l'aborescence
@@ -2027,18 +2050,8 @@ namespace DOCUMAT.Pages.Image
 
                         // Chanrgement des indicateurs du header
                         HeaderInfosGetter();
-                        
-                        #region CHARGEMENT DU BOUTON DE VALIDATION
-                        //Affichage du bouton de validadtion du contrôle si toute les images sont marqué en phase 1 
-                        if (ct.Image.All(i => i.StatutActuel == (int)Enumeration.Image.PHASE1))
-                        {
-                            btnValideControle.Visibility = Visibility.Visible;
-                        }
-                        else
-                        {
-                            btnValideControle.Visibility = Visibility.Collapsed;
-                        }
-                        #endregion
+
+                        checksControleEnd();
 
                         // Charger l'élément suivant 
                         this.btnSuivant_Click(sender, e);

@@ -206,81 +206,81 @@ namespace DOCUMAT.Pages.Image
 		/// </summary>
 		private void ActualiserArborescence()
 		{
-			// Définition des types d'icon dans l'aborescence en fonction des statuts des images
-			// récupération de la liste des Images
-			ImageView imageView1 = new ImageView();
-			// Récupération de la liste des manquants pour ce registre
-			List<Models.ManquantImage> manquantImages = imageView1.context.ManquantImage.Where(m => m.IdRegistre == RegistreParent.RegistreID).ToList();
-			// Liste des Images de ce registre
-			List<Models.Image> images = imageView1.context.Image.Where(i => i.RegistreID == RegistreParent.RegistreID).ToList();
-			// Liste des Controles pour ce registres 
-			List<Models.Controle> controles = imageView1.context.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseControle == 3).ToList();
-			// Liste des Corrections pour ce registres
-			List<Models.Correction> corrections = imageView1.context.Correction.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3).ToList();
+            using (var ct = new DocumatContext())
+            {
+                // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                // récupération de la liste des Images
+                ImageView imageView1 = new ImageView();
+                // Récupération de la liste des manquants pour ce registre
+                List<Models.ManquantImage> manquantImages = ct.ManquantImage.Where(m => m.IdRegistre == RegistreParent.RegistreID).ToList();
+                // Liste des Images de ce registre
+                List<Models.Image> images = ct.Image.Where(i => i.RegistreID == RegistreParent.RegistreID).ToList();
+                // Liste des Controles pour ce registres 
+                List<Models.Controle> controles = ct.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseControle == 3).ToList();
+                // Liste des Corrections pour ce registres
+                List<Models.Correction> corrections = ct.Correction.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3).ToList();
 
-			// Définition des types d'icon dans l'aborescence en fonction des statuts des images
-			foreach (TreeViewItem item in registreAbre.Items)
-			{
-				using (var ct = new DocumatContext())
-				{
-					Models.Image image1 = images.FirstOrDefault(i => i.NomPage.ToLower() == item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower());
-					if (image1 != null)
-					{
-						if (image1.StatutActuel == (int)Enumeration.Image.PHASE1)
-						{							
-							item.Tag = "valide";
-
-						}
-						else if(image1.StatutActuel == (int)Enumeration.Image.PHASE2)
+                // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                foreach (TreeViewItem item in registreAbre.Items)
+                {
+                    Models.Image image1 = images.FirstOrDefault(i => i.NomPage.ToLower() == item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower());
+                    if (image1 != null)
+                    {
+                        if (image1.StatutActuel == (int)Enumeration.Image.PHASE1)
                         {
-							item.Tag = "Correct";
-						}
-						else if (image1.StatutActuel == (int)Enumeration.Image.PHASE3)
-						{ 
-							if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-								&& c.PhaseControle == 3 && c.StatutControle == 0) != null)
-							{
-								item.Tag = "valide";
-							}
-							else
-							{
-								if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-										&& c.PhaseControle == 3 && c.StatutControle == 1 && c.ASupprimer == 1) != null)
-								{
-									item.Tag = "fileDelele";
-								}
-								else
-								{
-									item.Tag = "instance";
-								}
-							}
-						}
+                            item.Tag = "valide";
 
-						// Cas de la PAGE DE GARDE AYANT LES INDEX DE REGISTRES ERRONES
-						if (image1.NumeroPage == -1)
-						{
-							List<Models.Correction> correctionpg = corrections.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3
-														   && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
-														   || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)).ToList();
-							if (correctionpg.Count > 0)
-							{
-								if (correctionpg.Any(c => c.StatutCorrection == 0))
-								{
-									item.Tag = "Correct";
-								}
-								else
-								{
-									item.Tag = "instance";
-								}
-							}
-						}
-					}
-					else
-					{
-						item.Tag = "image.png";
-					}					
-				}
-			}
+                        }
+                        else if (image1.StatutActuel == (int)Enumeration.Image.PHASE2)
+                        {
+                            item.Tag = "Correct";
+                        }
+                        else if (image1.StatutActuel == (int)Enumeration.Image.PHASE3)
+                        {
+                            if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
+                                && c.PhaseControle == 3 && c.StatutControle == 0) != null)
+                            {
+                                item.Tag = "valide";
+                            }
+                            else
+                            {
+                                if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
+                                        && c.PhaseControle == 3 && c.StatutControle == 1 && c.ASupprimer == 1) != null)
+                                {
+                                    item.Tag = "fileDelele";
+                                }
+                                else
+                                {
+                                    item.Tag = "instance";
+                                }
+                            }
+                        }
+
+                        // Cas de la PAGE DE GARDE AYANT LES INDEX DE REGISTRES ERRONES
+                        if (image1.NumeroPage == -1)
+                        {
+                            List<Models.Correction> correctionpg = corrections.Where(c => c.RegistreId == RegistreParent.RegistreID && c.PhaseCorrection == 3
+                                                            && c.ImageID == null && c.SequenceID == null && (c.Numero_idx == 1 || c.NumeroDebut_idx == 1 || c.NumeroDepotFin_idx == 1
+                                                            || c.DateDepotDebut_idx == 1 || c.DateDepotFin_idx == 1 || c.NombrePage_idx == 1)).ToList();
+                            if (correctionpg.Count > 0)
+                            {
+                                if (correctionpg.Any(c => c.StatutCorrection == 0))
+                                {
+                                    item.Tag = "Correct";
+                                }
+                                else
+                                {
+                                    item.Tag = "instance";
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        item.Tag = "image.png";
+                    }
+                } 
+            }
 		}
 
 		private void FileTree_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -346,9 +346,9 @@ namespace DOCUMAT.Pages.Image
 							}
 
 							//Préparation du chemin de l'image et déplacement de l'image dans le dossier parent
-							if (imageView.context.Image.FirstOrDefault(i => i.NumeroPage == manquantImage.NumeroPage) != null)
+							using (var ct = new DocumatContext())
 							{
-								using (var ct = new DocumatContext())
+								if (ct.Image.FirstOrDefault(i => i.NumeroPage == manquantImage.NumeroPage) != null)
 								{
 									string Destination = System.IO.Path.Combine(RegistreParent.CheminDossier
 														, newfichier + fichierSource.Extension);
@@ -408,16 +408,16 @@ namespace DOCUMAT.Pages.Image
 									ct.SaveChanges();
 
 									// Enregistrement du Traitement
-									DocumatContext.AddTraitement(DocumatContext.TbImage,image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION,"CORRECTION PH3 : IMAGE MANQUANT AJOUTER");
+									DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "CORRECTION PH3 : IMAGE MANQUANT AJOUTER");
 
 									//Chargement de la nouvelle image ajouté
 									currentImage = manquantImage.NumeroPage;
 									ChargerImage(currentImage);
 								}
-							}
-							else
-							{
-								throw new Exception("Une image ayant le même numéro de page existe déja !!!");
+								else
+								{
+									throw new Exception("Une image ayant le même numéro de page existe déja !!!");
+								}
 							}
 						}
 						else
@@ -582,45 +582,47 @@ namespace DOCUMAT.Pages.Image
                     {
 						throw new Exception("La page : \"" + imageView1.Image.NumeroPage + "\" est introuvable !!!");
                     }
-					#endregion
+                    #endregion
 
-					#region RECUPERATION DES SEQUENCES DE L'IMAGE
+                    #region RECUPERATION DES SEQUENCES DE L'IMAGE
+                    using (var ct = new DocumatContext())
+                    {
+                        // On vide le Dictionary des séquences de l'image précédente
+                        ListeSequences.Clear();
+                        // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
+                        List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
 
-					// On vide le Dictionary des séquences de l'image précédente
-					ListeSequences.Clear();
-					// Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
-					List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
+                        //Récupération des contrôles de séquences rejetés
+                        List<SequenceView> sequenceViews = SequenceView.GetViewsList(sequences).Where(s => s.En_Correction == true).ToList();
 
-					//Récupération des contrôles de séquences rejetés
-					List<SequenceView> sequenceViews = SequenceView.GetViewsList(sequences).Where(s => s.En_Correction == true).ToList();
-
-					dgSequence.Visibility = Visibility.Visible;
-					dgSequenceIndex.Visibility = Visibility.Collapsed;
-					if (sequenceViews.Count() > 0)
-					{
-						dgSequence.ItemsSource = sequenceViews;
-						dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
-						tbNumeroOrdreSequence.IsEnabled = false;
-						tbDateSequence.IsEnabled = false;
-						tbReference.IsEnabled = false;
-						cbxBisOrdre.IsEnabled = false;
-						cbxDoublonOrdre.IsEnabled = false;
-						BtnModifierSequence.IsEnabled = false;
-						BtnSupprimerSequence.IsEnabled = false;
-						BtnTerminerImage.IsEnabled = false;
-					}
-					else
-					{
-						dgSequence.ItemsSource = null;
-						tbNumeroOrdreSequence.IsEnabled = false;
-						tbDateSequence.IsEnabled = false;
-						tbReference.IsEnabled = false;
-						cbxBisOrdre.IsEnabled = false;
-						cbxDoublonOrdre.IsEnabled = false;
-						BtnModifierSequence.IsEnabled = false;
-						BtnSupprimerSequence.IsEnabled = false;
-						BtnTerminerImage.IsEnabled = true;
-					}
+                        dgSequence.Visibility = Visibility.Visible;
+                        dgSequenceIndex.Visibility = Visibility.Collapsed;
+                        if (sequenceViews.Count() > 0)
+                        {
+                            dgSequence.ItemsSource = sequenceViews;
+                            dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+                            tbNumeroOrdreSequence.IsEnabled = false;
+                            tbDateSequence.IsEnabled = false;
+                            tbReference.IsEnabled = false;
+                            cbxBisOrdre.IsEnabled = false;
+                            cbxDoublonOrdre.IsEnabled = false;
+                            BtnModifierSequence.IsEnabled = false;
+                            BtnSupprimerSequence.IsEnabled = false;
+                            BtnTerminerImage.IsEnabled = false;
+                        }
+                        else
+                        {
+                            dgSequence.ItemsSource = null;
+                            tbNumeroOrdreSequence.IsEnabled = false;
+                            tbDateSequence.IsEnabled = false;
+                            tbReference.IsEnabled = false;
+                            cbxBisOrdre.IsEnabled = false;
+                            cbxDoublonOrdre.IsEnabled = false;
+                            BtnModifierSequence.IsEnabled = false;
+                            BtnSupprimerSequence.IsEnabled = false;
+                            BtnTerminerImage.IsEnabled = true;
+                        } 
+                    }
 					#endregion
 
 					#region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE

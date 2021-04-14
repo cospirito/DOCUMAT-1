@@ -230,22 +230,25 @@ namespace DOCUMAT.Pages.Inventaire
                     {
                         if (MessageBox.Show("Voulez vous vraiment supprimer ?", "QUESTION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                         {
-                            VersementView versementView1 = new VersementView();
-                            List<int> VersementIds = new List<int>();
-                            foreach (VersementView versementView in dgVersement.SelectedItems)
+                            using (var ct = new DocumatContext())
                             {
-                                VersementIds.Add(versementView.Versement.VersementID);
-                                versementView1.context.Versement.Remove(versementView1.context.Versement.FirstOrDefault(v => v.VersementID == versementView.Versement.VersementID));
-                            }
-                            versementView1.context.SaveChanges();
+                                VersementView versementView1 = new VersementView();
+                                List<int> VersementIds = new List<int>();
+                                foreach (VersementView versementView in dgVersement.SelectedItems)
+                                {
+                                    VersementIds.Add(versementView.Versement.VersementID);
+                                    ct.Versement.Remove(ct.Versement.FirstOrDefault(v => v.VersementID == versementView.Versement.VersementID));
+                                }
+                                ct.SaveChanges();
 
-                            // Enregistrement du traitement de l'agent 
-                            foreach (int id in VersementIds)
-                            {
-                                DocumatContext.AddTraitement(DocumatContext.TbVersement, id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION,"SUPPRESSION D'UN VERSEMENT");
+                                // Enregistrement du traitement de l'agent 
+                                foreach (int id in VersementIds)
+                                {
+                                    DocumatContext.AddTraitement(DocumatContext.TbVersement, id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION, "SUPPRESSION D'UN VERSEMENT");
+                                }
+                                dgVersement.ItemsSource = cbVersement.ItemsSource = versementView1.GetVersViewsByService((int)cbService.SelectedValue);
+                                versementView1.Dispose(); 
                             }
-                            dgVersement.ItemsSource = cbVersement.ItemsSource = versementView1.GetVersViewsByService((int)cbService.SelectedValue);
-                            versementView1.Dispose();
                         }
                     }
                 }
@@ -290,23 +293,26 @@ namespace DOCUMAT.Pages.Inventaire
                     if (MessageBox.Show("Voulez-vous vraiment supprimer cet élément ?", "ATTENTION", MessageBoxButton.YesNo, MessageBoxImage.Question)
                         == MessageBoxResult.Yes)
                     {
-                        RegistreView registreView = new RegistreView();
-                        List<int> RegistreIds = new List<int>();
-
-                        foreach (RegistreView item in dgRegistre.SelectedItems)
+                        using (var ct = new DocumatContext())
                         {
-                            RegistreIds.Add(item.Registre.RegistreID);
-                            registreView.context.Registre.Remove(registreView.context.Registre.FirstOrDefault(r => r.RegistreID == item.Registre.RegistreID));
-                        }
-                        registreView.context.SaveChanges();
+                            RegistreView registreView = new RegistreView();
+                            List<int> RegistreIds = new List<int>();
 
-                        foreach (int id in RegistreIds)
-                        {
-                            // Enregistrement du traitement de l'agent 
-                            DocumatContext.AddTraitement(DocumatContext.TbRegistre, id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION);
+                            foreach (RegistreView item in dgRegistre.SelectedItems)
+                            {
+                                RegistreIds.Add(item.Registre.RegistreID);
+                                ct.Registre.Remove(ct.Registre.FirstOrDefault(r => r.RegistreID == item.Registre.RegistreID));
+                            }
+                            ct.SaveChanges();
+
+                            foreach (int id in RegistreIds)
+                            {
+                                // Enregistrement du traitement de l'agent 
+                                DocumatContext.AddTraitement(DocumatContext.TbRegistre, id, Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION);
+                            }
+                            MessageBox.Show("Suppression éffectuée", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
+                            RefreshRegistre(); 
                         }
-                        MessageBox.Show("Suppression éffectuée", "NOTIFICATION", MessageBoxButton.OK, MessageBoxImage.Information);
-                        RefreshRegistre();
                     }
                 }
                 else

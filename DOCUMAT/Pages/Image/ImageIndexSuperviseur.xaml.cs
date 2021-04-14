@@ -174,20 +174,23 @@ namespace DOCUMAT.Pages.Image
                 tbxAgentNoms.Text = "Noms : " + MainParent.Utilisateur.Noms;
                 tbxAgentType.Text = "Aff : " + Enum.GetName(typeof(Enumeration.AffectationAgent), MainParent.Utilisateur.Affectation);
 
-                // Récupération de l'agent en charge de l'indexation 
-                Models.Traitement traitementAttrRegistre = imageView1.context.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreParent.RegistreID
-                                    && t.TypeTraitement == (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION);
-                if (traitementAttrRegistre != null)
+                using (var ct = new DocumatContext())
                 {
-                    Models.Agent agentAttrRegistre = imageView1.context.Agent.FirstOrDefault(a => a.AgentID == traitementAttrRegistre.AgentID);
-                    // Agent Indexeur
-                    if (!string.IsNullOrEmpty(agentAttrRegistre.CheminPhoto))
+                    // Récupération de l'agent en charge de l'indexation 
+                    Models.Traitement traitementAttrRegistre = ct.Traitement.FirstOrDefault(t => t.TableSelect == DocumatContext.TbRegistre && t.TableID == RegistreParent.RegistreID
+                                        && t.TypeTraitement == (int)Enumeration.TypeTraitement.REGISTRE_ATTRIBUE_INDEXATION);
+                    if (traitementAttrRegistre != null)
                     {
-                        AgentIndexImage.Source = new BitmapImage(new Uri(System.IO.Path.Combine(DossierRacine, agentAttrRegistre.CheminPhoto)), new System.Net.Cache.RequestCachePolicy());
-                    }
-                    tbxAgentIndexLogin.Text = "Login : " + agentAttrRegistre.Login;
-                    tbxAgentIndexNoms.Text = "Noms : " + agentAttrRegistre.Noms;
-                    tbxAgentIndexType.Text = "Aff : " + Enum.GetName(typeof(Enumeration.AffectationAgent), agentAttrRegistre.Affectation);
+                        Models.Agent agentAttrRegistre = ct.Agent.FirstOrDefault(a => a.AgentID == traitementAttrRegistre.AgentID);
+                        // Agent Indexeur
+                        if (!string.IsNullOrEmpty(agentAttrRegistre.CheminPhoto))
+                        {
+                            AgentIndexImage.Source = new BitmapImage(new Uri(System.IO.Path.Combine(DossierRacine, agentAttrRegistre.CheminPhoto)), new System.Net.Cache.RequestCachePolicy());
+                        }
+                        tbxAgentIndexLogin.Text = "Login : " + agentAttrRegistre.Login;
+                        tbxAgentIndexNoms.Text = "Noms : " + agentAttrRegistre.Noms;
+                        tbxAgentIndexType.Text = "Aff : " + Enum.GetName(typeof(Enumeration.AffectationAgent), agentAttrRegistre.Affectation);
+                    } 
                 }
 
                 tbxQrCode.Text = "Qrcode : " + RegistreParent.QrCode; using (var ct = new DocumatContext())
@@ -485,32 +488,35 @@ namespace DOCUMAT.Pages.Image
                     #endregion
 
                     #region RECUPERATION DES SEQUENCES DE L'IMAGE
-                    // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
-                    List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
-                    dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);
-                    if (sequences.Count != 0)
+                    using (var ct = new DocumatContext())
                     {
-                        dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+                        // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
+                        List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
+                        dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);
+                        if (sequences.Count != 0)
+                        {
+                            dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
+                        }
+
+                        //Vide les champs du formulaire de séquence 
+                        ChampsSequence.Visibility = Visibility.Collapsed;
+                        tbNumeroOrdreSequence.Text = "";
+                        tbIsSpecial.SelectedIndex = 0;
+                        tbDateSequence.Text = "";
+                        tbReference.Text = "";
+                        tbNbRefPreindex.Text = "";
+                        dgSequence.IsEnabled = true;
+                        editSequence = false;
+
+                        // Définition des champs de modification de l'image 
+                        tbNumeroPage.Text = CurrentImageView.Image.NumeroPage.ToString();
+                        tbNumeroDebutSequence.Text = CurrentImageView.Image.DebutSequence.ToString();
+                        tbFinSequence.Text = CurrentImageView.Image.FinSequence.ToString();
+                        tbDateDebSequence.Text = CurrentImageView.Image.DateDebutSequence.ToShortDateString();
+                        FichierImporte = "";
+                        BtnImporterImage.Foreground = Brushes.White;
+                        BtnValiderModifImage.Foreground = Brushes.White; 
                     }
-
-                    //Vide les champs du formulaire de séquence 
-                    ChampsSequence.Visibility = Visibility.Collapsed;
-                    tbNumeroOrdreSequence.Text = "";
-                    tbIsSpecial.SelectedIndex = 0;
-                    tbDateSequence.Text = "";
-                    tbReference.Text = "";
-                    tbNbRefPreindex.Text = "";
-                    dgSequence.IsEnabled = true;
-                    editSequence = false;
-
-                    // Définition des champs de modification de l'image 
-                    tbNumeroPage.Text = CurrentImageView.Image.NumeroPage.ToString();
-                    tbNumeroDebutSequence.Text = CurrentImageView.Image.DebutSequence.ToString();
-                    tbFinSequence.Text = CurrentImageView.Image.FinSequence.ToString();
-                    tbDateDebSequence.Text = CurrentImageView.Image.DateDebutSequence.ToShortDateString();
-                    FichierImporte = "";
-                    BtnImporterImage.Foreground = Brushes.White;
-                    BtnValiderModifImage.Foreground = Brushes.White;
                     #endregion
 
                     #region ADAPTATION DE L'AFFICHAGE EN FONCTION DES INSTANCES DE L'IMAGE
@@ -1012,42 +1018,6 @@ namespace DOCUMAT.Pages.Image
             }
         }
 
-        //private void BtnSupprimerSequence_Click(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        using (var ct = new DocumatContext())
-        //        {
-        //            List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID
-        //                                       && s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
-        //            if (sequences.Count > 0)
-        //            {
-        //                ct.Sequence.RemoveRange(sequences);
-        //                ct.SaveChanges();
-
-        //                dgSequence.ItemsSource = SequenceView.GetViewsList(ct.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID
-        //                     && s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList());
-        //                if (dgSequence.Items.Count != 0)
-        //                {
-        //                    dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
-        //                }
-
-        //                var LastSequence = ct.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID
-        //                                   && s.References.ToLower() != "defaut").OrderByDescending(i => i.NUmeroOdre).FirstOrDefault();
-        //                tbNumeroOrdreSequence.Text = (LastSequence != null) ? (LastSequence.NUmeroOdre + 1).ToString() : CurrentImageView.Image.DebutSequence.ToString();
-        //                tbDateSequence.Text = (LastSequence != null) ? LastSequence.DateSequence.ToShortDateString() : CurrentImageView.Image.DateDebutSequence.ToShortDateString();
-        //                // On vide le tableau des références 
-        //                tbReference.Text = "";
-        //                References.Clear();
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ex.ExceptionCatcher();
-        //    }
-        //}
-
         private void cbxRetirerInstance_Checked(object sender, RoutedEventArgs e)
         {
             panelChoixInstance.Visibility = Visibility.Visible;
@@ -1113,7 +1083,7 @@ namespace DOCUMAT.Pages.Image
                                 imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
                                 if (imageView1 != null)
                                 {
-                                    List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
+                                    List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
                                     dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);
                                     if (sequences.Count != 0)
                                     {
@@ -1176,7 +1146,7 @@ namespace DOCUMAT.Pages.Image
                                 imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
                                 if (imageView1 != null)
                                 {
-                                    List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
+                                    List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
                                     dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);
                                     if (sequences.Count != 0)
                                     {

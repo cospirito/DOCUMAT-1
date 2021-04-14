@@ -81,8 +81,8 @@ namespace DOCUMAT.Pages.Image
             try
             {
                 if (fileInfo.Exists)
-                {                    
-                    PageImage.Source = null;                    
+                {
+                    PageImage.Source = null;
                     PageImage.Source = BitmapFrame.Create(new Uri(fileInfo.FullName), BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
                 }
                 else
@@ -268,8 +268,12 @@ namespace DOCUMAT.Pages.Image
 
                 #region DEFINITION DES ICONS DE L'ABORESCENCE
                 // récupération de la liste des Images
-                ImageView imageView1 = new ImageView();
-                List<Models.Image> imageViews = imageView1.context.Database.SqlQuery<Models.Image>($"SELECT * FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} ").ToList();
+                List<Models.Image> imageViews = new List<Models.Image>();
+
+                using (var ct = new DocumatContext())
+                {
+                    imageViews = ct.Database.SqlQuery<Models.Image>($"SELECT * FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} ").ToList();
+                }
 
                 // Définition des types d'icon dans l'aborescence en fonction des statuts des images
                 foreach (TreeViewItem item in registreAbre.Items)
@@ -411,21 +415,23 @@ namespace DOCUMAT.Pages.Image
         {
             try
             {
-                // Récupération des Arguments registres
-                Models.Registre registre = (Models.Registre)e.Argument;
+                using (var ct = new DocumatContext())
+                {
+                    // Récupération des Arguments registres
+                    Models.Registre registre = (Models.Registre)e.Argument;
 
-                //Obtention de la liste des images du registre dans la base de données 
-                ImageView imageView1 = new ImageView();
-                List<ImageView> imageViews = imageView1.GetSimpleViewsList(registre);
+                    //Obtention de la liste des images du registre dans la base de données 
+                    List<Models.Image> images = ct.Database.SqlQuery<Models.Image>($"SELECT * FROM Images WHERE RegistreID = {registre.RegistreID}").ToList();
 
-                //Procédure de modification de l'indicateur de reussite
-                double perTerminer = (((float)imageViews.Where(i => i.Image.StatutActuel == (int)Enumeration.Image.INDEXEE).Count() / (float)imageViews.Count()) * 100);
-                double Instance = Math.Round(((float)imageViews.Where(i => i.Image.StatutActuel == (int)Enumeration.Image.INSTANCE).Count() / (float)imageViews.Count()) * 100, 1);
-                double EnCours = Math.Round(((float)imageViews.Where(i => i.Image.StatutActuel == (int)Enumeration.Image.CREEE).Count() / (float)imageViews.Count()) * 100, 1);
+                    //Procédure de modification de l'indicateur de reussite
+                    double perTerminer = (((float)images.Where(i => i.StatutActuel == (int)Enumeration.Image.INDEXEE).Count() / (float)images.Count()) * 100);
+                    double Instance = Math.Round(((float)images.Where(i => i.StatutActuel == (int)Enumeration.Image.INSTANCE).Count() / (float)images.Count()) * 100, 1);
+                    double EnCours = Math.Round(((float)images.Where(i => i.StatutActuel == (int)Enumeration.Image.CREEE).Count() / (float)images.Count()) * 100, 1);
 
-                // Tableau de Resultats 
-                double[] result = new double[] { perTerminer, EnCours, Instance };
-                e.Result = result;
+                    // Tableau de Resultats 
+                    double[] result = new double[] { perTerminer, EnCours, Instance };
+                    e.Result = result; 
+                }
             }
             catch (Exception ex)
             {
@@ -501,28 +507,35 @@ namespace DOCUMAT.Pages.Image
             try
             {
                 ImageView imageView1 = new ImageView();
-                //List<ImageView> imageViews = imageView1.GetSimpleViewsList(RegistreParent);
-                Models.Image image = imageView1.context.Database.SqlQuery<Models.Image>($"SELECT TOP 1 * FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND NumeroPage = {currentImage} ORDER BY ImageID ASC").FirstOrDefault();
-                //imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
-                if (imageView1 != null)
+                Models.Image image = null;
+
+                using (var ct = new DocumatContext())
+                {
+                    image = ct.Database.SqlQuery<Models.Image>($"SELECT TOP 1 * FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND NumeroPage = {currentImage} ORDER BY ImageID ASC").FirstOrDefault(); 
+                }
+                               
+                if (image != null)
                 {
                     imageView1.Image = image;
 
                     #region VERIFICATION DE l'IMAGE EN COURS D'INDEXATION 
                     if (imageView1.Image.StatutActuel == (int)Enumeration.Image.CREEE)
                     {
-                        //On vérifie que lindexation de l'image est terminée 
-                        int? imageEnCours = imageView1.context.Database.SqlQuery<int?>($"SELECT TOP 1 NumeroPage FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND StatutActuel = {(int)Enumeration.Image.CREEE} ORDER BY NumeroPage ASC,ImageID ASC").FirstOrDefault();
-                        if (imageEnCours != null)
+                        using (var ct = new DocumatContext())
                         {
-                            if (imageView1.Image.NumeroPage != imageEnCours)
+                            //On vérifie que lindexation de l'image est terminée 
+                            int? imageEnCours = ct.Database.SqlQuery<int?>($"SELECT TOP 1 NumeroPage FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND StatutActuel = {(int)Enumeration.Image.CREEE} ORDER BY NumeroPage ASC,ImageID ASC").FirstOrDefault();
+                            if (imageEnCours != null)
+                            {
+                                if (imageView1.Image.NumeroPage != imageEnCours)
+                                {
+                                    return;
+                                }
+                            }
+                            else
                             {
                                 return;
-                            }
-                        }
-                        else
-                        {
-                            return;
+                            } 
                         }
                     } 
                     #endregion
@@ -568,33 +581,36 @@ namespace DOCUMAT.Pages.Image
                     }
                     else
                     {
-                        tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
-                        tbxNumeroPage.Text = "N° : " + imageView1.Image.NumeroPage.ToString() + " / " + imageView1.context.Database.SqlQuery<int?>($"SELECT COUNT(DISTINCT NumeroPage) FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND NumeroPage NOT IN (-1,0)").FirstOrDefault();
-                        tbxDebSeq.Text = ((imageView1.Image.DebutSequence == 0) ? "" : "N° Debut : " + imageView1.Image.DebutSequence.ToString());
-                        tbxFinSeq.Text = ((imageView1.Image.FinSequence == 0) ? "" : imageView1.Image.FinSequence.ToString());
+                        using (var ct = new DocumatContext())
+                        {
+                            tbxNomPage.Text = "PAGE : " + imageView1.Image.NomPage;
+                            tbxNumeroPage.Text = "N° : " + imageView1.Image.NumeroPage.ToString() + " / " + ct.Database.SqlQuery<int?>($"SELECT COUNT(DISTINCT NumeroPage) FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND NumeroPage NOT IN (-1,0)").FirstOrDefault();
+                            tbxDebSeq.Text = ((imageView1.Image.DebutSequence == 0) ? "" : "N° Debut : " + imageView1.Image.DebutSequence.ToString());
+                            tbxFinSeq.Text = ((imageView1.Image.FinSequence == 0) ? "" : imageView1.Image.FinSequence.ToString());
 
-                        if(imageView1.Image.NumeroPage == 0)
-                        {
-                            tbxPagePrecName.Text = "P.PREC : ND / P.ACT : ";
+                            if (imageView1.Image.NumeroPage == 0)
+                            {
+                                tbxPagePrecName.Text = "P.PREC : ND / P.ACT : ";
+                            }
+                            else if (imageView1.Image.NumeroPage == -1)
+                            {
+                                tbxPagePrecName.Text = "P.PREC : PAGE DE GARDE / P.ACT : ";
+                            }
+                            else if (imageView1.Image.NumeroPage == 1)
+                            {
+                                tbxPagePrecName.Text = "P.PREC : PAGE D'OUVERTURE / P.ACT : ";
+                            }
+                            else if (imageView1.Image.NumeroPage > 1)
+                            {
+                                tbxPagePrecName.Text = "P.PREC : " + (imageView1.Image.NumeroPage - 1) + " / P.ACT : ";
+                            }
+                            else
+                            {
+                                tbxPagePrecName.Text = "P.PREC : ND / P.ACT : ";
+                            }
+                            tbPageName.Text = imageView1.Image.NomPage.ToUpper();
+                            tbPageName.Visibility = Visibility.Visible; 
                         }
-                        else if(imageView1.Image.NumeroPage == -1)
-                        {
-                            tbxPagePrecName.Text = "P.PREC : PAGE DE GARDE / P.ACT : ";
-                        }
-                        else if (imageView1.Image.NumeroPage == 1)
-                        {
-                            tbxPagePrecName.Text = "P.PREC : PAGE D'OUVERTURE / P.ACT : ";
-                        }
-                        else if(imageView1.Image.NumeroPage > 1)
-                        {
-                            tbxPagePrecName.Text = "P.PREC : " + (imageView1.Image.NumeroPage -1) + " / P.ACT : ";
-                        }
-                        else
-                        {
-                            tbxPagePrecName.Text = "P.PREC : ND / P.ACT : ";
-                        }
-                        tbPageName.Text = imageView1.Image.NomPage.ToUpper();
-                        tbPageName.Visibility = Visibility.Visible;
                     }
                     #endregion
 
@@ -633,33 +649,36 @@ namespace DOCUMAT.Pages.Image
                     }
                     else if (imageView1.Image.StatutActuel == (int)Enumeration.Image.CREEE)
                     {
-                        //On vérifie que lindexation de l'image est terminée 
-                        int? imageEnCours = imageView1.context.Database.SqlQuery<int?>($"SELECT TOP 1 NumeroPage FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND StatutActuel = {(int)Enumeration.Image.CREEE} ORDER BY NumeroPage ASC,ImageID ASC").FirstOrDefault();
-
-                        if (imageEnCours != null)
+                        using (var ct = new DocumatContext())
                         {
-                            if (imageView1.Image.NumeroPage == imageEnCours)
-                            {
-                                BtnAddSequence.IsEnabled = true;
-                                BtnSupprimerSequence.IsEnabled = true;
-                                tbNumeroOrdreSequence.IsEnabled = true;
-                                tbDateSequence.IsEnabled = true;
-                                tbReference.IsEnabled = true;
-                                cbxBisOrdre.IsEnabled = true;
-                                cbxDoublonOrdre.IsEnabled = true;
-                                cbxSautOrdre.IsEnabled = true;
-                                BtnTerminerImage.IsEnabled = false;
+                            //On vérifie que lindexation de l'image est terminée 
+                            int? imageEnCours = ct.Database.SqlQuery<int?>($"SELECT TOP 1 NumeroPage FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND StatutActuel = {(int)Enumeration.Image.CREEE} ORDER BY NumeroPage ASC,ImageID ASC").FirstOrDefault();
 
-                                TbkIndicateurImage.Text = "EN COURS";
-                                cbxMettreInstance.IsEnabled = true;
-                                cbxMettreInstance.IsChecked = false;
-                                panelChoixInstance.Visibility = Visibility.Collapsed;
-                                tbPageName.IsEnabled = true;
-                                panelIndexation.IsEnabled = true;
-                                BtnAddSequence.IsEnabled = true;
-                                BtnTerminerImage.IsEnabled = true;
-                                setActiveAboImageIcon((int)imageEnCours, "edit");
-                            }
+                            if (imageEnCours != null)
+                            {
+                                if (imageView1.Image.NumeroPage == imageEnCours)
+                                {
+                                    BtnAddSequence.IsEnabled = true;
+                                    BtnSupprimerSequence.IsEnabled = true;
+                                    tbNumeroOrdreSequence.IsEnabled = true;
+                                    tbDateSequence.IsEnabled = true;
+                                    tbReference.IsEnabled = true;
+                                    cbxBisOrdre.IsEnabled = true;
+                                    cbxDoublonOrdre.IsEnabled = true;
+                                    cbxSautOrdre.IsEnabled = true;
+                                    BtnTerminerImage.IsEnabled = false;
+
+                                    TbkIndicateurImage.Text = "EN COURS";
+                                    cbxMettreInstance.IsEnabled = true;
+                                    cbxMettreInstance.IsChecked = false;
+                                    panelChoixInstance.Visibility = Visibility.Collapsed;
+                                    tbPageName.IsEnabled = true;
+                                    panelIndexation.IsEnabled = true;
+                                    BtnAddSequence.IsEnabled = true;
+                                    BtnTerminerImage.IsEnabled = true;
+                                    setActiveAboImageIcon((int)imageEnCours, "edit");
+                                }
+                            } 
                         }
                     }
                     else if (imageView1.Image.StatutActuel == (int)Enumeration.Image.INDEXEE)
@@ -684,94 +703,97 @@ namespace DOCUMAT.Pages.Image
                     #endregion
 
                     #region RECUPERATION DES SEQUENCES DE L'IMAGE
-                    // On réinitialise l'état des cbx saut,doublon et bis pour le rechargement
-                    cbxSautOrdre.IsChecked = false;
-                    cbxDoublonOrdre.IsChecked = false;
-                    cbxBisOrdre.IsChecked = false;
-
-                    // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
-                    List<Sequence> sequences = imageView1.context.Database.SqlQuery<Models.Sequence>($"SELECT * FROM {DocumatContext.TbSequence} WHERE ImageID = {imageView1.Image.ImageID} ").ToList();
-                    dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);
-                    if (sequences.Count != 0)
+                    using (var ct = new DocumatContext())
                     {
-                        dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
-                    }
+                        // On réinitialise l'état des cbx saut,doublon et bis pour le rechargement
+                        cbxSautOrdre.IsChecked = false;
+                        cbxDoublonOrdre.IsChecked = false;
+                        cbxBisOrdre.IsChecked = false;
 
-                    #region RECUPERATION DE LA PAGE PECEDENTE INDEXEE
-                    // Récupération de la dernière séquence et renseignement des champs d'ajout de séquence
-                    //var LastSequence = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID && s.References.ToLower() != "defaut").OrderByDescending(i => i.NUmeroOdre).FirstOrDefault();
-                    var LastSequence = sequences.Where(s => s.ImageID == imageView1.Image.ImageID && s.References.ToLower() != "defaut").OrderByDescending(i => i.NUmeroOdre).FirstOrDefault();
-
-                    if (imageView1.Image.NumeroPage == 1)
-                    {
-                        tbNumeroOrdreSequence.Text = (LastSequence != null) ? (LastSequence.NUmeroOdre + 1).ToString() : imageView1.Image.DebutSequence.ToString();
-                        tbDateSequence.Text = (LastSequence != null) ? LastSequence.DateSequence.ToShortDateString() : imageView1.Image.DateDebutSequence.ToShortDateString();
-                        tbReference.Text = "";
-                    }
-                    else if (imageView1.Image.NumeroPage >= 2)
-                    {
-                        if (LastSequence == null)
+                        // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
+                        List<Sequence> sequences = ct.Database.SqlQuery<Models.Sequence>($"SELECT * FROM {DocumatContext.TbSequence} WHERE ImageID = {imageView1.Image.ImageID} ").ToList();
+                        dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);
+                        if (sequences.Count != 0)
                         {
-                            Models.Image imagePreced = imageView1.context.Image.FirstOrDefault(im => im.NumeroPage == imageView1.Image.NumeroPage - 1 && im.RegistreID == RegistreParent.RegistreID);
-                            Models.Sequence LastSequenceImagePrecede = null;
-                            int NumeroImagePreced = imageView1.Image.NumeroPage;
-                            if (imagePreced != null)
-                            {
-                                NumeroImagePreced = imagePreced.NumeroPage;
-                                LastSequenceImagePrecede = imageView1.context.Sequence.Where(s => s.ImageID == imagePreced.ImageID).OrderBy(s => s.NUmeroOdre).ToList().LastOrDefault();
-                            }
-
-                            do
-                            {
-                                if (imagePreced != null)
-                                {
-                                    if (imagePreced.StatutActuel == (int)Enumeration.Image.INSTANCE)
-                                    {
-                                        tbNumeroOrdreSequence.Text = (string.IsNullOrWhiteSpace(imagePreced.ObservationInstance)) ? "ERREUR" : (Int32.Parse(imagePreced.ObservationInstance) + 1).ToString();
-                                        DateTime? lastDateSeq = imageView1.context.Database.SqlQuery<DateTime?>($"SELECT TOP 1 DateSequence FROM {DocumatContext.TbSequence} S INNER JOIN {DocumatContext.TbImage} I ON S.ImageID = I.ImageID " +
-                                            $"WHERE I.RegistreID = {RegistreParent.RegistreID} ORDER BY I.NumeroPage DESC,S.SequenceID DESC").FirstOrDefault();
-                                        if(lastDateSeq != null)
-                                        {
-                                            tbDateSequence.Text = lastDateSeq.Value.ToShortDateString();
-                                        }
-                                        else
-                                        {
-                                            tbDateSequence.Text = RegistreParent.DateDepotDebut.ToShortDateString();
-                                        }
-                                        tbReference.Text = "";
-                                        break;
-                                    }
-                                    else if (imagePreced.NumeroPage == 1)
-                                    {
-                                        LastSequenceImagePrecede = imageView1.context.Sequence.Where(s => s.ImageID == imagePreced.ImageID).OrderBy(s => s.NUmeroOdre).ToList().LastOrDefault();
-                                        tbNumeroOrdreSequence.Text = (LastSequenceImagePrecede != null) ? (LastSequenceImagePrecede.NUmeroOdre + 1).ToString() : imageView1.Image.DebutSequence.ToString();
-                                        tbDateSequence.Text = (LastSequenceImagePrecede != null) ? LastSequenceImagePrecede.DateSequence.ToShortDateString() : imageView1.Image.DateDebutSequence.ToShortDateString();
-                                        tbReference.Text = "";
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        LastSequenceImagePrecede = imageView1.context.Sequence.Where(s => s.ImageID == imagePreced.ImageID).OrderBy(s => s.NUmeroOdre).ToList().LastOrDefault();
-                                        if (LastSequenceImagePrecede != null)
-                                        {
-                                            tbNumeroOrdreSequence.Text = (LastSequenceImagePrecede.NUmeroOdre + 1).ToString();
-                                            tbDateSequence.Text = LastSequenceImagePrecede.DateSequence.ToShortDateString();
-                                            tbReference.Text = "";
-                                            break;
-                                        }
-                                    }
-                                }
-                                NumeroImagePreced = NumeroImagePreced - 1;
-                                imagePreced = imageView1.context.Image.FirstOrDefault(iv => iv.NumeroPage == NumeroImagePreced && iv.RegistreID == RegistreParent.RegistreID);
-                            }
-                            while (LastSequenceImagePrecede == null);
+                            dgSequence.ScrollIntoView(dgSequence.Items.GetItemAt(dgSequence.Items.Count - 1));
                         }
-                        else
+
+                        #region RECUPERATION DE LA PAGE PECEDENTE INDEXEE
+                        // Récupération de la dernière séquence et renseignement des champs d'ajout de séquence
+                        //var LastSequence = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID && s.References.ToLower() != "defaut").OrderByDescending(i => i.NUmeroOdre).FirstOrDefault();
+                        var LastSequence = sequences.Where(s => s.ImageID == imageView1.Image.ImageID && s.References.ToLower() != "defaut").OrderByDescending(i => i.NUmeroOdre).FirstOrDefault();
+
+                        if (imageView1.Image.NumeroPage == 1)
                         {
                             tbNumeroOrdreSequence.Text = (LastSequence != null) ? (LastSequence.NUmeroOdre + 1).ToString() : imageView1.Image.DebutSequence.ToString();
                             tbDateSequence.Text = (LastSequence != null) ? LastSequence.DateSequence.ToShortDateString() : imageView1.Image.DateDebutSequence.ToShortDateString();
                             tbReference.Text = "";
                         }
+                        else if (imageView1.Image.NumeroPage >= 2)
+                        {
+                            if (LastSequence == null)
+                            {
+                                Models.Image imagePreced = ct.Image.FirstOrDefault(im => im.NumeroPage == imageView1.Image.NumeroPage - 1 && im.RegistreID == RegistreParent.RegistreID);
+                                Models.Sequence LastSequenceImagePrecede = null;
+                                int NumeroImagePreced = imageView1.Image.NumeroPage;
+                                if (imagePreced != null)
+                                {
+                                    NumeroImagePreced = imagePreced.NumeroPage;
+                                    LastSequenceImagePrecede = ct.Sequence.Where(s => s.ImageID == imagePreced.ImageID).OrderBy(s => s.NUmeroOdre).ToList().LastOrDefault();
+                                }
+
+                                do
+                                {
+                                    if (imagePreced != null)
+                                    {
+                                        if (imagePreced.StatutActuel == (int)Enumeration.Image.INSTANCE)
+                                        {
+                                            tbNumeroOrdreSequence.Text = (string.IsNullOrWhiteSpace(imagePreced.ObservationInstance)) ? "ERREUR" : (Int32.Parse(imagePreced.ObservationInstance) + 1).ToString();
+                                            DateTime? lastDateSeq = ct.Database.SqlQuery<DateTime?>($"SELECT TOP 1 DateSequence FROM {DocumatContext.TbSequence} S INNER JOIN {DocumatContext.TbImage} I ON S.ImageID = I.ImageID " +
+                                                $"WHERE I.RegistreID = {RegistreParent.RegistreID} ORDER BY I.NumeroPage DESC,S.SequenceID DESC").FirstOrDefault();
+                                            if (lastDateSeq != null)
+                                            {
+                                                tbDateSequence.Text = lastDateSeq.Value.ToShortDateString();
+                                            }
+                                            else
+                                            {
+                                                tbDateSequence.Text = RegistreParent.DateDepotDebut.ToShortDateString();
+                                            }
+                                            tbReference.Text = "";
+                                            break;
+                                        }
+                                        else if (imagePreced.NumeroPage == 1)
+                                        {
+                                            LastSequenceImagePrecede = ct.Sequence.Where(s => s.ImageID == imagePreced.ImageID).OrderBy(s => s.NUmeroOdre).ToList().LastOrDefault();
+                                            tbNumeroOrdreSequence.Text = (LastSequenceImagePrecede != null) ? (LastSequenceImagePrecede.NUmeroOdre + 1).ToString() : imageView1.Image.DebutSequence.ToString();
+                                            tbDateSequence.Text = (LastSequenceImagePrecede != null) ? LastSequenceImagePrecede.DateSequence.ToShortDateString() : imageView1.Image.DateDebutSequence.ToShortDateString();
+                                            tbReference.Text = "";
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            LastSequenceImagePrecede = ct.Sequence.Where(s => s.ImageID == imagePreced.ImageID).OrderBy(s => s.NUmeroOdre).ToList().LastOrDefault();
+                                            if (LastSequenceImagePrecede != null)
+                                            {
+                                                tbNumeroOrdreSequence.Text = (LastSequenceImagePrecede.NUmeroOdre + 1).ToString();
+                                                tbDateSequence.Text = LastSequenceImagePrecede.DateSequence.ToShortDateString();
+                                                tbReference.Text = "";
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    NumeroImagePreced = NumeroImagePreced - 1;
+                                    imagePreced = ct.Image.FirstOrDefault(iv => iv.NumeroPage == NumeroImagePreced && iv.RegistreID == RegistreParent.RegistreID);
+                                }
+                                while (LastSequenceImagePrecede == null);
+                            }
+                            else
+                            {
+                                tbNumeroOrdreSequence.Text = (LastSequence != null) ? (LastSequence.NUmeroOdre + 1).ToString() : imageView1.Image.DebutSequence.ToString();
+                                tbDateSequence.Text = (LastSequence != null) ? LastSequence.DateSequence.ToShortDateString() : imageView1.Image.DateDebutSequence.ToShortDateString();
+                                tbReference.Text = "";
+                            }
+                        } 
                     }
                     #endregion
 
@@ -786,17 +808,20 @@ namespace DOCUMAT.Pages.Image
                     #endregion
 
                     #region Affichage Bouton de Validation
-                    //Affichage du bouton de validadtion d'indexation si le 
-                    int nbImageNonTraite = imageView1.context.Database.SqlQuery<int>($"SELECT COUNT(DISTINCT ImageID) FROM {DocumatContext.TbImage} WHERE " +
-                        $"RegistreID = {RegistreParent.RegistreID} AND StatutActuel <= {(int)Enumeration.Image.INSTANCE} ").FirstOrDefault();
+                    using (var ct = new DocumatContext())
+                    {
+                        //Affichage du bouton de validadtion d'indexation si le 
+                        int nbImageNonTraite = ct.Database.SqlQuery<int>($"SELECT COUNT(DISTINCT ImageID) FROM {DocumatContext.TbImage} WHERE " +
+                            $"RegistreID = {RegistreParent.RegistreID} AND StatutActuel <= {(int)Enumeration.Image.INSTANCE} ").FirstOrDefault();
 
-                    if (nbImageNonTraite == 0)
-                    {
-                        btnValideIndexation.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        btnValideIndexation.Visibility = Visibility.Collapsed;
+                        if (nbImageNonTraite == 0)
+                        {
+                            btnValideIndexation.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            btnValideIndexation.Visibility = Visibility.Collapsed;
+                        } 
                     }
                     #endregion
 
@@ -919,10 +944,7 @@ namespace DOCUMAT.Pages.Image
 
                             int imageID = ct.Database.SqlQuery<int>($"SELECT DISTINCT ImageID FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND NumeroPage = -1 ORDER BY ImageID DESC").FirstOrDefault();
 
-                            // Ajout Manuel du Statut Image
-                            ct.Database.ExecuteSqlCommand($"INSERT INTO {DocumatContext.TbStatutImage} (Code,DateCreation,DateDebut,DateModif,ImageID) " +
-                                $"VALUES ({(int)Enumeration.Image.INDEXEE},GETDATE(),GETDATE(),GETDATE(),{imageID})");
-                            DocumatContext.AddTraitement(DocumatContext.TbImage, imageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "INDEXATION DE LA PAGE DE GARDE DU REGISTRE ID N° " + RegistreParent.RegistreID);
+                            DocumatContext.AddTraitement(DocumatContext.TbImage, imageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "#INDEXATION_PAGE_GARDE");
                         }
                         // Enregistrement de l'action effectué par l'agent
                     }
@@ -954,12 +976,8 @@ namespace DOCUMAT.Pages.Image
 
                             int imageID = ct.Database.SqlQuery<int>($"SELECT DISTINCT ImageID FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND NumeroPage = 0 ORDER BY ImageID DESC").FirstOrDefault();
 
-                            // Ajout Manuel du Statut Image
-                            ct.Database.ExecuteSqlCommand($"INSERT INTO {DocumatContext.TbStatutImage} (Code,DateCreation,DateDebut,DateModif,ImageID) " +
-                                $"VALUES ({(int)Enumeration.Image.INDEXEE},GETDATE(),GETDATE(),GETDATE(),{imageID})");
-
                             // Enregistrement de l'action effectué par l'agent
-                            DocumatContext.AddTraitement(DocumatContext.TbImage, imageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "INDEXATION DE LA PAGE OUVERTURE DU REGISTRE ID N° " + RegistreParent.RegistreID);
+                            DocumatContext.AddTraitement(DocumatContext.TbImage, imageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.CREATION, "#INDEXATION_PAGE_OUVERTURE");
                         }
                     }
                 }
@@ -974,6 +992,11 @@ namespace DOCUMAT.Pages.Image
                 using (var ct = new DocumatContext())
                 {
                     imageViews = ct.Database.SqlQuery<Models.Image>($"SELECT * FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND NumeroPage NOT IN (-1,0)").ToList();
+
+                    // Modification Manuel de l'Image
+                    ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbImage} SET  " +
+                        $"DateModif = GETDATE(), StatutActuel = {(int)Enumeration.Image.CREEE} " +
+                        $"WHERE RegistreID = {RegistreParent.RegistreID} AND StatutActuel = {(int)Enumeration.Image.SCANNEE}");
                 } 
                 
                 foreach (var imageView in imageViews)
@@ -998,34 +1021,7 @@ namespace DOCUMAT.Pages.Image
                         }
 
                         FileInfo file = fileInfos.FirstOrDefault(f => f.Name.Remove(f.Name.Length - 4) == nomFile);
-                        if (file != null)
-                        {
-                            using (var ct = new DocumatContext())
-                            {
-                                // Modification Manuel de l'Image
-                                ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbImage} SET NomPage = @nomPage, " +
-                                    $"CheminImage = @chemin,Type = @type," +
-                                    $"Taille = @taille ,DateModif = GETDATE(), StatutActuel = @statutActuel WHERE ImageID = @ImageID"
-                                    , new SqlParameter[] { new SqlParameter("@nomPage", nomFile)
-                                    , new SqlParameter("@chemin", Path.Combine(RegistreParent.CheminDossier, file.Name))
-                                    , new SqlParameter("@type", file.Extension.Substring(1).ToUpper())
-                                    , new SqlParameter("@taille", file.Length)
-                                    , new SqlParameter("@statutActuel", (int)Enumeration.Image.CREEE)
-                                    , new SqlParameter("@ImageID", imageView.ImageID)
-                                    });
-
-                                // Ajout Manuel du Statut Image
-                                ct.Database.ExecuteSqlCommand($"INSERT INTO {DocumatContext.TbStatutImage} (Code,DateCreation,DateDebut,DateModif,ImageID) " +
-                                    $"VALUES (@statutActuel,GETDATE(),GETDATE(),GETDATE(),@ImageID)"
-                                    , new SqlParameter[] { new SqlParameter("@statutActuel", (int)Enumeration.Image.CREEE)
-                                    , new SqlParameter("@ImageID", imageView.ImageID)
-                                    });
-
-                                // Enregistrement de l'action effectuée par l'agent
-                                DocumatContext.AddTraitement(DocumatContext.TbImage, imageView.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "INDEXATION VERIFICATION DU SCAN DE LA PAGE N° : " + imageView.NumeroPage + " DU REGISTRE ID N° " + imageView.RegistreID);                               
-                            }
-                        }
-                        else
+                        if (file == null)
                         {
                             ListPageIntrouvable = ListPageIntrouvable + imageView.NumeroPage + " ,";
                         }
@@ -1063,7 +1059,7 @@ namespace DOCUMAT.Pages.Image
 
                                 if (MessageBox.Show("Voulez vous commencez l'indexation ?", "COMMENCER L'INDEXATION", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                                 {
-                                    DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreParent.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.INDEXATION_REGISTRE_DEBUT,"DEBUT INDEXATION PAR AGENT");
+                                    DocumatContext.AddTraitement(DocumatContext.TbRegistre, RegistreParent.RegistreID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.INDEXATION_REGISTRE_DEBUT,"DEBUT INDEXATION");
                                 }
                                 else
                                 {
@@ -1493,15 +1489,7 @@ namespace DOCUMAT.Pages.Image
             {
                 using (var ct = new DocumatContext())
                 {
-                    Models.Image image = ct.Database.SqlQuery<Models.Image>($"SELECT TOP 1 * FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} AND NumeroPage > {currentImage} ORDER BY NumeroPage ASC").FirstOrDefault();
-                    if(image != null)
-                    {
-                        ChargerImage(image.NumeroPage); 
-                    }
-                    else
-                    {
-                        ChargerImage(-1);
-                    }
+                   ChargerImage(currentImage + 1); 
                 }
             }
             catch (Exception ex)
@@ -1796,8 +1784,7 @@ namespace DOCUMAT.Pages.Image
                             // Récupération des séquences pour vérifier les vides 
                             List<SequenceView> sequenceViews = dgSequence.ItemsSource as List<SequenceView>;
                             if (!sequenceViews.Any(s => s.Sequence.References.Trim().ToUpper().Contains("/ERR"))
-                                || !sequenceViews.Any(s => s.Sequence.References.Trim().ToUpper().Contains("00/AA"))
-                                || !sequenceViews.Any(s => s.Sequence.References.Trim().ToUpper().Contains("00/00")))
+                                || !sequenceViews.Any(s => s.Sequence.References.Trim().ToUpper().Contains("00/AA")))
                             {
                                 //List<Models.Image> images = ct.Image.Where(i => i.RegistreID == RegistreParent.RegistreID).ToList();
                                 Models.Image image = ct.Database.SqlQuery<Models.Image>($"SELECT TOP 1 * FROM {DocumatContext.TbImage} WHERE RegistreID = {RegistreParent.RegistreID} ORDER BY NumeroPage DESC").FirstOrDefault();
@@ -1807,8 +1794,9 @@ namespace DOCUMAT.Pages.Image
                                 {
                                     #region CAS DE LA DERNIERE PAGE DU REGISTRE
                                     // VERIFICATION QUE LE NUMERO DE DEPOT FIN EST LE NUMERO DE LA DERNIERE SEQUENCE
-                                    var LastSequence = CurrentImageView.context.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID
+                                    var LastSequence = ct.Sequence.Where(s => s.ImageID == CurrentImageView.Image.ImageID
                                                         && s.References.ToLower() != "defaut").OrderByDescending(i => i.NUmeroOdre).FirstOrDefault();
+
                                     if (LastSequence != null && LastSequence.NUmeroOdre == RegistreParent.NumeroDepotFin)
                                     {
                                         // Modification Manuel de l'Image
@@ -1818,27 +1806,8 @@ namespace DOCUMAT.Pages.Image
                                             ,new SqlParameter("@StatutActuel", (int)Enumeration.Image.INDEXEE)
                                             ,new SqlParameter("@ImageID", CurrentImageView.Image.ImageID)});
 
-                                        // Modification Manuel du Statut Image
-                                        ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbStatutImage} SET DateFin = GETDATE(), " +
-                                            $"DateModif = GETDATE() WHERE ImageID = {CurrentImageView.Image.ImageID} AND Code = {(int)Enumeration.Image.CREEE}");
-
-                                        // Récupération du Statut Indexation existant
-                                        StatutImage NewStatut = ct.Database.SqlQuery<StatutImage>($"SELECT TOP 1 * FROM {DocumatContext.TbStatutImage} WHERE Code = {(int)Enumeration.Image.INDEXEE} AND ImageID = {image.ImageID}").FirstOrDefault();
-                                        if (NewStatut == null)
-                                        {
-                                            // Ajout Manuel du Statut Image
-                                            ct.Database.ExecuteSqlCommand($"INSERT INTO {DocumatContext.TbStatutImage} (Code,DateCreation,DateDebut,DateModif,ImageID) " +
-                                                $"VALUES ({(int)Enumeration.Image.INDEXEE},GETDATE(),GETDATE(),GETDATE(),{image.ImageID})");
-                                        }
-                                        else
-                                        {
-                                            // Modification Manuel de l'Image
-                                            ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbStatutImage} SET " +
-                                                $"DateModif = GETDATE(),DateDebut = GETDATE(),DateFin = GETDATE() WHERE StatutImageID = {NewStatut.StatutImageID}");
-                                        }
-
                                         // Enregistrement de l'action effectuée par l'agent
-                                        DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "INDEXATION TERMINER IMAGE N° " + image.NumeroPage + " DU REGISTRE ID N° " + image.RegistreID);
+                                        DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION,"#IMAGE_INDEXE");
 
                                         // Actualisation des Images 
                                         HeaderInfosGetter();
@@ -1872,27 +1841,8 @@ namespace DOCUMAT.Pages.Image
                                             ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbImage} SET NomPage = @nomPage, " +
                                                 $"DateModif = GETDATE(), StatutActuel = {(int)Enumeration.Image.INDEXEE} WHERE ImageID = {CurrentImageView.Image.ImageID}", new SqlParameter("@nomPage", tbPageName.Text.Trim().ToUpper()));
 
-                                            // Modification Manuel du Statut Image
-                                            ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbStatutImage} SET DateFin = GETDATE(), " +
-                                                $"DateModif = GETDATE() WHERE ImageID = {CurrentImageView.Image.ImageID} AND Code = {(int)Enumeration.Image.CREEE}");
-
-                                            // Récupération du Statut Indexation existant
-                                            StatutImage NewStatut = ct.Database.SqlQuery<StatutImage>($"SELECT TOP 1 * FROM {DocumatContext.TbStatutImage} WHERE Code = {(int)Enumeration.Image.INDEXEE} AND ImageID = {CurrentImageView.Image.ImageID}").FirstOrDefault();
-                                            if (NewStatut == null)
-                                            {
-                                                // Ajout Manuel du Statut Image
-                                                ct.Database.ExecuteSqlCommand($"INSERT INTO {DocumatContext.TbStatutImage} (Code,DateCreation,DateDebut,DateModif,ImageID) " +
-                                                    $"VALUES ({(int)Enumeration.Image.INDEXEE},GETDATE(),GETDATE(),GETDATE(),{CurrentImageView.Image.ImageID})");
-                                            }
-                                            else
-                                            {
-                                                // Modification Manuel de l'Image
-                                                ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbStatutImage} SET " +
-                                                    $"DateModif = GETDATE(),DateDebut = GETDATE(),DateFin = GETDATE() WHERE StatutImageID = {NewStatut.StatutImageID}");
-                                            }
-
                                             // Enregistrement de l'action effectuée par l'agent
-                                            DocumatContext.AddTraitement(DocumatContext.TbImage,CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "INDEXATION TERMINER IMAGE N° " + CurrentImageView.Image.NumeroPage + " DU REGISTRE ID N° " + CurrentImageView.Image.RegistreID);
+                                            DocumatContext.AddTraitement(DocumatContext.TbImage,CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION,"#IMAGE_INDEXE");
 
                                             // Actualisation des Images 
                                             HeaderInfosGetter();
@@ -1918,26 +1868,8 @@ namespace DOCUMAT.Pages.Image
                                     ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbImage} SET NomPage = @nomPage, " +
                                         $"DateModif = GETDATE(), StatutActuel = {(int)Enumeration.Image.INDEXEE} WHERE ImageID = {CurrentImageView.Image.ImageID}",new SqlParameter("@nomPage",tbPageName.Text.Trim().ToUpper()));
 
-                                    // Modification Manuel du Statut Image
-                                    ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbStatutImage} SET DateFin = GETDATE(), " +
-                                        $"DateModif = GETDATE() WHERE ImageID = {CurrentImageView.Image.ImageID} AND Code = {(int)Enumeration.Image.CREEE}");
-
-                                    // Récupération du Statut Indexation existant
-                                    StatutImage NewStatut = ct.Database.SqlQuery<StatutImage>($"SELECT TOP 1 * FROM {DocumatContext.TbStatutImage} WHERE Code = {(int)Enumeration.Image.INDEXEE} AND ImageID = {CurrentImageView.Image.ImageID}").FirstOrDefault();
-                                    if (NewStatut == null)
-                                    {
-                                        // Ajout Manuel du Statut Image
-                                        ct.Database.ExecuteSqlCommand($"INSERT INTO {DocumatContext.TbStatutImage} (Code,DateCreation,DateDebut,DateModif,ImageID) " +
-                                            $"VALUES ({(int)Enumeration.Image.INDEXEE},GETDATE(),GETDATE(),GETDATE(),{CurrentImageView.Image.ImageID})");
-                                    }
-                                    else
-                                    {
-                                        // Modification Manuel de l'Image
-                                        ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbStatutImage} SET " +
-                                            $"DateModif = GETDATE(),DateDebut = GETDATE(),DateFin = GETDATE() WHERE StatutImageID = {NewStatut.StatutImageID}");
-                                    }
                                     // Enregistrement de l'action effectuée par l'agent
-                                    DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "INDEXATION TERMINER IMAGE N° " + CurrentImageView.Image.NumeroPage + " DU REGISTRE ID N° " + CurrentImageView.Image.RegistreID);
+                                    DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION,"#IMAGE_INDEXE");
 
                                     // Actualisation des Images 
                                     HeaderInfosGetter();
@@ -2014,27 +1946,8 @@ namespace DOCUMAT.Pages.Image
                                 , new SqlParameter[] { new SqlParameter("@typeInstance", typeInstance),
                                     new SqlParameter("@Observation", tbObservationInstance.Text.Trim()) });
 
-                            // Modification Manuel du Statut Image
-                            ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbStatutImage} SET DateFin = GETDATE(), " +
-                                $"DateModif = GETDATE() WHERE ImageID = {CurrentImageView.Image.ImageID} AND Code = {(int)Enumeration.Image.CREEE}");
-
-                            // Récupération du Statut Indexation existant
-                            StatutImage NewStatut = ct.Database.SqlQuery<StatutImage>($"SELECT TOP 1 * FROM {DocumatContext.TbStatutImage} WHERE Code = {(int)Enumeration.Image.INSTANCE} AND ImageID = {CurrentImageView.Image.ImageID}").FirstOrDefault();
-                            if (NewStatut == null)
-                            {
-                                // Ajout Manuel du Statut Image
-                                ct.Database.ExecuteSqlCommand($"INSERT INTO {DocumatContext.TbStatutImage} (Code,DateCreation,DateDebut,DateModif,ImageID) " +
-                                    $"VALUES ({(int)Enumeration.Image.INSTANCE},GETDATE(),GETDATE(),GETDATE(),{CurrentImageView.Image.ImageID})");
-                            }
-                            else
-                            {
-                                // Modification Manuel de l'Image
-                                ct.Database.ExecuteSqlCommand($"UPDATE {DocumatContext.TbStatutImage} SET " +
-                                    $"DateModif = GETDATE(),DateDebut = GETDATE(),DateFin = GETDATE() WHERE StatutImageID = {NewStatut.StatutImageID}");
-                            }
-
                             // Enregistrement de l'action effectuée par l'agent
-                            DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "INDEXATION MISE EN INSTANCE DE IMAGE N°" + CurrentImageView.Image.NumeroPage + " DU REGISTRE ID N°  " + RegistreParent.RegistreID + " POUR #" + tagInstance);
+                            DocumatContext.AddTraitement(DocumatContext.TbImage, CurrentImageView.Image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "#IMAGE_INSTANCE POUR #" + tagInstance);
 
                             TbkIndicateurImage.Text = "EN INSTANCE";
                             panelChoixInstance.Visibility = Visibility.Collapsed;
@@ -2258,12 +2171,20 @@ namespace DOCUMAT.Pages.Image
                 {
                     Regex regC = new Regex("^[0-9]{1,}/[\\w*]{1,}$");
                     Regex regCvide = new Regex("^[0-9]{1,}/$");
-                    if (regCvide.IsMatch(tbReference.Text))
+                    Regex regSpec = new Regex("^[0-9]{1,}/[\\w*]{1,}[_]([M][T])|([M][B])|([M])$");
+                    bool isSpec = false;
+
+                    if (regCvide.IsMatch(tbReference.Text.Trim()))
                     {
                         tbReference.Text = tbReference.Text.Trim() + "VIDE";
                     }
 
-                    if (regC.IsMatch(tbReference.Text))
+                    if(regSpec.IsMatch(tbReference.Text.Trim()))
+                    {
+                        isSpec = true;
+                    }
+
+                    if(isSpec)
                     {
                         tbListeReferences.Text = "";
                         tbListeReferences.ToolTip = "";
@@ -2271,7 +2192,11 @@ namespace DOCUMAT.Pages.Image
                         tbxNbRefsList.Visibility = Visibility.Visible;
                         try
                         {
-                            References.Add(RefInitiale + tbReference.Text, RefInitiale + tbReference.Text);
+                            string ref1 = tbReference.Text.Trim();
+                            var titreIndiceTab = ref1.Split('/');
+                            var IndiceTab = titreIndiceTab[1].Split('_');
+                            ref1 = titreIndiceTab[0] + IndiceTab[1] + "/" + IndiceTab[0];
+                            References.Add(RefInitiale + ref1, RefInitiale + ref1);
                             tbxNbRefsList.Text = "Nb : " + References.Count;
                             tbReference.Text = "";
                         }
@@ -2281,6 +2206,29 @@ namespace DOCUMAT.Pages.Image
                         {
                             tbListeReferences.Text += reference.Value + " ";
                             tbListeReferences.ToolTip += reference.Value + " ";
+                        }
+                    }
+                    else if (regC.IsMatch(tbReference.Text))
+                    {
+                        if (!tbReference.Text.Contains("_"))
+                        {
+                            tbListeReferences.Text = "";
+                            tbListeReferences.ToolTip = "";
+                            tbListeReferences.Visibility = Visibility.Visible;
+                            tbxNbRefsList.Visibility = Visibility.Visible;
+                            try
+                            {
+                                References.Add(RefInitiale + tbReference.Text, RefInitiale + tbReference.Text);
+                                tbxNbRefsList.Text = "Nb : " + References.Count;
+                                tbReference.Text = "";
+                            }
+                            catch (Exception) { }
+
+                            foreach (var reference in References)
+                            {
+                                tbListeReferences.Text += reference.Value + " ";
+                                tbListeReferences.ToolTip += reference.Value + " ";
+                            } 
                         }
                     }
                 }
@@ -2552,7 +2500,7 @@ namespace DOCUMAT.Pages.Image
                                             ct.SaveChanges();
 
                                             // Enregistrement du traitement
-                                            DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "MODIFICATION DU STATUT IMAGE A #CREEE, DU REGISTRE ID : " + RegistreParent.RegistreID);                                            
+                                            DocumatContext.AddTraitement(DocumatContext.TbImage, image.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION,"#IMAGE_INDEXE_ANNULE");                                            
                                             HeaderInfosGetter();
                                             ChargerImage(NumeroPage);
                                             ActualiserArborescence();
@@ -2951,7 +2899,7 @@ namespace DOCUMAT.Pages.Image
                             ct.SaveChanges();
 
                             // Enregistrement de l'action effectuée par l'agent
-                            DocumatContext.AddTraitement(DocumatContext.TbImage, imageManquant.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "INSTANCE DE IMAGE N°" + imageManquant.NumeroPage + " DU REGISTRE ID N°  " + imageManquant.RegistreID + " POUR #IMAGE_MANQUANTE");
+                            DocumatContext.AddTraitement(DocumatContext.TbImage, imageManquant.ImageID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.MODIFICATION, "#IMAGE_MANQUANTE");
 
                             // Actualisation du Registre
                             LoadAll();
@@ -2998,7 +2946,6 @@ namespace DOCUMAT.Pages.Image
                         {
                             ct.Sequence.Remove(ct.Sequence.FirstOrDefault(s => s.SequenceID == sequenceView.Sequence.SequenceID));
                             ct.SaveChanges();
-                            DocumatContext.AddTraitement(DocumatContext.TbSequence, sequenceView.Sequence.SequenceID, MainParent.Utilisateur.AgentID, (int)Enumeration.TypeTraitement.SUPPRESSION,"SUPPRESSION SEQUENCE");
 
                             // Refresh des données
                             ImageView imageView1 = new ImageView();
@@ -3006,7 +2953,7 @@ namespace DOCUMAT.Pages.Image
                             imageView1 = imageViews.FirstOrDefault(i => i.Image.NumeroPage == currentImage);
                             if (imageView1 != null)
                             {
-                                List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
+                                List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID).OrderBy(s => s.NUmeroOdre).ToList();
                                 dgSequence.ItemsSource = SequenceView.GetViewsList(sequences);
                                 if (sequences.Count != 0)
                                 {

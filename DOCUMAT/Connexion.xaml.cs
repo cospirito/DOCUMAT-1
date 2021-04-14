@@ -36,8 +36,11 @@ namespace DOCUMAT
         {
             //var versionInfo = FileVersionInfo.GetVersionInfo(pathToExe);
             //string version = versionInfo.FileVersion;
-            AgentView agentView = new AgentView();
-            Models.Agent agent = agentView.context.Agent.FirstOrDefault(a => a.Login.ToLower() == login.Text.Trim().ToLower() && a.Mdp == Pwd.Password);
+            Models.Agent agent = null;
+            using (var ct = new DocumatContext())
+            {
+                agent = ct.Agent.FirstOrDefault(a => a.Login.ToLower() == login.Text.Trim().ToLower() && a.Mdp == Pwd.Password); 
+            }
             if (agent != null)
             {
                 try
@@ -58,8 +61,8 @@ namespace DOCUMAT
 
                         Menu = new Menu(agent, sessionTravail);
                         Menu.Show();
-                        this.Close();
                     }
+                    this.Close();
                 }
                 catch (Exception ex)
                 {

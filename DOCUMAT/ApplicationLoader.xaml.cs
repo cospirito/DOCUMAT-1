@@ -7,6 +7,10 @@ using System.Configuration;
 using DOCUMAT.Pages.Parametre;
 using System.Linq;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Deployment;
+using System.Reflection;
 
 namespace DOCUMAT
 {
@@ -17,17 +21,26 @@ namespace DOCUMAT
     {
         // VERSION DE L'APPLICATION ACTUELLE
         // est défini ici pour des raisons de sécurité 
-        public string VERSION_APP = "1.1";
+        public string VERSION_APP = "1.2"; // pour la base de données
         public delegate void MontrerProgres(int valeur);
         public string DossierAnimation = ConfigurationManager.AppSettings["CheminDossier_Anim"];         
         public Connexion Connexion = null;
         private readonly BackgroundWorker AttempConnexion = new BackgroundWorker();
 
+
         public ApplicationLoader()
         {
             InitializeComponent();
+            //var versionInfo = FileVersionInfo.GetVersionInfo(Path.Combine(Directory.GetCurrentDirectory(),"Documat.exe"));
+            //string version = versionInfo.FileVersion;
+            //string version = GetPublishedVersion();
+
+            var assembly = Assembly.GetExecutingAssembly();
+            var fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            var version = fvi.FileVersion;
+
             // définition du titre et de la version 
-            txbTitre.Text = "DOCUMAT v" + VERSION_APP;
+            txbTitre.Text = "DOCUMAT v" + version;
             AttempConnexion.WorkerSupportsCancellation = true;
             AttempConnexion.DoWork += AttempConnexion_DoWork; ;
             AttempConnexion.RunWorkerCompleted += AttempConnexion_RunWorkerCompleted; ;
@@ -130,6 +143,16 @@ namespace DOCUMAT
 
         private void ProgressBar_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+        }
+
+        private string GetPublishedVersion()
+        {
+            if (System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed)
+            {
+                return System.Deployment.Application.ApplicationDeployment.CurrentDeployment.
+                    CurrentVersion.ToString();
+            }
+            return "Not network deployed";
         }
     }
 }

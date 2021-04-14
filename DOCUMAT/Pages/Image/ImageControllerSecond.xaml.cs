@@ -116,7 +116,7 @@ namespace DOCUMAT.Pages.Image
                     {
                         List<ManquantImage> manquantImages = ct.ManquantImage.ToList();
                         // Récupération des sequences déja renseignées, Différent des images préindexer ayant la référence défaut
-                        List<Sequence> sequences = imageView1.context.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID
+                        List<Sequence> sequences = ct.Sequence.Where(s => s.ImageID == imageView1.Image.ImageID
                         && s.References.ToLower() != "defaut").OrderBy(s => s.NUmeroOdre).ToList();
                         if (!manquantImages.Any(m => m.IdImage == imageView1.Image.ImageID))
                         {
@@ -495,18 +495,18 @@ namespace DOCUMAT.Pages.Image
         {
             try
             {
-                // Définition des types d'icon dans l'aborescence en fonction des statuts des images
-                // récupération de la liste des Images
-                ImageView imageView1 = new ImageView();
-                // Liste des Images de ce registre
-                List<Models.Image> images = imageView1.context.Image.Where(i => i.StatutActuel >= (int)Enumeration.Image.PHASE1 && i.RegistreID == RegistreParent.RegistreID).ToList();
-                // Liste des Controles pour ce registres 
-                List<Models.Controle> controles = imageView1.context.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID).ToList();
-
-                // Définition des types d'icon dans l'aborescence en fonction des statuts des images
-                foreach (TreeViewItem item in registreAbre.Items)
+                using (var ct = new DocumatContext())
                 {
-                    using (var ct = new DocumatContext())
+                    // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                    // récupération de la liste des Images
+                    ImageView imageView1 = new ImageView();
+                    // Liste des Images de ce registre
+                    List<Models.Image> images = ct.Image.Where(i => i.StatutActuel >= (int)Enumeration.Image.PHASE1 && i.RegistreID == RegistreParent.RegistreID).ToList();
+                    // Liste des Controles pour ce registres 
+                    List<Models.Controle> controles = ct.Controle.Where(c => c.RegistreId == RegistreParent.RegistreID).ToList();
+
+                    // Définition des types d'icon dans l'aborescence en fonction des statuts des images
+                    foreach (TreeViewItem item in registreAbre.Items)
                     {
                         Models.Image image1 = images.FirstOrDefault(i => i.NomPage.ToLower() == item.Header.ToString().Remove(item.Header.ToString().Length - 4).ToLower());
                         if (image1 != null)
@@ -546,7 +546,7 @@ namespace DOCUMAT.Pages.Image
                                 }
                             }
                             else if (controles.FirstOrDefault(c => c.ImageID == image1.ImageID && c.SequenceID == null
-                                 && c.PhaseControle == 3 && c.StatutControle == 1) != null)
+                                    && c.PhaseControle == 3 && c.StatutControle == 1) != null)
                             {
                                 item.Tag = "instance";
                             }
@@ -559,7 +559,7 @@ namespace DOCUMAT.Pages.Image
                         {
                             item.Tag = "image.png";
                         }
-                    }
+                    } 
                 }
             }
             catch (Exception ex)

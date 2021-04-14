@@ -8,7 +8,6 @@ namespace DOCUMAT.ViewModels
     public class VersementView : IView<VersementView, Models.Versement>
     {
         public int NumeroOrdre { get; set; }
-        public DocumatContext context { get; set; }
         public Versement Versement { get; set; }
         public int NombreRegistre { get; private set; }
         public string NombreRegistreEsV { get; private set; }
@@ -22,59 +21,73 @@ namespace DOCUMAT.ViewModels
         public VersementView()
         {
             Versement = new Versement();
-            context = new DocumatContext();
         }
 
         public void Add()
         {
-            if (!context.Versement.Any(v => v.NumeroVers == Versement.NumeroVers && v.LivraisonID == Versement.LivraisonID))
+            using (var ct = new DocumatContext())
             {
-                context.Versement.Add(Versement);
-                context.SaveChanges();
-            }
-            else
-            {
-                throw new Exception("Ce numero de versement est déja utilisé !!!");
+                if (!ct.Versement.Any(v => v.NumeroVers == Versement.NumeroVers && v.LivraisonID == Versement.LivraisonID))
+                {
+                    ct.Versement.Add(Versement);
+                    ct.SaveChanges();
+                }
+                else
+                {
+                    throw new Exception("Ce numero de versement est déja utilisé !!!");
+                } 
             }
         }
 
         public int AddLivraison(Livraison livraison)
         {
-            if (!context.Livraison.Any(l => l.Numero == livraison.Numero && l.ServiceID == livraison.ServiceID))
+            using (var ct = new DocumatContext())
             {
-                context.Livraison.Add(livraison);
-                context.SaveChanges();
+                if (!ct.Livraison.Any(l => l.Numero == livraison.Numero && l.ServiceID == livraison.ServiceID))
+                {
+                    ct.Livraison.Add(livraison);
+                    ct.SaveChanges();
+                }
+                else
+                {
+                    Versement.Livraison = ct.Livraison.FirstOrDefault(l => l.Numero == livraison.Numero && l.ServiceID == livraison.ServiceID);
+                    return 0;
+                }
+                return livraison.LivraisonID; 
             }
-            else
-            {
-                Versement.Livraison = context.Livraison.FirstOrDefault(l => l.Numero == livraison.Numero && l.ServiceID == livraison.ServiceID);
-                return 0;
-            }
-            return livraison.LivraisonID;
         }
 
         public int UpLivraison(Livraison livraison)
         {
-            Livraison oldLivre = context.Livraison.FirstOrDefault(l => l.Numero == livraison.Numero && l.ServiceID == livraison.ServiceID);
-            oldLivre.DateLivraison = livraison.DateLivraison;
-            oldLivre.DateModif = DateTime.Now;
-            context.SaveChanges();
-            return livraison.LivraisonID;
+            using (var ct = new DocumatContext())
+            {
+                Livraison oldLivre = ct.Livraison.FirstOrDefault(l => l.Numero == livraison.Numero && l.ServiceID == livraison.ServiceID);
+                oldLivre.DateLivraison = livraison.DateLivraison;
+                oldLivre.DateModif = DateTime.Now;
+                ct.SaveChanges();
+                return livraison.LivraisonID; 
+            }
         }
 
         public void Dispose()
         {
-            context.Dispose();
         }
 
         public bool GetView(int Id)
         {
-            Versement = context.Versement.FirstOrDefault(v => v.VersementID == Id);
+            using (var ct = new DocumatContext())
+            {
+                Versement = ct.Versement.FirstOrDefault(v => v.VersementID == Id);
 
-            if (Versement != null)
-                return true;
-            else
-                throw new Exception("Le versement est introuvable !!!");
+                if (Versement != null)
+                {
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("Le versement est introuvable !!!");
+                } 
+            }
         }
 
         public VersementView GetViewVers(int Id)
@@ -93,67 +106,80 @@ namespace DOCUMAT.ViewModels
 
         public List<VersementView> GetViewsList()
         {
-            List<VersementView> versementViews = new List<VersementView>();
-            List<Versement> versements = context.Versement.ToList();
-
-            foreach (var versement in versements)
+            using (var ct = new DocumatContext())
             {
-                VersementView versementView = new VersementView();
-                versementView.Versement = versement;
-                versementView.NombreR3 = context.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R3").Count();
-                versementView.NombreR4 = context.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R4").Count();
-                versementView.NombreR3EsV = versementView.NombreR3 + "/" + versement.NombreRegistreR3;
-                versementView.NombreR4EsV = versementView.NombreR4 + "/" + versement.NombreRegistreR4;
-                versementView.NombreRegistreEsV = (versementView.NombreR3 + versementView.NombreR4) + " / " + (versement.NombreRegistreR3 + versement.NombreRegistreR4);
-                versementView.NombreRegistre = versementView.NombreR3 + versementView.NombreR4;
-                versementViews.Add(versementView);
+                List<VersementView> versementViews = new List<VersementView>();
+                List<Versement> versements = ct.Versement.ToList();
+
+                foreach (var versement in versements)
+                {
+                    VersementView versementView = new VersementView();
+                    versementView.Versement = versement;
+                    versementView.NombreR3 = ct.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R3").Count();
+                    versementView.NombreR4 = ct.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R4").Count();
+                    versementView.NombreR3EsV = versementView.NombreR3 + "/" + versement.NombreRegistreR3;
+                    versementView.NombreR4EsV = versementView.NombreR4 + "/" + versement.NombreRegistreR4;
+                    versementView.NombreRegistreEsV = (versementView.NombreR3 + versementView.NombreR4) + " / " + (versement.NombreRegistreR3 + versement.NombreRegistreR4);
+                    versementView.NombreRegistre = versementView.NombreR3 + versementView.NombreR4;
+                    versementViews.Add(versementView);
+                }
+                return versementViews; 
             }
-            return versementViews;
         }
 
         public List<VersementView> GetVersViewsByService(int IdService)
         {
-            List<Livraison> livraisons = context.Livraison.Where(l => l.ServiceID == IdService).ToList();
-            List<VersementView> versementViews = new List<VersementView>();
-            List<Versement> versements = new List<Versement>();
-            foreach (var livraison in livraisons)
+            using (var ct = new DocumatContext())
             {
-                versements.AddRange(context.Versement.Where(v => v.LivraisonID == livraison.LivraisonID).ToList());
-            }
+                List<Livraison> livraisons = ct.Livraison.Where(l => l.ServiceID == IdService).ToList();
+                List<VersementView> versementViews = new List<VersementView>();
+                List<Versement> versements = new List<Versement>();
+                foreach (var livraison in livraisons)
+                {
+                    versements.AddRange(ct.Versement.Where(v => v.LivraisonID == livraison.LivraisonID).ToList());
+                }
 
-            foreach (var versement in versements)
-            {
-                VersementView versementView = new VersementView();
-                versementView.Versement = versement;
-                versementView.NombreR3 = context.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R3").Count();
-                versementView.NombreR4 = context.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R4").Count();
-                versementView.NombreR3EsV = versementView.NombreR3 + "/" + versement.NombreRegistreR3;
-                versementView.NombreR4EsV = versementView.NombreR4 + "/" + versement.NombreRegistreR4;
-                versementView.NombreRegistreEsV = (versementView.NombreR3 + versementView.NombreR4) + " / " + (versement.NombreRegistreR3 + versement.NombreRegistreR4);
-                versementView.NombreRegistre = versementView.NombreR3 + versementView.NombreR4;
-                versementViews.Add(versementView);
+                foreach (var versement in versements)
+                {
+                    VersementView versementView = new VersementView();
+                    versementView.Versement = versement;
+                    versementView.NombreR3 = ct.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R3").Count();
+                    versementView.NombreR4 = ct.Registre.Where(r => r.VersementID == versement.VersementID && r.Type == "R4").Count();
+                    versementView.NombreR3EsV = versementView.NombreR3 + "/" + versement.NombreRegistreR3;
+                    versementView.NombreR4EsV = versementView.NombreR4 + "/" + versement.NombreRegistreR4;
+                    versementView.NombreRegistreEsV = (versementView.NombreR3 + versementView.NombreR4) + " / " + (versement.NombreRegistreR3 + versement.NombreRegistreR4);
+                    versementView.NombreRegistre = versementView.NombreR3 + versementView.NombreR4;
+                    versementViews.Add(versementView);
+                }
+                return versementViews; 
             }
-            return versementViews;
         }
 
         public bool Update(Versement UpVersement)
         {
-            if (!context.Versement.Any(v => v.NumeroVers == UpVersement.NumeroVers && v.LivraisonID == UpVersement.LivraisonID && v.VersementID != UpVersement.VersementID))
+            using (var ct = new DocumatContext())
             {
-                Versement.NomAgentVersant = UpVersement.NomAgentVersant;
-                Versement.PrenomsAgentVersant = UpVersement.PrenomsAgentVersant;
-                Versement.DateVers = UpVersement.DateVers;
-                Versement.NumeroVers = UpVersement.NumeroVers;
-                Versement.NombreRegistreR3 = UpVersement.NombreRegistreR3;
-                Versement.NombreRegistreR4 = UpVersement.NombreRegistreR4;
-                Versement.DateModif = DateTime.Now;
-                context.SaveChanges();
+                if (!ct.Versement.Any(v => v.NumeroVers == UpVersement.NumeroVers && v.LivraisonID == UpVersement.LivraisonID && v.VersementID != UpVersement.VersementID))
+                {
+                    Models.Versement versement = ct.Versement.FirstOrDefault(v => v.VersementID == Versement.VersementID);
+                    if(versement != null)
+                    {
+                        versement.NomAgentVersant = UpVersement.NomAgentVersant;
+                        versement.PrenomsAgentVersant = UpVersement.PrenomsAgentVersant;
+                        versement.DateVers = UpVersement.DateVers;
+                        versement.NumeroVers = UpVersement.NumeroVers;
+                        versement.NombreRegistreR3 = UpVersement.NombreRegistreR3;
+                        versement.NombreRegistreR4 = UpVersement.NombreRegistreR4;
+                        versement.DateModif = DateTime.Now;
+                        ct.SaveChanges();
+                    }
+                }
+                else
+                {
+                    throw new Exception("Ce numero de versement est déja utilisé !!!");
+                }
+                return true; 
             }
-            else
-            {
-                throw new Exception("Ce numero de versement est déja utilisé !!!");
-            }
-            return true;
         }
     }
 }

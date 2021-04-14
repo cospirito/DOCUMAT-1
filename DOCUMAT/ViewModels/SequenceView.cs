@@ -9,7 +9,6 @@ namespace DOCUMAT.ViewModels
     public class SequenceView : IView<SequenceView, Models.Sequence>
     {
         public int NumeroOrdre { get; set; }
-        public DocumatContext context { get; set; }
         public Sequence Sequence { get; set; }
 
         // Propriété pour l'affichage des données

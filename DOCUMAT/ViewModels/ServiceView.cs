@@ -11,7 +11,6 @@ namespace DOCUMAT.ViewModels
         public int NombreVersement { get; private set; }
         public int NombreRegistre { get; private set; }
         public int NumeroOrdre { get; set; }
-        public DocumatContext context { get; set; }
 
         public static List<ServiceView> GetServiceViewsList(List<Models.Service> services)
         {
@@ -29,7 +28,6 @@ namespace DOCUMAT.ViewModels
         public ServiceView()
         {
             Service = new Service();
-            context = new DocumatContext();
         }
 
         public void Add()
@@ -67,20 +65,23 @@ namespace DOCUMAT.ViewModels
         }
         public List<ServiceView> GetViewsList(int IdRegion)
         {
-            List<Service> services = context.Service.Where(s => s.RegionID == IdRegion).ToList();
-            List<ServiceView> ServiceViews = new List<ServiceView>();
-            foreach (Service service in services)
+            using (var ct = new DocumatContext())
             {
-                ServiceView serviceView = new ServiceView();
-                serviceView.Service = service;
+                List<Service> services = ct.Service.Where(s => s.RegionID == IdRegion).ToList();
+                List<ServiceView> ServiceViews = new List<ServiceView>();
+                foreach (Service service in services)
+                {
+                    ServiceView serviceView = new ServiceView();
+                    serviceView.Service = service;
 
-                // Devra être implementé dans les statistiques
-                serviceView.NombreVersement = 0;
-                serviceView.NombreRegistre = 0;
+                    // Devra être implementé dans les statistiques
+                    serviceView.NombreVersement = 0;
+                    serviceView.NombreRegistre = 0;
 
-                ServiceViews.Add(serviceView);
+                    ServiceViews.Add(serviceView);
+                }
+                return ServiceViews; 
             }
-            return ServiceViews;
         }
 
         public bool Update(Service UpElement)
